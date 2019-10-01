@@ -16,8 +16,10 @@ from libcbm.model.cbm import cbm_simulator
 
 # First party modules #
 from autopaths.auto_paths import AutoPaths
+from plumbing.cache       import property_cached
 
 # Internal modules #
+from libcbm_runner.launch.create_json import CreateJSON
 
 ###############################################################################
 class Simulation(object):
@@ -36,6 +38,11 @@ class Simulation(object):
         # Automatically access paths based on a string of many subpaths #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
+    @property_cached
+    def create_json(self):
+        return CreateJSON(self)
+
+    #------------------------------- Methods ---------------------------------#
     def run(self):
         # Create the JSON #
         self.create_json()
@@ -60,3 +67,5 @@ class Simulation(object):
         )
         # This will contain results #
         self.results = results
+        # Return for convenience #
+        return self.results

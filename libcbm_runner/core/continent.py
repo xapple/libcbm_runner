@@ -64,6 +64,7 @@ class Continent(object):
         all_scenarios = [Scen(self) for Scen in scen_classes]
         return {s.short_name: s for s in all_scenarios}
 
+    #------------------------------- Methods ---------------------------------#
     def get_runner(self, scenario, country, step):
         """Return a runner based on scenario, country and step."""
         return self.scenarios[scenario].runners[country][step]

@@ -19,6 +19,7 @@ from plumbing.logger      import create_file_logger
 # Internal modules #
 import libcbm_runner
 from libcbm_runner.launch.simulation import Simulation
+from libcbm_runner.pump.input_data   import InputData
 
 ###############################################################################
 class Runner(object):
@@ -27,8 +28,7 @@ class Runner(object):
     and to bring this data all the way to the predicted carbon stock."""
 
     all_paths = """
-    /input/
-    /output/
+    /input/csv/
     /logs/runner.log
     """
 
@@ -70,6 +70,11 @@ class Runner(object):
         """The object that can run `libcbm` simulations."""
         return Simulation(self)
 
+    @property_cached
+    def input_data(self):
+        """Use the country object to copy the original input data."""
+        return InputData(self)
+
     #------------------------------- Methods ---------------------------------#
     def run(self):
         """Run the full modelling pipeline for a given country,
@@ -79,8 +84,16 @@ class Runner(object):
         self.log.info("Runner '%s' starting." % self.short_name)
         # Clean everything from previous run #
         self.remove_directory()
+        # Copy the original input data #
+        self.copy_orig_from_country()
+        # Modify input data #
+        pass
         # Run the model #
         self.simulation()
+        # Post-processing #
+        pass
+        # Reporting #
+        pass
         # Messages #
         self.log.info("Done.")
 
@@ -97,3 +110,9 @@ class Runner(object):
             if element != self.paths.log:
                 element.remove()
 
+    def copy_orig_from_country(self):
+        """Refresh the input data by copying the immutable original
+        CSVs from the current country."""
+        destination_dir = self.paths.csv_dir
+        destination_dir.remove()
+        self.country.paths.csv_dir.copy(destination_dir)

@@ -48,6 +48,14 @@ class Country(object):
         # Set country codes #
         self.set_codes()
 
+    @property_cached
+    def scenarios(self):
+        """A dictionary linking scenario names to a list of runners
+        that concern only this country."""
+        from cbmcfs3_runner.core.continent import continent
+        return {n: s.runners[self.iso2_code] for n,s in continent.scenarios.items()}
+
+    #------------------------------- Methods ---------------------------------#
     def set_codes(self):
         """Update all the country codes for this country.
         Typically the result will look something like this:
@@ -73,10 +81,3 @@ class Country(object):
         # More crazy codes #
         self.nuts_zero_2006 = row['nuts_zero_2006']
         self.nuts_zero_2016 = row['nuts_zero_2010']
-
-    @property_cached
-    def scenarios(self):
-        """A dictionary linking scenario names to a list of runners
-        that concern only this country."""
-        from cbmcfs3_runner.core.continent import continent
-        return {n: s.runners[self.iso2_code] for n,s in continent.scenarios.items()}
