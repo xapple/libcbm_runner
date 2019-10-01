@@ -18,33 +18,30 @@ from autopaths.auto_paths import AutoPaths
 
 ###############################################################################
 class CreateJSON(object):
-    """This class will generate the JSON file."""
+    """This class will generate the JSON file.
 
-    template = {
-      "output_path": None,
-      "import_config": {
-        "path":                          None,
-        "ageclass_table_name":           "AgeClasses$",
-        "classifiers_table_name":        "Classifiers$",
-        "disturbance_events_table_name": "DistEvents$",
-        "disturbance_types_table_name":  "DistType$",
-        "inventory_table_name":          "Inventory$",
-        "transition_rules_table_name":   "Transitions$",
-        "yield_table_name":              "Growth$"
+    The mapping mode "SeparateAdminEcoClassifiers" is used by
+    libcbm/input/sit/sit_mapping.py to assign the spatial unit IDs.
+    """
+
+    template = {"import_config": {
+        "classifiers":       {"type": "csv", "params": {"path": None}},
+        "disturbance_types": {"type": "csv", "params": {"path": None}},
+        "age_classes":       {"type": "csv", "params": {"path": None}},
+        "inventory":         {"type": "csv", "params": {"path": None}},
+        "yield":             {"type": "csv", "params": {"path": None}},
+        "events":            {"type": "csv", "params": {"path": None}},
+        "transitions":       {"type": "csv", "params": {"path": None}},
       },
       "mapping_config": {
         "spatial_units": {
-          "mapping_mode":     "SeperateAdminEcoClassifiers",
-              # Don't fix the 'Separate' spelling mistake
+          "mapping_mode":     "SeparateAdminEcoClassifiers",
           "admin_classifier": "Region",
           "eco_classifier":   "Climatic unit",
           "admin_mapping":    None,
           "eco_mapping":      None,
-        }
-        ,
-        "disturbance_types": {
-          "disturbance_type_mapping": None,
         },
+        "disturbance_types": None,
         "species": {
           "species_classifier": "Forest type",
           "species_mapping":    None,
