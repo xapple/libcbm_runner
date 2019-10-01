@@ -18,6 +18,7 @@ from plumbing.logger      import create_file_logger
 
 # Internal modules #
 import libcbm_runner
+from libcbm_runner.launch.simulation import Simulation
 
 ###############################################################################
 class Runner(object):
@@ -64,6 +65,11 @@ class Runner(object):
         msg += self.paths.log.pretty_tail
         return msg
 
+    @property_cached
+    def simulation(self):
+        """The object that can run `libcbm` simulations."""
+        return Simulation(self)
+
     #------------------------------- Methods ---------------------------------#
     def run(self):
         """Run the full modelling pipeline for a given country,
@@ -71,10 +77,10 @@ class Runner(object):
         # Messages #
         self.log.info("Using module at '%s'." % Path(libcbm_runner))
         self.log.info("Runner '%s' starting." % self.short_name)
-        # Main steps #
+        # Clean everything from previous run #
         self.remove_directory()
-        # Lorem ipsum #
-        pass
+        # Run the model #
+        self.simulation()
         # Messages #
         self.log.info("Done.")
 

@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Written by Lucas Sinclair and Paul Rougieux.
+
+JRC biomass Project.
+Unit D1 Bioeconomy.
+"""
+
+# Built-in modules #
+
+# Third party modules #
+from libcbm.input.sit import sit_cbm_factory
+from libcbm.model.cbm import cbm_simulator
+
+# First party modules #
+from autopaths.auto_paths import AutoPaths
+
+# Internal modules #
+
+###############################################################################
+class Simulation(object):
+    """
+    This class will run a `libcbm_py` simulation.
+    """
+
+    all_paths = """
+    /input/json/config.json
+    /output/
+    """
+
+    def __init__(self, parent):
+        # Default attributes #
+        self.parent = parent
+        # Automatically access paths based on a string of many subpaths #
+        self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
+
+    def run(self):
+        # Create the JSON #
+        self.create_json()
+        # Create a SIT object #
+        sit = sit_cbm_factory.load_sit(self.paths.json_config)
+        # Do some initialization #
+        classifiers, inventory = sit_cbm_factory.initialize_inventory(sit)
+        # Create a CBM object #
+        cbm = sit_cbm_factory.initialize_cbm(sit)
+        # Not sure about this #
+        results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
+        # Run #
+        cbm_simulator.simulate(
+            cbm,
+            n_steps              = 100,
+            classifiers          = classifiers,
+            inventory            = inventory,
+            pool_codes           = sit.defaults.get_pools(),
+            flux_indicator_codes = sit.defaults.get_flux_indicators(),
+            pre_dynamics_func    = lambda x: x,
+            reporting_func       = reporting_func
+        )
+        # This will contain results #
+        self.results = results
