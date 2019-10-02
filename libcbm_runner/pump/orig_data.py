@@ -18,21 +18,22 @@ from autopaths.auto_paths import AutoPaths
 # Internal modules #
 
 ###############################################################################
-class InputData(object):
+class OrigData(object):
     """
-    This class will provide access to the input data of a Runner
+    This class will provide access to the original data of a Country
     as several pandas data frames.
     """
 
     all_paths = """
-    /input/csv/
-    /input/csv/yield.csv
-    /input/csv/transitions.csv
-    /input/csv/events.csv
-    /input/csv/inventory.csv
-    /input/csv/classifiers.csv
-    /input/csv/disturbance_types.csv
-    /input/csv/age_classes.csv
+    /orig/associations.csv
+    /orig/csv/
+    /orig/csv/yield.csv
+    /orig/csv/transitions.csv
+    /orig/csv/events.csv
+    /orig/csv/inventory.csv
+    /orig/csv/classifiers.csv
+    /orig/csv/disturbance_types.csv
+    /orig/csv/age_classes.csv
     """
 
     def __init__(self, parent):

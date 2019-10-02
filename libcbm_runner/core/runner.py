@@ -28,7 +28,8 @@ class Runner(object):
     and to bring this data all the way to the predicted carbon stock."""
 
     all_paths = """
-    /input/csv/
+    /input/
+    /output/
     /logs/runner.log
     """
 
@@ -113,6 +114,6 @@ class Runner(object):
     def copy_orig_from_country(self):
         """Refresh the input data by copying the immutable original
         CSVs from the current country."""
-        destination_dir = self.paths.csv_dir
+        destination_dir = self.input_data.paths.csv_dir
         destination_dir.remove()
-        self.country.paths.csv_dir.copy(destination_dir)
+        self.country.orig_data.paths.csv_dir.copy(destination_dir)

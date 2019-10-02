@@ -23,4 +23,11 @@ from libcbm_runner.core.continent import continent
 scenario = continent.scenarios['historical']
 runners  = [rs[-1] for k,rs in scenario.runners.items() if k=='ZZ']
 runner   = runners[0]
-runner()
+
+
+runner.remove_directory()
+runner.copy_orig_from_country()
+runner.simulation.create_json()
+
+#import simplejson as json
+#print(json.dumps(runner.country.associations.all_mappings, indent=4, ignore_nan=True))

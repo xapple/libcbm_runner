@@ -19,7 +19,9 @@ from autopaths.auto_paths import AutoPaths
 from plumbing.cache       import property_cached
 
 # Internal modules #
-from libcbm_runner.core.continent import libcbm_data_dir
+from libcbm_runner.core.continent      import libcbm_data_dir
+from libcbm_runner.launch.associations import Associations
+from libcbm_runner.pump.orig_data      import OrigData
 
 # Country codes #
 all_country_codes = libcbm_data_dir + 'common/country_codes.csv'
@@ -31,7 +33,6 @@ class Country(object):
     amongst the 26 EU member states we are examining."""
 
     all_paths = """
-    /orig/
     """
 
     def __repr__(self):
@@ -54,6 +55,17 @@ class Country(object):
         that concern only this country."""
         from cbmcfs3_runner.core.continent import continent
         return {n: s.runners[self.iso2_code] for n,s in continent.scenarios.items()}
+
+    @property_cached
+    def associations(self):
+        """Associations of admin/eco/species/disturbances names between
+        the input and the reference."""
+        return Associations(self)
+
+    @property_cached
+    def orig_data(self):
+        """Access the non-changing original data."""
+        return OrigData(self)
 
     #------------------------------- Methods ---------------------------------#
     def set_codes(self):

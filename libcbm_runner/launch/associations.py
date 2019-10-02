@@ -26,21 +26,20 @@ class Associations(object):
     """
 
     keys = ['MapAdminBoundary', 'MapEcoBoundary', 'MapSpecies',
-            'MapDisturbanceType', 'MapNonForestType']
+            'MapDisturbanceType']
 
     def __init__(self, parent):
         # Default attributes #
         self.parent = parent
-        # The associations.csv file path #
-        self.path = self.parent.paths.associations
 
     @property_cached
     def df(self):
         """Load the CSV that is 'associations.csv'."""
-        return pandas.read_csv(str(self.path))
+        return pandas.read_csv(str(self.parent.orig_data.paths.associations))
 
     def key_to_rows(self, mapping_name):
         """
+        The *mapping_name* has to be one of "keys".
         Here is an example call:
 
         >>> self.key_to_rows('MapDisturbanceType')
@@ -49,8 +48,7 @@ class Associations(object):
          'Fire': 'Wild Fire',
          'Generic 15%': 'generic 15% mortality',
          'Generic 20%': 'generic 20% mortality',
-         'Generic 30%': 'generic 30% mortality',
-         'Spruce Beetle 2% mortality (Ice sleet)': 'Spruce Beetle 2% mortality'}
+         'Generic 30%': 'generic 30% mortality'}
         """
         query   = "A == '%s'" % mapping_name
         mapping = self.df.query(query).set_index('B')['C'].to_dict()
@@ -82,8 +80,5 @@ class Associations(object):
            'map_disturbance': self.rows_to_list(self.keys[3],
                                                 'user_dist_type',
                                                 'default_dist_type'),
-           'map_nonforest':   self.rows_to_list(self.keys[4],        # Not always present
-                                                'user_nonforest_type',
-                                                'default_nonforest_type'),
         }
 
