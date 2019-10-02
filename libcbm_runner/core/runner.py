@@ -90,7 +90,7 @@ class Runner(object):
         # Modify input data #
         pass
         # Run the model #
-        self.simulation()
+        self.simulation.run()
         # Post-processing #
         pass
         # Reporting #
