@@ -18,7 +18,7 @@ from autopaths.auto_paths import AutoPaths
 from plumbing.cache       import property_cached
 
 # Constants #
-libcbm_data_dir = Path("~/repos/libcbm_data/")
+libcbm_data_dir = Path("~/deploy/libcbm_data/")
 
 # Internal modules #
 from libcbm_runner.core.country import Country
