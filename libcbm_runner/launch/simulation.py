@@ -47,7 +47,8 @@ class Simulation(object):
         # Create the JSON #
         self.create_json()
         # Create a SIT object #
-        sit = sit_cbm_factory.load_sit(self.paths.json_config)
+        sit = sit_cbm_factory.load_sit(self.paths.json_config,
+                                       db_path=self.parent.country.aidb.path)
         # Do some initialization #
         classifiers, inventory = sit_cbm_factory.initialize_inventory(sit)
         # Create a CBM object #

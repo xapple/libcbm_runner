@@ -18,22 +18,14 @@ from autopaths.auto_paths import AutoPaths
 # Internal modules #
 
 ###############################################################################
-class OrigData(object):
+class AIDB(object):
     """
-    This class will provide access to the original data of a Country
-    as several pandas data frames.
+    This class will provide access to the archive index database
+    also called cbm_defaults in libcbm.
     """
 
     all_paths = """
-    /orig/config/associations.csv
-    /orig/csv/
-    /orig/csv/yield.csv
-    /orig/csv/transitions.csv
-    /orig/csv/events.csv
-    /orig/csv/inventory.csv
-    /orig/csv/classifiers.csv
-    /orig/csv/disturbance_types.csv
-    /orig/csv/age_classes.csv
+    /orig/config/aidb.db
     """
 
     def __init__(self, parent):

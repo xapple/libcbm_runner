@@ -22,6 +22,7 @@ from plumbing.cache       import property_cached
 from libcbm_runner.core.continent      import libcbm_data_dir
 from libcbm_runner.launch.associations import Associations
 from libcbm_runner.pump.orig_data      import OrigData
+from libcbm_runner.pump.aidb           import AIDB
 
 # Country codes #
 all_country_codes = libcbm_data_dir + 'common/country_codes.csv'
@@ -61,6 +62,11 @@ class Country(object):
         """Associations of admin/eco/species/disturbances names between
         the input and the reference."""
         return Associations(self)
+
+    @property_cached
+    def aidb(self):
+        """Archive Index Database also called cbm_defaults in libcbm"""
+        return AIDB(self)
 
     @property_cached
     def orig_data(self):
