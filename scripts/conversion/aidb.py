@@ -67,6 +67,8 @@ class ConvertAIDB(object):
         # Specify paths #
         config['output_path'] = self.libcbm_country.aidb.paths.db
         config['archive_index_data'][0]['path'] = self.cbmcfs3_country.paths.aidb_eu
+        # Delete previous version of the db
+        self.libcbm_country.aidb.paths.db.remove()
         # Call script #
         cbm_defaults.app.run(config)
 
