@@ -9,7 +9,7 @@ Unit D1 Bioeconomy.
 
 Typically you would run this file from a command line like this:
 
-     ipython3.exe -i -- ~/deploy/libcbm_runner/scripts/conversion/aidb.py
+     ipython3.exe -i -- /deploy/libcbm_runner/scripts/conversion/aidb.py
 """
 
 # Built-in modules #
@@ -31,7 +31,7 @@ from cbmcfs3_runner.core.continent import continent as cbmcfs3_continent
 class ConvertAIDB(object):
     """
     This class will enable us to convert the old AIDB format (Access DB)
-    from CBMCFS3 to a SQLITE3 database compatible with libcbm.
+    from CBMCFS3 to an SQLITE3 database compatible with libcbm.
     """
 
     template = {
