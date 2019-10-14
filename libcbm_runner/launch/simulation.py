@@ -55,7 +55,8 @@ class Simulation(object):
         # Create a CBM object #
         cbm = sit_cbm_factory.initialize_cbm(sit)
         # Not sure about this #
-        results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
+        # This will contain results #
+        self.results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
         # Run #
         cbm_simulator.simulate(
             cbm,
@@ -67,7 +68,5 @@ class Simulation(object):
             pre_dynamics_func    = lambda x: x,
             reporting_func       = reporting_func
         )
-        # This will contain results #
-        self.results = results
         # Return for convenience #
         return self.results
