@@ -47,7 +47,7 @@ class Simulation(object):
         # Create the JSON #
         self.create_json()
         # The 'AIDB' path as it was called previously #
-        db_path = self.parent.country.aidb.path
+        db_path = self.parent.country.aidb.paths.db
         # Create a SIT object #
         sit = sit_cbm_factory.load_sit(self.paths.json_config, db_path=db_path)
         # Do some initialization #

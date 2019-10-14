@@ -78,7 +78,7 @@ if __name__ == '__main__':
     converters = [ConvertAIDB(c) for c in cbmcfs3_continent]
     # Run them #
     for converter in tqdm(converters):
-        if converter.cbmcfs3_country.iso2_code != 'ZZ': continue
+        #if converter.cbmcfs3_country.iso2_code != 'AT': continue
         converter()
 
 
