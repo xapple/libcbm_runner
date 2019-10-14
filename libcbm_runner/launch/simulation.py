@@ -44,27 +44,33 @@ class Simulation(object):
 
     #------------------------------- Methods ---------------------------------#
     def run(self):
+        """Call libcbm_py to run the cbm simulation
+
+        The interaction with libcm_py is decomposed
+        in several calls to pass a .json config,
+        a default database (also called aidb)
+        and csv files"""
         # Create the JSON #
         self.create_json()
         # The 'AIDB' path as it was called previously #
         db_path = self.parent.country.aidb.paths.db
         # Create a SIT object #
-        sit = sit_cbm_factory.load_sit(self.paths.json_config, db_path=db_path)
+        self.sit = sit_cbm_factory.load_sit(self.paths.json_config, db_path=db_path)
         # Do some initialization #
-        classifiers, inventory = sit_cbm_factory.initialize_inventory(sit)
+        self.classifiers, self.inventory = sit_cbm_factory.initialize_inventory(self.sit)
         # Create a CBM object #
-        cbm = sit_cbm_factory.initialize_cbm(sit)
+        self.cbm = sit_cbm_factory.initialize_cbm(self.sit)
         # Not sure about this #
         # This will contain results #
         self.results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
         # Run #
         cbm_simulator.simulate(
-            cbm,
+            self.cbm,
             n_steps              = 100,
-            classifiers          = classifiers,
-            inventory            = inventory,
-            pool_codes           = sit.defaults.get_pools(),
-            flux_indicator_codes = sit.defaults.get_flux_indicators(),
+            classifiers          = self.classifiers,
+            inventory            = self.inventory,
+            pool_codes           = self.sit.defaults.get_pools(),
+            flux_indicator_codes = self.sit.defaults.get_flux_indicators(),
             pre_dynamics_func    = lambda x: x,
             reporting_func       = reporting_func
         )
