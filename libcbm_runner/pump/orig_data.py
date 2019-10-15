@@ -11,6 +11,7 @@ Unit D1 Bioeconomy.
 # Built-in modules #
 
 # Third party modules #
+import pandas
 
 # First party modules #
 from autopaths.auto_paths import AutoPaths
@@ -41,3 +42,6 @@ class OrigData(object):
         self.parent = parent
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
+
+    def __getitem__(self, item):
+        return pandas.read_csv(str(self.paths[item]))
