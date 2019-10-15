@@ -21,7 +21,8 @@ from autopaths.auto_paths import AutoPaths
 class AIDB(object):
     """
     This class will provide access to the archive index database
-    also called cbm_defaults in libcbm.
+    also called 'cbm_defaults' in libcbm.
+    It is an SQLite3 database.
     """
 
     all_paths = """

@@ -17,6 +17,11 @@ from libcbm_runner.core.runner import Runner
 
 ###############################################################################
 class Historical(Scenario):
+    """
+    This scenario simulates the historical period ranging from
+    the <country.start_year> until 2015, but no further.
+    """
+
     short_name = 'historical'
 
     @property_cached

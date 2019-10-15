@@ -13,4 +13,5 @@ A list of all scenarios classes.
 from libcbm_runner.scenarios.historical import Historical
 
 ###############################################################################
+# List all scenario classes #
 scen_classes = [Historical]

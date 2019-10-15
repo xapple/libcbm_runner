@@ -26,8 +26,10 @@ from libcbm_runner.scenarios    import scen_classes
 
 ###############################################################################
 class Continent(object):
-    """Aggregates countries together. Enables access to a data frame containing
-    concatenates data from all countries."""
+    """Entry object to the pipeline.
+
+    Aggregates countries together and enables access to a data frame containing
+    concatenated data from all countries at once."""
 
     all_paths = """
     /countries/
@@ -54,7 +56,7 @@ class Continent(object):
 
     @property_cached
     def countries(self):
-        """Return a dictionary of country iso2 code to country objects."""
+        """Return a dictionary of country iso2 codes to country objects."""
         all_countries = [Country(self, d) for d in self.countries_dir.flat_directories]
         return {c.iso2_code: c for c in all_countries}
 
@@ -70,6 +72,6 @@ class Continent(object):
         return self.scenarios[scenario].runners[country][step]
 
 ###############################################################################
-# Create list of all countries #
+# Create singleton #
 continent = Continent(libcbm_data_dir)
 

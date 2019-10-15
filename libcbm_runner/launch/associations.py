@@ -22,11 +22,9 @@ from plumbing.cache import property_cached
 class Associations(object):
     """
     This class parses the file "associations.csv" and returns
-    a dictionary useful to produce the JSON for consumption by SIT.
+    a dictionary useful to produce the JSON for consumption by
+    libcbm.
     """
-
-    keys = ['MapAdminBoundary', 'MapEcoBoundary', 'MapSpecies',
-            'MapDisturbanceType']
 
     def __init__(self, parent):
         # Default attributes #
@@ -43,6 +41,7 @@ class Associations(object):
         Here is an example call:
 
         >>> self.key_to_rows('MapDisturbanceType')
+
         {'10% commercial thinning': '10% Commercial thinning',
          'Deforestation': 'Deforestation',
          'Fire': 'Wild Fire',
@@ -60,6 +59,7 @@ class Associations(object):
         Here is an example call:
 
         >>> self.key_to_rows('MapSpecies', 'user_species', 'default_species')
+
         {...}
         """
         return [{user:k, default:v} for k,v in self.key_to_rows(mapping_name).items()]
@@ -68,17 +68,16 @@ class Associations(object):
     def all_mappings(self):
         """Return a dictionary for creation of the JSON file."""
         return {
-           'map_admin_bound': self.rows_to_list(self.keys[0],
+           'map_admin_bound': self.rows_to_list('MapAdminBoundary',
                                                 'user_admin_boundary',
                                                 'default_admin_boundary'),
-           'map_eco_bound':   self.rows_to_list(self.keys[1],
+           'map_eco_bound':   self.rows_to_list('MapEcoBoundary',
                                                 'user_eco_boundary',
                                                 'default_eco_boundary'),
-           'map_species':     self.rows_to_list(self.keys[2],
+           'map_species':     self.rows_to_list('MapSpecies',
                                                 'user_species',
                                                 'default_species'),
-           'map_disturbance': self.rows_to_list(self.keys[3],
+           'map_disturbance': self.rows_to_list('MapDisturbanceType',
                                                 'user_dist_type',
                                                 'default_dist_type'),
         }
-

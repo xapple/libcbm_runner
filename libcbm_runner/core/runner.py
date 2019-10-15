@@ -25,7 +25,8 @@ from libcbm_runner.pump.input_data   import InputData
 class Runner(object):
     """This object is capable of running a CBM simulation pipeline, starting
     from a few input tables, such as an inventory and a list of disturbances
-    and to bring this data all the way to the predicted carbon stock."""
+    and to bring this data all the way to the predicted carbon stock and
+    fluxes."""
 
     all_paths = """
     /input/
@@ -73,7 +74,8 @@ class Runner(object):
 
     @property_cached
     def input_data(self):
-        """Use the country object to copy the original input data."""
+        """Access the input data to this run. This data can be
+        a modified version of the original country's CSV files."""
         return InputData(self)
 
     #------------------------------- Methods ---------------------------------#
@@ -100,6 +102,7 @@ class Runner(object):
 
     def remove_directory(self):
         """Removes the directory that will be recreated by running this runner.
+        This guarantees that all output data is regenerated.
         Note: we need to keep the log we are writing to currently."""
         # Message #
         self.log.info("Removing directory '%s'." % self.data_dir)
@@ -113,7 +116,7 @@ class Runner(object):
 
     def copy_orig_from_country(self):
         """Refresh the input data by copying the immutable original
-        CSVs from the current country."""
+        CSVs from the current country to this runner's input."""
         destination_dir = self.input_data.paths.csv_dir
         destination_dir.remove()
         self.country.orig_data.paths.csv_dir.copy(destination_dir)

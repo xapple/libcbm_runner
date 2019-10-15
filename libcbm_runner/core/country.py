@@ -70,7 +70,7 @@ class Country(object):
 
     @property_cached
     def orig_data(self):
-        """Access the non-changing original data."""
+        """Access the immutable original data."""
         return OrigData(self)
 
     #------------------------------- Methods ---------------------------------#

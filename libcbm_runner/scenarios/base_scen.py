@@ -22,7 +22,11 @@ from tqdm import tqdm
 
 ###############################################################################
 class Scenario(object):
-    """This object represents a harvest and economic scenario."""
+    """
+    This object represents a harvest and economic scenario.
+    Each Scenario subclass must define a list of Runner instances as
+    the <self.runners> property.
+    """
 
     all_paths = """
     """
