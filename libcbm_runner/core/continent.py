@@ -9,6 +9,7 @@ Unit D1 Bioeconomy.
 """
 
 # Built-in modules #
+import os
 
 # Third party modules #
 
@@ -17,8 +18,12 @@ from autopaths            import Path
 from autopaths.auto_paths import AutoPaths
 from plumbing.cache       import property_cached
 
-# Constants #
+# Where is the data, default case #
 libcbm_data_dir = Path("~/deploy/libcbm_data/")
+
+# But you can override that with an environment variable #
+if os.environ.get("LIBCBM_DATA"):
+    libcbm_data_dir = Path(os.environ['LIBCBM_DATA'])
 
 # Internal modules #
 from libcbm_runner.core.country import Country
