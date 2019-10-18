@@ -35,9 +35,17 @@ for lib_country, cbm_country in tqdm(zip(lib_continent, cbm_continent)):
         lib_country.data_dir.remove()
         lib_country.data_dir.create()
     # Define what we will copy #
-    orig_files_to_copy = ['inventory']
+    orig_files_to_copy = {
+        'ageclass':           'age_classes',
+        'classifiers':        'classifiers',
+        'disturbance_events': 'events',
+        'disturbance_types':  'disturbance_types',
+        'inventory':          'inventory',
+        'transition_rules':   'transitions',
+        'yields':             'yield',
+    }
     # Main loop #
-    for name in orig_files_to_copy:
-        source = cbm_country.orig_data.paths[name]
-        destin = lib_country.orig_data.paths[name]
+    for old_name, new_name in orig_files_to_copy.items():
+        source = cbm_country.orig_data.paths[old_name]
+        destin = lib_country.orig_data.paths[new_name]
         source.copy(destin)

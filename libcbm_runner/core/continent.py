@@ -19,7 +19,7 @@ from autopaths.auto_paths import AutoPaths
 from plumbing.cache       import property_cached
 
 # Where is the data, default case #
-libcbm_data_dir = Path("~/deploy/libcbm_data/")
+libcbm_data_dir = Path("~/repos/libcbm_data/")
 
 # But you can override that with an environment variable #
 if os.environ.get("LIBCBM_DATA"):
