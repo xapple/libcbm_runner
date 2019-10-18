@@ -72,7 +72,7 @@ class Simulation(object):
             inventory            = self.inventory,
             pool_codes           = self.sit.defaults.get_pools(),
             flux_indicator_codes = self.sit.defaults.get_flux_indicators(),
-            pre_dynamics_func    = lambda x: x,
+            pre_dynamics_func    = lambda time_step, cbm_vars: cbm_vars,
             reporting_func       = reporting_func
         )
         # Return for convenience #
