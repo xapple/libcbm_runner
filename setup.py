@@ -5,6 +5,7 @@ setup(
         version          = '0.1.1',
         description      = 'libcbm_runner is a python package for running carbon budget simulations.',
         long_description = open('README.md').read(),
+        long_description_content_type = 'text/markdown',
         license          = 'MIT',
         url              = 'https://github.com/xapple/libcbm_runner',
         author           = 'Lucas Sinclair',
