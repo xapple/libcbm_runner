@@ -50,9 +50,6 @@ These modules themselves have dependencies that will be auto-installed, so altho
     $ python3 -m pip install --user numexpr
     $ python3 -m pip install --user tqdm
 
-
-
-
 ## Paths variables
 
 The next step is to set the environment variable `$PYTHONPATH` so that our interpreter can find the repositories we just cloned. We will edit the `~/.profile` file and add these lines to it:
