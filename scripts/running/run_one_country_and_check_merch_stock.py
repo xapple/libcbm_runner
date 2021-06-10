@@ -1,56 +1,52 @@
-from libcbm_runner.core.continent import continent
-
-#####################################
-# JRC's version using libcbm_runner #
-#####################################
 
 ################################################################################
+##################### JRC's version using libcbm_runner ########################
+################################################################################
+
+# Import
+from libcbm_runner.core.continent import continent
+
+# Init
 scenario = continent.scenarios['historical']
 runner_libcbm = scenario.runners['LU'][-1]
 runner_libcbm.run()
-
 
 # Show results
 #print(runner_libcbm.simulation.results)
 #print(runner_libcbm.simulation.inventory)
 
+# Retrieve pools
 pools_libcbm = runner_libcbm.simulation.results.pools
 
+# Make dataframe
 merch_libcbm_by_year = (pools_libcbm
   .groupby('timestep')
   .agg({'HardwoodMerch': 'sum',
         'SoftwoodMerch': 'sum'})
   .reset_index())
 
-# pools0_libcbm=pools_libcbm.query('timestep==0')
-# for c in pools0_libcbm.columns:
-#     print (c, sum(pools0_libcbm[c]))
+# Show
+print(merch_libcbm_by_year)
 
-merch_libcbm_by_year
+###############################################################################
+################ Canada's version using only libcbm_py ########################
+###############################################################################
 
-#########################################
-# Canada's version using only libcbm_py #
-#########################################
-
+# Imports
 from libcbm.input.sit import sit_cbm_factory
 from libcbm.model.cbm import cbm_simulator
 import os
 
+# Constant
+json_config_path = "xxxxxxxxxxxxxxxx"
+
+# Function
 def run_libcbm():
-    # run the same dataset in libcbm.  the output will be appended
-    # timestep-by-timestep to the dataframe results variable in this class
-    libcbm_config_path = os.path.abspath(r"./data/libcbm_config.json")
+    libcbm_config_path = os.path.abspath(json_config_path)
     sit = sit_cbm_factory.load_sit(libcbm_config_path)
     classifiers, inventory = sit_cbm_factory.initialize_inventory(sit)
     cbm = sit_cbm_factory.initialize_cbm(sit)
-
-    # I would encourage you to consider writing your own results
-    # processing function/class if you have not already.
-    # This one works, but it can cause issues in notebooks if not rebuilt each time
-    # (will just keep appending results making it invalid) I suspect this having a
-    # role in the doubling you observed in the results you sent.
     results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
-
     rule_based_processor = sit_cbm_factory.create_sit_rule_based_processor(sit, cbm)
     cbm_simulator.simulate(
         cbm,
@@ -64,9 +60,10 @@ def run_libcbm():
     )
     return results
 
-# run libcbm
+# Run libcbm
 libcbm_results = run_libcbm()
 
+# Make dataframe
 libcbm_merch_by_timestep = libcbm_results.pools[
     ["timestep", "SoftwoodMerch", "HardwoodMerch"]
 ].groupby("timestep").sum().rename(
@@ -75,4 +72,8 @@ libcbm_merch_by_timestep = libcbm_results.pools[
         "SoftwoodMerch": "swm_libcbm",
         "HardwoodMerch": "hwm_libcbm"
     })
+
+# Show
+print(libcbm_merch_by_timestep)
+
 
