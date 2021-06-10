@@ -1,17 +1,16 @@
-
-from libcbm_runner.core.continent import continent as continent_libcbm
+from libcbm_runner.core.continent import continent
 
 #####################################
 # JRC's version using libcbm_runner #
 #####################################
 
 ################################################################################
-scenario = continent_libcbm.scenarios['historical']
-runner_libcbm   = scenario.runners['LU'][-1]
+scenario = continent.scenarios['historical']
+runner_libcbm = scenario.runners['LU'][-1]
 runner_libcbm.run()
 
 
-
+# Show results
 #print(runner_libcbm.simulation.results)
 #print(runner_libcbm.simulation.inventory)
 
@@ -35,6 +34,7 @@ merch_libcbm_by_year
 
 from libcbm.input.sit import sit_cbm_factory
 from libcbm.model.cbm import cbm_simulator
+import os
 
 def run_libcbm():
     # run the same dataset in libcbm.  the output will be appended
