@@ -24,14 +24,14 @@ The first step is to clone the needed git repositories. We will clone all the pr
     $ mkdir repos
     $ cd repos
     $ git clone git@github.com:cat-cfs/libcbm_py.git
-    $ git clone git@github.com:xapple/libcbm_runner.git
-    $ git clone git@github.com:xapple/libcbm_data.git
+    $ git clone git@gitlab.com:bioeconomy/libcbm/libcbm_runner.git
+    $ git clone git@gitlab.com:bioeconomy/libcbm/libcbm_data.git
 
 ## The EU AIDB
 
 Next, we must obtain a copy the europeean cbm_defaults sqlite database. As it's a bit larger, it's not included in the libcbm_data repository. Instead, it's in a standalone one.
 
-    $ git clone git@github.com:xapple/libcbm_aidb.git
+    $ git clone git@gitlab.com:bioeconomy/libcbm/libcbm_aidb.git
     $ ln -s ~/repos/libcbm_aidb/aidb.db  ~/repos/libcbm_data/countries/ZZ/orig/config/aidb.db
 
 ## Install pip
