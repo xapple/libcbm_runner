@@ -1,10 +1,8 @@
-
-
 # Installation
 
-## Installation of libcbm and libcbm_py
+## Installation of `libcbm` and `libcbm_py`
 
-libcbm is a C++ library with python binding developed by the Canadian Forest Service.
+`libcbm` is a C++ library with python binding developed by the Canadian Forest Service.
 The python module uses pandas data frames to manipulate data.
 
 
@@ -14,7 +12,7 @@ This guide shows how to setup the `libcbm_data` and `libcbm_runner` projects tog
 
 ## Fresh OS
 
-In this guide we will be using an "Ubuntu Server 18.04 LTS" operating system. Specifically we will have tested the commands with the pre-made AMI image offered by the EC2 service from Amazon. The exact reference on AWS is "ami-02df9ea15c1778c9c". This is the x86 image version (not ARM). Still, this should work the same on more or less any Linux distribution.
+In this guide we will be using an "Ubuntu Server 20 LTS" operating system. Specifically we will have tested the commands with the pre-made AMI image offered by the EC2 service from Amazon. The exact reference on AWS is "ami-0a8e758f5e873d1c1". This is the x86 image version (not ARM). Still, this should work the same on more or less any Linux distribution.
 
 ## Clone repos
 
@@ -29,25 +27,25 @@ The first step is to clone the needed git repositories. We will clone all the pr
 
 ## The EU AIDB
 
-Next, we must obtain a copy the europeean cbm_defaults sqlite database. As it's a bit larger, it's not included in the libcbm_data repository. Instead, it's in a standalone one.
+Next, we must obtain a copy the European "cbm_defaults" sqlite3 database. As it's a bit larger, it's not included in the `libcbm_data` repository. Instead, it's in a standalone one.
 
     $ git clone git@gitlab.com:bioeconomy/libcbm/libcbm_aidb.git
-    $ ln -s ~/repos/libcbm_aidb/aidb.db  ~/repos/libcbm_data/countries/ZZ/orig/config/aidb.db
+    $ mkdir -p ~/repos/libcbm_data/countries/ZZ/orig/config/
+    $ ln -s ~/repos/libcbm_aidb/aidb.db ~/repos/libcbm_data/countries/ZZ/orig/config/aidb.db
 
 ## Install pip
 
 The modules we have developed rely on some third party (as well as first party) packages that you can install easily with `pip`. However, you first need to run a few commands to get `pip` itself as it's not included by default.
 
-    $ sudo apt-get install python3-distutils
-    $ curl -O https://bootstrap.pypa.io/get-pip.py
-    $ python3 get-pip.py --user
+    $ sudo apt update
+    $ sudo apt install python3-pip
 
 ## Install dependencies
 
 These modules themselves have dependencies that will be auto-installed, so although there is just two commands, you will end up installing many more packages.
 
-    $ python3 -m pip install --user autopaths
-    $ python3 -m pip install --user plumbing
+    $ python3 -m pip install --user autopaths<=2.0.0
+    $ python3 -m pip install --user plumbing<=3.0.0
     $ python3 -m pip install --user simplejson
 
 ## Paths variables
