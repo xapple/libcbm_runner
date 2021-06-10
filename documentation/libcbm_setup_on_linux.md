@@ -47,6 +47,11 @@ These modules themselves have dependencies that will be auto-installed, so altho
     $ python3 -m pip install --user autopaths<=2.0.0
     $ python3 -m pip install --user plumbing<=3.0.0
     $ python3 -m pip install --user simplejson
+    $ python3 -m pip install --user numexpr
+    $ python3 -m pip install --user tqdm
+
+
+
 
 ## Paths variables
 
