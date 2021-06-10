@@ -62,6 +62,10 @@ class Simulation(object):
         self.classifiers, self.inventory = sit_cbm_factory.initialize_inventory(self.sit)
         # Create a CBM object #
         self.cbm = sit_cbm_factory.initialize_cbm(self.sit)
+        # create a function to apply rule based events and transition rules #
+        rule_based_event_func = \
+            sit_cbm_factory.create_sit_rule_based_pre_dynamics_func(
+                self.sit, self.cbm, lambda x: None)
         # This will contain results #
         self.results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
         # Run #
@@ -72,7 +76,7 @@ class Simulation(object):
             inventory            = self.inventory,
             pool_codes           = self.sit.defaults.get_pools(),
             flux_indicator_codes = self.sit.defaults.get_flux_indicators(),
-            pre_dynamics_func    = lambda time_step, cbm_vars: cbm_vars,
+            pre_dynamics_func    = rule_based_event_func,
             reporting_func       = reporting_func
         )
         # Return for convenience #
