@@ -2,6 +2,9 @@
 ################################################################################
 ##################### JRC's version using libcbm_runner ########################
 ################################################################################
+# Data preparation: 
+# Copy the 
+
 
 # Import
 from libcbm_runner.core.continent import continent
@@ -27,6 +30,9 @@ merch_libcbm_by_year = (pools_libcbm
 
 # Show
 print(merch_libcbm_by_year)
+
+#      timestep  HardwoodMerch  SoftwoodMerch
+# 0           0   6.541837e+06   3.742087e+06
 
 ###############################################################################
 ################ Canada's version using only libcbm_py ########################
