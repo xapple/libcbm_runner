@@ -42,6 +42,23 @@ class Simulation(object):
     def create_json(self):
         return CreateJSON(self)
 
+    def pre_dynamics_func(self, timestep, cbm_vars):
+        if timestep == 1:
+            # see the simulate method of the libcbm simulator
+            # https://github.com/cat-cfs/libcbm_py/blob/e9e37ce5a91cb2bcb07011812a7d49c859d88fa4/libcbm/model/cbm/cbm_simulator.py#L148
+            # if t=1 we know this is the first timestep, and nothing has yet been done to the post-spinup pools
+            # it is here that you want to change the yields,
+            # and this can be done by changing the classifier set of each inventory record
+            # Function suggested by 
+            #cbm_vars["initialization"] = get_classifier_id("initialization", "c")
+
+            # TODO change this hard coded value into a method that gets 
+            # the classifier id of the initialization classifier value
+            #  8      c                                 current_yield
+            cbm_vars.classifiers.initialization = 25
+
+        return self.rule_based_processor.pre_dynamic_func(timestep, cbm_vars)
+
     #------------------------------- Methods ---------------------------------#
     def run(self):
         """
@@ -63,7 +80,7 @@ class Simulation(object):
         # This will contain results #
         self.results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
         # Create a function to apply rule based events and transition rules #
-        rule_based_processor = sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
+        self.rule_based_processor = sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
         # Run #
         cbm_simulator.simulate(
             self.cbm,
@@ -72,7 +89,7 @@ class Simulation(object):
             inventory            = self.inventory,
             pool_codes           = self.sit.defaults.get_pools(),
             flux_indicator_codes = self.sit.defaults.get_flux_indicators(),
-            pre_dynamics_func    = rule_based_processor.pre_dynamic_func,
+            pre_dynamics_func    = self.pre_dynamics_func,
             reporting_func       = reporting_func
         )
         # Return for convenience #

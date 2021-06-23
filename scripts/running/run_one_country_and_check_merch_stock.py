@@ -34,6 +34,38 @@ print(merch_libcbm_by_year)
 #      timestep  HardwoodMerch  SoftwoodMerch
 # 0           0   6.541837e+06   3.742087e+06
 
+# Pools after adding the classifier 8 initialization of historical yield curves
+# Before changing the pre dynamics func
+#      timestep  HardwoodMerch  SoftwoodMerch
+# 0           0   3.525395e+06   1.794624e+06
+# 1           1   3.545718e+06   1.822014e+06
+# 2           2   3.565945e+06   1.849315e+06
+# 3           3   3.586067e+06   1.876554e+06
+# 4           4   3.606076e+06   1.903788e+06
+# ..        ...            ...            ...
+# 96         96   4.675313e+06   3.502686e+06
+# 97         97   4.680244e+06   3.510688e+06
+# 98         98   4.685087e+06   3.518549e+06
+# 99         99   4.689840e+06   3.526268e+06
+# 100       100   4.694504e+06   3.533846e+06
+
+# After changing the pre dynamics func
+# In [8]: print(merch_libcbm_by_year)
+#      timestep  HardwoodMerch  SoftwoodMerch
+# 0           0   3.525395e+06   1.794624e+06
+# 1           1   3.557359e+06   1.808860e+06
+# 2           2   3.588982e+06   1.822863e+06
+# 3           3   3.619472e+06   1.835535e+06
+# 4           4   3.650726e+06   1.849599e+06
+# ..        ...            ...            ...
+# 96         96   6.050578e+06   2.730617e+06
+# 97         97   6.082812e+06   2.723987e+06
+# 98         98   6.114835e+06   2.717199e+06
+# 99         99   6.146645e+06   2.710249e+06
+# 100       100   6.178240e+06   2.703150e+06
+
+
+
 ###############################################################################
 ################ Canada's version using only libcbm_py ########################
 ###############################################################################
@@ -85,7 +117,17 @@ libcbm_merch_by_timestep = libcbm_results.pools[
 # Show
 print(libcbm_merch_by_timestep)
 
+# Results using the current yield Curves
 #             swm_libcbm    hwm_libcbm
 # timestep
 # 0         3.742087e+06  6.541837e+06
+
+# Results using the historical yield curves
+# Changing line 30 in
+# ~/rp/libcbm_data/scenarios/historical/LU/0/input/json/config.json
+# "path": "/home/paul/repos/libcbm_data/scenarios/historical/LU/0/input/csv/historical_yields.csv"
+# RuntimeWarning)
+#             swm_libcbm    hwm_libcbm
+# timestep
+# 0         1.794624e+06  3.525395e+06
 
