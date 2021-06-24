@@ -21,5 +21,14 @@
 
 - Fix version of autopath and plumbing dependencies
 
-- Increase verbosity, display more messages when the model is running
+- Increase verbosity, display more messages when the model is running. Replace the print 
+  statements with a mechanism that enables logging.
+
+- Would it make sense to make sit available before the simulation run?  i.e. Create a 
+  SIT object before the run method? Maybe it doesn't make sense. An alternative would be 
+  to decompose the run in 2 one that prepares the run and one that actually calls the 
+  simulator? That's mostly useful for debugging anyway.
+
+        self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config), db_path=str(db_path))
+
 
