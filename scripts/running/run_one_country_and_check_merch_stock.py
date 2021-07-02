@@ -28,8 +28,11 @@ merch_libcbm_by_year = (pools_libcbm
         'SoftwoodMerch': 'sum'})
   .reset_index())
 
-# Show
+# Show the 100 year simulation
 print(merch_libcbm_by_year)
+
+# Show only the 33 years run in the static demand scenario
+print(merch_libcbm_by_year.iloc[0:33,])
 
 #      timestep  HardwoodMerch  SoftwoodMerch
 # 0           0   6.541837e+06   3.742087e+06

@@ -8,13 +8,30 @@
 - As of June 2021 the model output is volatile in memory. Add a mechanism to write the 
   model output to disk for different scenarios.
 
-- check the consiency of pools for merch, LB, SOC - notebooks available 
-        (C:/CBM/cbmcfs3_runner/notebooks/comparison_libcbm/Soil_comparison.md)
-        (C:/CBM/cbmcfs3_runner/notebooks/comparison_libcbm/current_historical_libcbm.md
+- Transfer the static_demand disturbances to the orig/csv/events.csv
+  from
+  /home/paul/rp/cbmcfs3_data/scenarios/static_demand/LU/0/input/csv/disturbance_events.csv
+  to /libcbm_data/countries/LU/orig/csv/
 
-- creating a mechanism to define and run scenarios
+- Adding the 8th classifier called `historical_yield` to the following input files. As 
+  has currently been done manually for Luxemburg.
 
+    classifiers.csv
+    events.csv
+    inventory.csv
+    transitions.csv
+    yield.csv
 
+- Check between libcbm-runner and cbmcfs3_data scenraio of the static demand the
+  consistency of pools for merchantable, Living Biomass, Soil Organic Carbon 
+
+- notebooks available 
+  (C:/CBM/cbmcfs3_runner/notebooks/comparison_libcbm/Soil_comparison.md)
+  (C:/CBM/cbmcfs3_runner/notebooks/comparison_libcbm/current_historical_libcbm.md
+  For each of the relevant pools using
+  numpy.testing.assert_allclose(processed, raw, rtol=1e-02)
+
+- Creating a mechanism to define and run scenarios
 
 
 # Dynamic harvest allocation Task
