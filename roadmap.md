@@ -8,6 +8,14 @@
 - As of June 2021 the model output is volatile in memory. Add a mechanism to write the 
   model output to disk for different scenarios.
 
+- check the consiency of pools for merch, LB, SOC - notebooks available 
+        (C:/CBM/cbmcfs3_runner/notebooks/comparison_libcbm/Soil_comparison.md)
+        (C:/CBM/cbmcfs3_runner/notebooks/comparison_libcbm/current_historical_libcbm.md
+
+- creating a mechanism to define and run scenarios
+
+
+
 
 # Dynamic harvest allocation Task
 
