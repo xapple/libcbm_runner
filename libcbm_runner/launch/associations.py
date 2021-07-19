@@ -54,7 +54,8 @@ class Associations(object):
         return mapping
 
     def rows_to_list(self, mapping_name, user, default):
-        """Create a list string by picking the appropriate rows in the CSV file.
+        """
+        Create a list string by picking the appropriate rows in the CSV file.
 
         Here is an example call:
 

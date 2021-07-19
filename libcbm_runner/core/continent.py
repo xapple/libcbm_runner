@@ -18,7 +18,7 @@ from autopaths            import Path
 from autopaths.auto_paths import AutoPaths
 from plumbing.cache       import property_cached
 
-# Where is the data, default case #
+# Where is the data, default case #
 libcbm_data_dir = Path("~/repos/libcbm_data/")
 
 # But you can override that with an environment variable #
@@ -31,10 +31,12 @@ from libcbm_runner.scenarios    import scen_classes
 
 ###############################################################################
 class Continent(object):
-    """Entry object to the pipeline.
+    """
+    Entry object to the pipeline.
 
     Aggregates countries together and enables access to a data frame containing
-    concatenated data from all countries at once."""
+    concatenated data from all countries at once.
+    """
 
     all_paths = """
     /countries/

@@ -23,10 +23,12 @@ from libcbm_runner.pump.input_data   import InputData
 
 ###############################################################################
 class Runner(object):
-    """This object is capable of running a CBM simulation pipeline, starting
+    """
+    This object is capable of running a CBM simulation pipeline, starting
     from a few input tables, such as an inventory and a list of disturbances
     and to bring this data all the way to the predicted carbon stock and
-    fluxes."""
+    fluxes.
+    """
 
     all_paths = """
     /input/
@@ -55,8 +57,10 @@ class Runner(object):
 
     @property_cached
     def log(self):
-        """Each runner will have its own logger.
-        By default we clear the log file when we start logging."""
+        """
+        Each runner will have its own logger.
+        By default we clear the log file when we start logging.
+        """
         return create_file_logger(self.short_name, self.paths.log)
 
     @property
@@ -74,14 +78,18 @@ class Runner(object):
 
     @property_cached
     def input_data(self):
-        """Access the input data to this run. This data can be
-        a modified version of the original country's CSV files."""
+        """
+        Access the input data to this run. This data can be
+        a modified version of the original country's CSV files.
+        """
         return InputData(self)
 
     #------------------------------- Methods ---------------------------------#
     def run(self):
-        """Run the full modelling pipeline for a given country,
-        a given scenario and a given step."""
+        """
+        Run the full modelling pipeline for a given country,
+        a given scenario and a given step.
+        """
         # Messages #
         self.log.info("Using module at '%s'." % Path(libcbm_runner))
         self.log.info("Runner '%s' starting." % self.short_name)
@@ -101,9 +109,11 @@ class Runner(object):
         self.log.info("Done.")
 
     def remove_directory(self):
-        """Removes the directory that will be recreated by running this runner.
+        """
+        Removes the directory that will be recreated by running this runner.
         This guarantees that all output data is regenerated.
-        Note: we need to keep the log we are writing to currently."""
+        Note: we need to keep the log we are writing to currently.
+        """
         # Message #
         self.log.info("Removing directory '%s'." % self.data_dir)
         # The output directory #
@@ -115,8 +125,10 @@ class Runner(object):
                 element.remove()
 
     def copy_orig_from_country(self):
-        """Refresh the input data by copying the immutable original
-        CSVs from the current country to this runner's input."""
+        """
+        Refresh the input data by copying the immutable original
+        CSVs from the current country to this runner's input.
+        """
         destination_dir = self.input_data.paths.csv_dir
         destination_dir.remove()
         self.country.orig_data.paths.csv_dir.copy(destination_dir)

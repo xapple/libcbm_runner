@@ -30,8 +30,10 @@ all_country_codes = pandas.read_csv(str(all_country_codes))
 
 ###############################################################################
 class Country(object):
-    """This object gives access to the data pertaining to one country
-    amongst the 26 EU member states we are examining."""
+    """
+    This object gives access to the data pertaining to one country
+    amongst the 26 EU member states we are examining.
+    """
 
     all_paths = """
     """
@@ -52,15 +54,19 @@ class Country(object):
 
     @property_cached
     def scenarios(self):
-        """A dictionary linking scenario names to a list of runners
-        that concern only this country."""
+        """
+        A dictionary linking scenario names to a list of runners
+        that concern only this country.
+        """
         from cbmcfs3_runner.core.continent import continent
-        return {n: s.runners[self.iso2_code] for n,s in continent.scenarios.items()}
+        return {n: s.runners[self.iso2_code] for n, s in continent.scenarios.items()}
 
     @property_cached
     def associations(self):
-        """Associations of admin/eco/species/disturbances names between
-        the input and the reference."""
+        """
+        Associations of admin/eco/species/disturbances names between
+        the input and the reference.
+        """
         return Associations(self)
 
     @property_cached
@@ -75,7 +81,8 @@ class Country(object):
 
     #------------------------------- Methods ---------------------------------#
     def set_codes(self):
-        """Update all the country codes for this country.
+        """
+        Update all the country codes for this country.
         Typically the result will look something like this:
 
          'iso2_code':      'BE',
