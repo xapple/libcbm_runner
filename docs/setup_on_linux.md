@@ -1,18 +1,12 @@
 # Installation
 
-## Installation of `libcbm` and `libcbm_py`
-
-`libcbm` is a C++ library with python binding developed by the Canadian Forest Service.
-The python module uses pandas data frames to manipulate data.
-
-
 ## Setup of `libcbm_data` and `libcbm_runner`
 
-This guide shows how to setup the `libcbm_data` and `libcbm_runner` projects together on a fresh Ubuntu system so as to run the 26 EU carbon budget simulations with `libcbm_py` automatically.
+This guide shows how to set up the `libcbm_data` and `libcbm_runner` projects together on a fresh Ubuntu system to run the 26 EU carbon budget simulations with `libcbm_py` automatically.
 
 ## Fresh OS
 
-In this guide we will be using an "Ubuntu Server 20 LTS" operating system. Specifically we will have tested the commands with the pre-made AMI image offered by the EC2 service from Amazon. The exact reference on AWS is "ami-0a8e758f5e873d1c1". This is the x86 image version (not ARM). Still, this should work the same on more or less any Linux distribution.
+In this guide we will be using an "Ubuntu Server 20 LTS" operating system. Specifically we will have tested the commands with the pre-made AMI image offered by the EC2 service from Amazon. We used the x86 image version (not ARM). Still, this should work the same on more or less any Linux distribution.
 
 ## Clone repos
 
@@ -22,8 +16,8 @@ The first step is to clone the needed git repositories. We will clone all the pr
     $ mkdir repos
     $ cd repos
     $ git clone git@github.com:cat-cfs/libcbm_py.git
-    $ git clone git@gitlab.com:bioeconomy/libcbm/libcbm_runner.git
-    $ git clone git@gitlab.com:bioeconomy/libcbm/libcbm_data.git
+    $ git clone git@github.com:xapple/libcbm_runner.git
+    $ git clone git@github.com:xapple/libcbm_data.git
 
 ## The EU AIDB
 
@@ -42,15 +36,15 @@ The modules we have developed rely on some third party (as well as first party) 
 
 ## Install dependencies
 
-These modules themselves have dependencies that will be auto-installed, so although there is just two commands, you will end up installing many more packages.
+These modules themselves have dependencies that will be auto-installed.
 
-    $ python3 -m pip install --user autopaths<=2.0.0
-    $ python3 -m pip install --user plumbing<=3.0.0
-    $ python3 -m pip install --user simplejson
-    $ python3 -m pip install --user numexpr
-    $ python3 -m pip install --user tqdm
+    $ python3 -m pip install autopaths
+    $ python3 -m pip install plumbing
+    $ python3 -m pip install simplejson
+    $ python3 -m pip install numexpr
+    $ python3 -m pip install tqdm
 
-## Paths variables
+## Environment variables
 
 The next step is to set the environment variable `$PYTHONPATH` so that our interpreter can find the repositories we just cloned. We will edit the `~/.profile` file and add these lines to it:
 
