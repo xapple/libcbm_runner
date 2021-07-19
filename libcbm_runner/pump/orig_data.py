@@ -24,9 +24,15 @@ class OrigData(object):
     """
     This class will provide access to the original data of a Country
     as several pandas data frames.
+
     This data was taken from the original cbmcfs3 dataset composed by
     Roberto P. and thus depends on the `cbmcfs3_runner` python module
     to be generated.
+
+    To copy all the data from the `cbmcfs3_data` repository do the following:
+
+        >>> from libcbm_runner.core.continent import continent
+        >>> for country in continent: country.orig_data.copy_from_cbmcfs3()
     """
 
     all_paths = """
@@ -77,3 +83,7 @@ class OrigData(object):
             source = cbm_country.orig_data.paths[old_name]
             destin = lib_country.orig_data.paths[new_name]
             source.copy(destin)
+        # We also need the 'associations' file #
+        source = cbm_country.paths.associations
+        destin = lib_country.orig_data.paths.associations
+        source.copy(destin)
