@@ -29,9 +29,6 @@ class Scenario(object):
     all_paths = """
     """
 
-    def __iter__(self): return iter(self.runners.values())
-    def __len__(self):  return len(self.runners.values())
-
     def __init__(self, continent):
         # Save parent #
         self.continent = continent
@@ -39,6 +36,12 @@ class Scenario(object):
         self.base_dir = Path(self.scenarios_dir + self.short_name + '/')
         # Automatically access paths based on a string of many subpaths #
         self.paths = AutoPaths(self.base_dir, self.all_paths)
+
+    def __repr__(self):
+        return '%s object with %i runners' % (self.__class__, len(self))
+
+    def __iter__(self): return iter(self.runners.values())
+    def __len__(self):  return len(self.runners.values())
 
     @property
     def scenarios_dir(self):

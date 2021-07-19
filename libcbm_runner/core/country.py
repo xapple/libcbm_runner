@@ -59,8 +59,10 @@ class Country(object):
         that concern only this country.
         """
         from cbmcfs3_runner.core.continent import continent
-        return {n: s.runners[self.iso2_code] for n, s in continent.scenarios.items()}
+        return {n: s.runners[self.iso2_code]
+                for n, s in continent.scenarios.items()}
 
+    #---------------------------- Compositions --------------------------------#
     @property_cached
     def associations(self):
         """
@@ -86,9 +88,9 @@ class Country(object):
         Typically the result will look something like this:
 
          'iso2_code':      'BE',
-         'country_num':    255,
+         'country_num':     255,
          'country_name':   'Belgium',
-         'country_m49':    56,
+         'country_m49':     56,
          'country_iso3':   'BEL',
          'nuts_zero_2006': 'BE',
          'nuts_zero_2016': 'BE',

@@ -36,11 +36,6 @@ class Runner(object):
     /logs/runner.log
     """
 
-    def __repr__(self):
-        return '%s object on "%s"' % (self.__class__, self.data_dir)
-
-    def __bool__(self): return self.paths.log.exists
-
     def __init__(self, scenario, country, num):
         # Base attributes #
         self.scenario = scenario
@@ -55,6 +50,12 @@ class Runner(object):
         # Automatically access paths based on a string of many subpaths #
         self.paths = AutoPaths(self.data_dir, self.all_paths)
 
+    def __repr__(self):
+        return '%s object on "%s"' % (self.__class__, self.data_dir)
+
+    def __bool__(self): return self.paths.log.exists
+
+    #----------------------------- Properties ---------------------------------#
     @property_cached
     def log(self):
         """
@@ -94,7 +95,7 @@ class Runner(object):
         self.log.info("Using module at '%s'." % Path(libcbm_runner))
         self.log.info("Runner '%s' starting." % self.short_name)
         # Clean everything from previous run #
-        self.remove_directory()
+        self.remove_directories()
         # Copy the original input data #
         self.copy_orig_from_country()
         # Modify input data #
@@ -108,7 +109,7 @@ class Runner(object):
         # Messages #
         self.log.info("Done.")
 
-    def remove_directory(self):
+    def remove_directories(self):
         """
         Removes the directory that will be recreated by running this runner.
         This guarantees that all output data is regenerated.
@@ -129,6 +130,10 @@ class Runner(object):
         Refresh the input data by copying the immutable original
         CSVs from the current country to this runner's input.
         """
+        # Get the destination #
         destination_dir = self.input_data.paths.csv_dir
         destination_dir.remove()
-        self.country.orig_data.paths.csv_dir.copy(destination_dir)
+        # Get the origin #
+        origin_dir = self.country.orig_data.paths.csv_dir
+        # Copy #
+        origin_dir.copy(destination_dir)

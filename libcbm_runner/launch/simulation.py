@@ -47,7 +47,7 @@ class Simulation(object):
         """
         Call `libcbm_py` to run the cbm simulation.
 
-        The interaction with libcm_py is decomposed in several calls to pass a
+        The interaction with `libcbm_py` is decomposed in several calls to pass a
         `.json` config, a default database (also called aidb) and csv files.
         """
         # Create the JSON #

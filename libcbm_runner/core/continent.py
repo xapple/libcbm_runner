@@ -44,8 +44,10 @@ class Continent(object):
     """
 
     def __init__(self, base_dir):
-        """Store the directory paths where there is a directory for every
-        country and for every scenario."""
+        """
+        Store the directory paths where there is a directory for every
+        country and for every scenario.
+        """
         # The base directory #
         self.base_dir = base_dir
         # Automatically access paths based on a string of many subpaths #
@@ -53,6 +55,9 @@ class Continent(object):
         # Where the data will be stored for this run #
         self.countries_dir = self.paths.countries_dir
         self.scenarios_dir = self.paths.scenarios_dir
+
+    def __repr__(self):
+        return '%s object with %i countries' % (self.__class__, len(self))
 
     def __getitem__(self, key):
         """Return a runner based on a tuple of scenario, country and step."""
@@ -64,7 +69,8 @@ class Continent(object):
     @property_cached
     def countries(self):
         """Return a dictionary of country iso2 codes to country objects."""
-        all_countries = [Country(self, d) for d in self.countries_dir.flat_directories]
+        all_countries = [Country(self, d)
+                         for d in self.countries_dir.flat_directories]
         return {c.iso2_code: c for c in all_countries}
 
     @property_cached

@@ -19,7 +19,7 @@ from autopaths.auto_paths import AutoPaths
 ###############################################################################
 class CreateJSON(object):
     """
-    This class will generate the JSON file consumed by libcbm.
+    This class will generate the JSON file consumed by `libcbm`.
 
     The mapping mode "SeparateAdminEcoClassifiers" is used by
     libcbm/input/sit/sit_mapping.py to assign the spatial unit IDs.
@@ -70,11 +70,11 @@ class CreateJSON(object):
         # Retrieve the four classifiers mappings #
         mappings = self.runner.country.associations.all_mappings
         # Set the admin and eco classifiers #
-        maps['spatial_units']['admin_mapping']   = mappings['map_admin_bound']
-        maps['spatial_units']['eco_mapping']     = mappings['map_eco_bound']
+        maps['spatial_units']['admin_mapping'] = mappings['map_admin_bound']
+        maps['spatial_units']['eco_mapping']   = mappings['map_eco_bound']
         # Set the disturbances and species classifiers #
-        maps['disturbance_types']                = mappings['map_disturbance']
-        maps['species']['species_mapping']       = mappings['map_species']
+        maps['disturbance_types']              = mappings['map_disturbance']
+        maps['species']['species_mapping']     = mappings['map_species']
         # Get the names of all the CSVs #
         all_files_names = config['import_config'].keys()
         # Finally set the paths to all the CSVs #
