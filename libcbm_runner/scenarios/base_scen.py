@@ -11,12 +11,10 @@ Unit D1 Bioeconomy.
 # Built-in modules #
 
 # Third party modules #
-import pandas
 
 # First party modules #
 from autopaths            import Path
 from autopaths.auto_paths import AutoPaths
-from tqdm import tqdm
 
 # Internal modules #
 
