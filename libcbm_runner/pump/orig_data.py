@@ -12,6 +12,7 @@ Unit D1 Bioeconomy.
 
 # Third party modules #
 import pandas
+from tqdm import tqdm
 
 # First party modules #
 from autopaths.auto_paths import AutoPaths
@@ -23,6 +24,9 @@ class OrigData(object):
     """
     This class will provide access to the original data of a Country
     as several pandas data frames.
+    This data was taken from the original cbmcfs3 dataset composed by
+    Roberto P. and thus depends on the `cbmcfs3_runner` python module
+    to be generated.
     """
 
     all_paths = """
@@ -45,3 +49,31 @@ class OrigData(object):
 
     def __getitem__(self, item):
         return pandas.read_csv(str(self.paths[item]))
+
+    #------------------------------- Methods ---------------------------------#
+    # Define what we will copy #
+    orig_files_to_copy = {
+        'ageclass':           'age_classes',
+        'classifiers':        'classifiers',
+        'disturbance_events': 'events',
+        'disturbance_types':  'disturbance_types',
+        'inventory':          'inventory',
+        'transition_rules':   'transitions',
+        'yields':             'yield',
+    }
+
+    def copy_from_cbmcfs3(self):
+        """
+        A method to copy over the data from the cbmcfs3_data repository to the
+        libcbm_data repository for this particular country.
+        """
+        # The two country objects #
+        lib_country = self.parent
+        cbm_country = self.parent.cbmcfs3_country
+        # Check we are pairing countries correctly #
+        assert lib_country.iso2_code == cbm_country.iso2_code
+        # Main loop #
+        for old_name, new_name in self.orig_files_to_copy.items():
+            source = cbm_country.orig_data.paths[old_name]
+            destin = lib_country.orig_data.paths[new_name]
+            source.copy(destin)

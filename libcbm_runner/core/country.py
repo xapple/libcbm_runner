@@ -52,16 +52,6 @@ class Country(object):
         # Set country codes #
         self.set_codes()
 
-    @property_cached
-    def scenarios(self):
-        """
-        A dictionary linking scenario names to a list of runners
-        that concern only this country.
-        """
-        from cbmcfs3_runner.core.continent import continent
-        return {n: s.runners[self.iso2_code]
-                for n, s in continent.scenarios.items()}
-
     #---------------------------- Compositions --------------------------------#
     @property_cached
     def associations(self):
@@ -77,9 +67,26 @@ class Country(object):
         return AIDB(self)
 
     @property_cached
+    def cbmcfs3_country(self):
+        """Access the corresponding country in the `cbmcfs3_runner` module."""
+        from cbmcfs3_runner.core.continent import continent as cbm_continent
+        return cbm_continent.countries[self.iso2_code]
+
+    @property_cached
     def orig_data(self):
         """Access the immutable original data."""
         return OrigData(self)
+
+    #----------------------------- Properties ---------------------------------#
+    @property_cached
+    def scenarios(self):
+        """
+        A dictionary linking scenario names to a list of runners
+        that concern only this country.
+        """
+        from cbmcfs3_runner.core.continent import continent
+        return {n: s.runners[self.iso2_code]
+                for n, s in continent.scenarios.items()}
 
     #------------------------------- Methods ---------------------------------#
     def set_codes(self):

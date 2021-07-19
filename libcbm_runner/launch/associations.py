@@ -32,7 +32,7 @@ class Associations(object):
 
     @property_cached
     def df(self):
-        """Load the CSV that is 'associations.csv'."""
+        """Load the CSV that is the original 'associations.csv' from cbmcfs3."""
         return pandas.read_csv(str(self.parent.orig_data.paths.associations))
 
     def key_to_rows(self, mapping_name):
