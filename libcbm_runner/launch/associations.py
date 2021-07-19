@@ -59,11 +59,12 @@ class Associations(object):
 
         Here is an example call:
 
-        >>> self.key_to_rows('MapSpecies', 'user_species', 'default_species')
+        >>> self.rows_to_list('MapSpecies', 'user_species', 'default_species')
 
         {...}
         """
-        return [{user:k, default:v} for k,v in self.key_to_rows(mapping_name).items()]
+        return [{user: k, default: v}
+                for k, v in self.key_to_rows(mapping_name).items()]
 
     @property_cached
     def all_mappings(self):
