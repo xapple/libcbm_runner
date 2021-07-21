@@ -3,7 +3,7 @@
 
 """
 A script to add an eighth classifier to every country except Bulgaria in order
-to separate harmonize the number of classifiers in every country.
+to harmonize the number of classifiers in every country.
 """
 
 # Built-in modules #
