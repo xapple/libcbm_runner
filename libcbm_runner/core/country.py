@@ -15,7 +15,6 @@ import pandas
 
 # First party modules #
 from autopaths.dir_path   import DirectoryPath
-from autopaths.auto_paths import AutoPaths
 from plumbing.cache       import property_cached
 
 # Internal modules #
@@ -35,9 +34,6 @@ class Country(object):
     amongst the 26 EU member states we are examining.
     """
 
-    all_paths = """
-    """
-
     def __repr__(self):
         return '%s object code "%s"' % (self.__class__, self.iso2_code)
 
@@ -47,12 +43,10 @@ class Country(object):
         self.continent = continent
         # Main directory #
         self.data_dir = DirectoryPath(data_dir)
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.data_dir, self.all_paths)
         # Set country codes #
         self.set_codes()
 
-    #---------------------------- Compositions --------------------------------#
+    #---------------------------- Compositions -------------------------------#
     @property_cached
     def associations(self):
         """
@@ -67,17 +61,17 @@ class Country(object):
         return AIDB(self)
 
     @property_cached
+    def orig_data(self):
+        """Access the immutable original data."""
+        return OrigData(self)
+
+    @property_cached
     def cbmcfs3_country(self):
         """Access the corresponding country in the `cbmcfs3_runner` module."""
         from cbmcfs3_runner.core.continent import continent as cbm_continent
         return cbm_continent.countries[self.iso2_code]
 
-    @property_cached
-    def orig_data(self):
-        """Access the immutable original data."""
-        return OrigData(self)
-
-    #----------------------------- Properties ---------------------------------#
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def scenarios(self):
         """

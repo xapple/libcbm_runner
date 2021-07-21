@@ -15,11 +15,8 @@ from libcbm.input.sit import sit_cbm_factory
 from libcbm.model.cbm import cbm_simulator
 
 # First party modules #
-from autopaths.auto_paths import AutoPaths
-from plumbing.cache       import property_cached
 
 # Internal modules #
-from libcbm_runner.launch.create_json import CreateJSON
 
 ###############################################################################
 class Simulation(object):
@@ -27,20 +24,9 @@ class Simulation(object):
     This class will run a `libcbm_py` simulation.
     """
 
-    all_paths = """
-    /input/json/config.json
-    /output/
-    """
-
     def __init__(self, parent):
         # Default attributes #
         self.parent = parent
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
-
-    @property_cached
-    def create_json(self):
-        return CreateJSON(self)
 
     #--------------------------- Special Methods -----------------------------#
     def dynamics_func(self, timestep, cbm_vars):
@@ -55,6 +41,7 @@ class Simulation(object):
         change the growth curves, and this can be done by switching the
         classifier value of each inventory record.
         """
+        # Check the timestep #
         if timestep == 1:
             # The name of our extra classifier #
             key = 'Simulation period (for yields)'
@@ -73,12 +60,10 @@ class Simulation(object):
         The interaction with `libcbm_py` is decomposed in several calls to pass
         a `.json` config, a default database (also called aidb) and csv files.
         """
-        # Create the JSON #
-        self.create_json()
         # The 'AIDB' path as it was called previously #
         db_path = self.parent.country.aidb.paths.db
         # Create a SIT object #
-        self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config),
+        self.sit = sit_cbm_factory.load_sit(str(self.parent.paths.json),
                                             db_path = str(db_path))
         # Do some initialization #
         self.clfrs, self.inv = sit_cbm_factory.initialize_inventory(self.sit)

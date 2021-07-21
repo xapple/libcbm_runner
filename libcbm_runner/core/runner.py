@@ -15,11 +15,14 @@ from autopaths            import Path
 from autopaths.auto_paths import AutoPaths
 from plumbing.cache       import property_cached
 from plumbing.logger      import create_file_logger
+from plumbing.timer       import LogTimer
 
 # Internal modules #
 import libcbm_runner
-from libcbm_runner.launch.simulation import Simulation
-from libcbm_runner.pump.input_data   import InputData
+from libcbm_runner.launch.create_json import CreateJSON
+from libcbm_runner.launch.simulation  import Simulation
+from libcbm_runner.pump.input_data    import InputData
+from libcbm_runner.pump.output_data   import OutputData
 
 ###############################################################################
 class Runner(object):
@@ -28,10 +31,18 @@ class Runner(object):
     from a few input tables, such as an inventory and a list of disturbances
     and to bring this data all the way to the predicted carbon stock and
     fluxes.
+
+    You can run a scenario like this:
+
+        >>> from libcbm_runner.core.continent import continent
+        >>> scenario = continent.scenarios['historical']
+        >>> runner   = scenario.runners['LU'][0]
+        >>> runner.run()
     """
 
     all_paths = """
     /input/
+    /input/json/config.json
     /output/
     /logs/runner.log
     """
@@ -55,7 +66,30 @@ class Runner(object):
 
     def __bool__(self): return self.paths.log.exists
 
-    #----------------------------- Properties ---------------------------------#
+    #---------------------------- Compositions -------------------------------#
+    @property_cached
+    def create_json(self):
+        return CreateJSON(self)
+
+    @property_cached
+    def simulation(self):
+        """The object that can run `libcbm` simulations."""
+        return Simulation(self)
+
+    @property_cached
+    def input_data(self):
+        """
+        Access the input data to this run. This data can be
+        a modified version of the original country's CSV files.
+        """
+        return InputData(self)
+
+    @property_cached
+    def output(self):
+        """Create and access the output data to this run."""
+        return OutputData(self)
+
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def log(self):
         """
@@ -72,41 +106,37 @@ class Runner(object):
         msg += self.paths.log.pretty_tail
         return msg
 
-    @property_cached
-    def simulation(self):
-        """The object that can run `libcbm` simulations."""
-        return Simulation(self)
-
-    @property_cached
-    def input_data(self):
-        """
-        Access the input data to this run. This data can be
-        a modified version of the original country's CSV files.
-        """
-        return InputData(self)
-
     #------------------------------- Methods ---------------------------------#
-    def run(self):
+    def run(self, keep_in_ram=True):
         """
         Run the full modelling pipeline for a given country,
         a given scenario and a given step.
         """
         # Messages #
-        self.log.info("Using module at '%s'." % Path(libcbm_runner))
+        self.log.info("Using source at '%s'." % Path(libcbm_runner))
         self.log.info("Runner '%s' starting." % self.short_name)
+        # Start the timer #
+        self.timer = LogTimer(self.log)
+        self.timer.print_start()
         # Clean everything from previous run #
         self.remove_directories()
         # Copy the original input data #
-        self.copy_orig_from_country()
+        self.input_data.copy_orig_from_country()
         # Modify input data #
         pass
+        self.timer.print_elapsed()
+        # Create the JSON configuration #
+        self.create_json()
         # Run the model #
         self.simulation.run()
+        self.timer.print_elapsed()
         # Post-processing #
-        pass
-        # Reporting #
-        pass
+        self.output.save()
+        # Free memory #
+        if not keep_in_ram: del self.simulation
         # Messages #
+        self.timer.print_end()
+        self.timer.print_total_elapsed()
         self.log.info("Done.")
 
     def remove_directories(self):
@@ -124,16 +154,3 @@ class Runner(object):
         for element in self.paths.logs_dir.flat_contents:
             if element != self.paths.log:
                 element.remove()
-
-    def copy_orig_from_country(self):
-        """
-        Refresh the input data by copying the immutable original
-        CSVs from the current country to this runner's input.
-        """
-        # Get the destination #
-        destination_dir = self.input_data.paths.csv_dir
-        destination_dir.remove()
-        # Get the origin #
-        origin_dir = self.country.orig_data.paths.csv_dir
-        # Copy #
-        origin_dir.copy(destination_dir)

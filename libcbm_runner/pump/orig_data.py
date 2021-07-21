@@ -50,6 +50,7 @@ class OrigData(object):
     def __init__(self, parent):
         # Default attributes #
         self.parent = parent
+        self.runner = parent
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 

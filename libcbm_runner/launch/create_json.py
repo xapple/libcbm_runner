@@ -14,7 +14,6 @@ Unit D1 Bioeconomy.
 import simplejson as json
 
 # First party modules #
-from autopaths.auto_paths import AutoPaths
 
 ###############################################################################
 class CreateJSON(object):
@@ -28,12 +27,12 @@ class CreateJSON(object):
     def __init__(self, parent):
         # Default attributes #
         self.parent = parent
-        self.runner = parent.parent
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.runner.data_dir, self.parent.all_paths)
+        self.runner = parent
 
     def __call__(self):
-        self.paths.json.write(json.dumps(self.content, indent=4, ignore_nan=True))
+        self.runner.paths.json.write(json.dumps(self.content,
+                                                indent=4,
+                                                ignore_nan=True))
 
     template = {
         "import_config": {

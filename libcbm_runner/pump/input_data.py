@@ -39,8 +39,23 @@ class InputData(object):
     def __init__(self, parent):
         # Default attributes #
         self.parent = parent
+        self.runner = parent
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
     def __getitem__(self, item):
         return pandas.read_csv(str(self.paths[item]))
+
+    #------------------------------- Methods ---------------------------------#
+    def copy_orig_from_country(self):
+        """
+        Refresh the input data by copying the immutable original
+        CSVs from the current country to this runner's input.
+        """
+        # Get the destination #
+        destination_dir = self.paths.csv_dir
+        destination_dir.remove()
+        # Get the origin #
+        origin_dir = self.runner.country.orig_data.paths.csv_dir
+        # Copy #
+        origin_dir.copy(destination_dir)
