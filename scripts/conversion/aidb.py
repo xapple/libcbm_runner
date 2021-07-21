@@ -14,6 +14,10 @@ Typically you would run this file from a command line like this:
 
      ipython3.exe -i -- /deploy/libcbm_runner/scripts/conversion/aidb.py
 
+Or on a windows system which has paths defined as such
+    
+     ipython3.exe -i -- /c/repos/libcbm_runner/scripts/conversion/aidb.py
+
 You need to run this on a machine that has a Microsoft Access driver installed.
 So likely this will mean a Windows machine.
 
