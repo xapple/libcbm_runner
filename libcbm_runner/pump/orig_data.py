@@ -38,7 +38,7 @@ class OrigData(object):
     all_paths = """
     /orig/config/associations.csv
     /orig/csv/
-    /orig/csv/yield.csv
+    /orig/csv/growth_curves.csv
     /orig/csv/transitions.csv
     /orig/csv/events.csv
     /orig/csv/inventory.csv
@@ -65,7 +65,6 @@ class OrigData(object):
         'disturbance_types':  'disturbance_types',
         'inventory':          'inventory',
         'transition_rules':   'transitions',
-        'yields':             'yield',
     }
 
     def copy_from_cbmcfs3(self):

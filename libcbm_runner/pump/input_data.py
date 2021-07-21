@@ -27,7 +27,7 @@ class InputData(object):
 
     all_paths = """
     /input/csv/
-    /input/csv/yield.csv
+    /input/csv/growth_curves.csv
     /input/csv/transitions.csv
     /input/csv/events.csv
     /input/csv/inventory.csv

@@ -49,8 +49,8 @@ class Simulation(object):
 
         If t=1, we know this is the first timestep, and nothing has yet been
         done to the post-spinup pools. It is at this moment that we want to
-        change the yields, and this can be done by switching the classifier
-        value of each inventory record.
+        change the growth curves, and this can be done by switching the
+        classifier value of each inventory record.
         """
         if timestep == 1:
             switch_clfrs = self.sit.classifier_value_ids["initialization"]["c"]

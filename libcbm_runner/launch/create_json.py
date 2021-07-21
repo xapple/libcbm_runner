@@ -79,7 +79,8 @@ class CreateJSON(object):
         all_files_names = config['import_config'].keys()
         # Finally set the paths to all the CSVs #
         for file_name in all_files_names:
-            full_path = self.runner.input_data.paths[file_name]
+            name = file_name if file_name != 'yield' else 'growth_curves'
+            full_path = self.runner.input_data.paths[name]
             config['import_config'][file_name]['params']['path'] = full_path
         # Return result #
         return config

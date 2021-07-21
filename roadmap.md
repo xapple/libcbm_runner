@@ -13,14 +13,14 @@
   /home/paul/rp/cbmcfs3_data/scenarios/static_demand/LU/0/input/csv/disturbance_events.csv
   to /libcbm_data/countries/LU/orig/csv/
 
-- Adding the 8th classifier called `historical_yield` to the following input files. As 
+- Adding the 9th classifier called `period` to the following input files. As 
   has currently been done manually for Luxemburg.
 
     classifiers.csv
     events.csv
     inventory.csv
     transitions.csv
-    yield.csv
+    growth_curves.csv
 
 - Check between libcbm-runner and cbmcfs3_data scenraio of the static demand the
   consistency of pools for merchantable, Living Biomass, Soil Organic Carbon 
