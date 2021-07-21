@@ -42,16 +42,19 @@ class Simulation(object):
     def create_json(self):
         return CreateJSON(self)
 
-    def pre_dynamics_func(self, timestep, cbm_vars):
-        if timestep == 1:
-            print("Carbon pool initialization is finished, now starting the current period")
-            # see the simulate method of the libcbm simulator
-            # https://github.com/cat-cfs/libcbm_py/blob/e9e37ce5a91cb2bcb07011812a7d49c859d88fa4/libcbm/model/cbm/cbm_simulator.py#L148
-            # if t=1 we know this is the first timestep, and nothing has yet been done to the post-spinup pools
-            # it is here that you want to change the yields,
-            # And this can be done by changing the classifier set of each inventory record
-            cbm_vars.classifiers.initialization = self.sit.classifier_value_ids["initialization"]["c"]
+    def dynamics_func(self, timestep, cbm_vars):
+        """
+        See the simulate method of the libcbm simulator:
+        https://github.com/cat-cfs/libcbm_py/blob/master/libcbm/model/cbm/cbm_simulator.py#L148
 
+        If t=1, we know this is the first timestep, and nothing has yet been
+        done to the post-spinup pools. It is at this moment that we want to
+        change the yields, and this can be done by switching the classifier
+        value of each inventory record.
+        """
+        if timestep == 1:
+            switch_clfrs = self.sit.classifier_value_ids["initialization"]["c"]
+            cbm_vars.classifiers.initialization = switch_clfrs
         return self.rule_based_processor.pre_dynamic_func(timestep, cbm_vars)
 
     #------------------------------- Methods ---------------------------------#
@@ -59,8 +62,8 @@ class Simulation(object):
         """
         Call `libcbm_py` to run the cbm simulation.
 
-        The interaction with `libcbm_py` is decomposed in several calls to pass a
-        `.json` config, a default database (also called aidb) and csv files.
+        The interaction with `libcbm_py` is decomposed in several calls to pass
+        a `.json` config, a default database (also called aidb) and csv files.
         """
         print("Preparing the data")
         # Create the JSON #
@@ -68,25 +71,27 @@ class Simulation(object):
         # The 'AIDB' path as it was called previously #
         db_path = self.parent.country.aidb.paths.db
         # Create a SIT object #
-        self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config), db_path=str(db_path))
+        self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config),
+                                            db_path = str(db_path))
         # Do some initialization #
-        self.classifiers, self.inventory = sit_cbm_factory.initialize_inventory(self.sit)
+        self.clfrs, self.inv = sit_cbm_factory.initialize_inventory(self.sit)
         # Create a CBM object #
         self.cbm = sit_cbm_factory.initialize_cbm(self.sit)
         # This will contain results #
-        self.results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
+        self.results, reporting_func = \
+            cbm_simulator.create_in_memory_reporting_func()
         # Create a function to apply rule based events and transition rules #
-        self.rule_based_processor = sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
-        print("Running the libcbmsimulation")
+        self.rule_based_processor = \
+            sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
         # Run #
         cbm_simulator.simulate(
             self.cbm,
             n_steps              = 100,
-            classifiers          = self.classifiers,
-            inventory            = self.inventory,
+            classifiers          = self.clfrs,
+            inventory            = self.inv,
             pool_codes           = self.sit.defaults.get_pools(),
             flux_indicator_codes = self.sit.defaults.get_flux_indicators(),
-            pre_dynamics_func    = self.pre_dynamics_func,
+            pre_dynamics_func    = self.dynamics_func,
             reporting_func       = reporting_func
         )
         # Return for convenience #
