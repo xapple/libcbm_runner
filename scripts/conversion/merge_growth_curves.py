@@ -14,6 +14,11 @@ This script will combine the two files:
 
 into one single file.
 
+The word "yield" will be dropped because it is a reserved keyword in python and
+replaced by "growth".
+
+* /export/growth_curves.csv
+
 This is useful to switch all the yield curves of every species as soon as we hit
 the country start year.
 """
@@ -44,8 +49,27 @@ class MergeGrowthCurves(object):
         """The matching libcbm country object."""
         return libcbm_continent.countries[self.cbmcfs3_country.iso2_code]
 
-    def __call__(self):
-        pass
+    def __call__(self, verbose=False):
+        # Get paths #
+        hist_curves = self.cbmcfs3_country.orig_data.paths.yields
+        curr_curves = self.cbmcfs3_country.orig_data.paths.historical_yields
+        destination = self.libcbm_country.orig_data.paths.growth_curves
+        # Print output #
+        if verbose:
+            print(hist_curves)
+            print(curr_curves)
+            print(destination)
+            print('----')
+        # Combine #
+        hist_curves.copy(destination)
+        lines = iter(curr_curves)
+        next(lines)
+        destination.writelines(lines, mode='a')
+        # Check headers are the same #
+        assert hist_curves.first == curr_curves.first == destination.first
+        # Remove old file #
+        old_file = self.libcbm_country.data_dir + '/orig/csv/yield.csv'
+        old_file.remove()
 
 ###############################################################################
 if __name__ == '__main__':
