@@ -13,8 +13,15 @@
   /home/paul/rp/cbmcfs3_data/scenarios/static_demand/LU/0/input/csv/disturbance_events.csv
   to /libcbm_data/countries/LU/orig/csv/
 
-- Adding the 9th classifier called `period` to the following input files. As 
-  has currently been done manually for Luxemburg.
+* Add an 8th classifier for site index classifiers to all countries like is already the 
+  case in Bulgaria.
+
+  8	_CLASSIFIER	Site index
+  8	1 default
+
+- Adding the 9th classifier called `growth_period` to the following input files. As has 
+  currently been done manually for Luxemburg. It should take values ̀`init` for the 
+  initialization period and `current` for the current period.
 
     classifiers.csv
     events.csv
