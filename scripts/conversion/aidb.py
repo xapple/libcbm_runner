@@ -85,12 +85,20 @@ class ConvertAIDB(object):
         """The matching libcbm country object."""
         return libcbm_continent.countries[self.cbmcfs3_country.iso2_code]
 
-    def __call__(self):
+    def __call__(self, verbose=True):
+        # Get paths #
+        source = self.cbmcfs3_country.paths.aidb_eu
+        destin = self.libcbm_country.aidb.paths.db
+        # Messages #
+        if verbose:
+            print("Source: " + source)
+            print("Destination: " + destin)
+            print("-------------")
         # Make a copy of the template #
         config = self.template.copy()
         # Specify paths #
-        config['output_path'] = self.libcbm_country.aidb.paths.db
-        config['archive_index_data'][0]['path'] = self.cbmcfs3_country.paths.aidb_eu
+        config['archive_index_data'][0]['path'] = source
+        config['output_path'] = destin
         # Delete previous version of the database #
         self.libcbm_country.aidb.paths.db.remove()
         # Call method in `cbm_defaults` #
