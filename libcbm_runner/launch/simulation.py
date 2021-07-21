@@ -65,7 +65,6 @@ class Simulation(object):
         The interaction with `libcbm_py` is decomposed in several calls to pass
         a `.json` config, a default database (also called aidb) and csv files.
         """
-        print("Preparing the data")
         # Create the JSON #
         self.create_json()
         # The 'AIDB' path as it was called previously #
