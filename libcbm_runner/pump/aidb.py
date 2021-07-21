@@ -17,7 +17,12 @@ import os
 from autopaths.dir_path import DirectoryPath
 from autopaths.auto_paths import AutoPaths
 
-# Internal modules #
+# Where is the data, default case #
+aidb_repo = DirectoryPath("~/repos/libcbm_aidb/")
+
+# But you can override that with an environment variable #
+if os.environ.get("AIDB_REPO"):
+    aidb_repo = DirectoryPath(os.environ['AIDB_REPO'])
 
 ###############################################################################
 class AIDB(object):
@@ -30,6 +35,11 @@ class AIDB(object):
 
         >>> from libcbm_runner.core.continent import continent
         >>> for country in continent: country.aidb.symlink_single_aidb()
+
+    To symlink every AIDB from every countries do the following:
+
+        >>> from libcbm_runner.core.continent import continent
+        >>> for country in continent: country.aidb.symlink_all_aidb()
     """
 
     all_paths = """
@@ -42,18 +52,23 @@ class AIDB(object):
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
+    #------------------------------- Methods ---------------------------------#
     def symlink_single_aidb(self):
         """
         During development, and for testing purposes we have a single AIDB
         that all countries can share and that is found in another repository.
         """
-        # Where is the data, default case #
-        aidb_repo = DirectoryPath("~/repos/libcbm_aidb/")
-        # But you can override that with an environment variable #
-        if os.environ.get("AIDB_REPO"):
-            aidb_repo = DirectoryPath(os.environ['AIDB_REPO'])
         # Check it exists #
         source = aidb_repo + 'aidb.db'
+        assert source
+        # Symlink #
+        destin = self.paths.aidb
+        source.link_to(destin)
+
+    def symlink_all_aidb(self):
+        # Check it exists #
+        country_dir = aidb_repo + 'countries/' + self.parent.iso2_code
+        source = country_dir + '/orig/config/aidb.db'
         assert source
         # Symlink #
         destin = self.paths.aidb
