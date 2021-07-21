@@ -42,10 +42,13 @@ class Simulation(object):
     def create_json(self):
         return CreateJSON(self)
 
+    #--------------------------- Special Methods -----------------------------#
     def dynamics_func(self, timestep, cbm_vars):
         """
         See the simulate method of the libcbm simulator:
-        https://github.com/cat-cfs/libcbm_py/blob/master/libcbm/model/cbm/cbm_simulator.py#L148
+
+            https://github.com/cat-cfs/libcbm_py/blob/master/libcbm/
+            model/cbm/cbm_simulator.py#L148
 
         If t=1, we know this is the first timestep, and nothing has yet been
         done to the post-spinup pools. It is at this moment that we want to
@@ -53,8 +56,13 @@ class Simulation(object):
         classifier value of each inventory record.
         """
         if timestep == 1:
-            switch_clfrs = self.sit.classifier_value_ids["initialization"]["c"]
-            cbm_vars.classifiers.initialization = switch_clfrs
+            # The name of our extra classifier #
+            key = 'Simulation period (for yields)'
+            # Get the corresponding ID in the libcbm simulation #
+            id_of_cur = self.sit.classifier_value_ids[key]["Cur"]
+            # Modify the whole column of the dataframe #
+            cbm_vars.classifiers[key] = id_of_cur
+        # Return #
         return self.rule_based_processor.pre_dynamic_func(timestep, cbm_vars)
 
     #------------------------------- Methods ---------------------------------#
