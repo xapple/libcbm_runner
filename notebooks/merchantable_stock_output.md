@@ -50,7 +50,7 @@ runner_libcbm.input_data['classifiers']
 ```python
 # Classifiers as used by libcbm
 with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
-    display(runner_libcbm.simulation.classifiers)
+    display(runner_libcbm.simulation.clfrs)
 ```
 
 ## Inventory
