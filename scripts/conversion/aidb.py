@@ -7,6 +7,9 @@ Written by Lucas Sinclair and Paul Rougieux.
 JRC Biomass Project.
 Unit D1 Bioeconomy.
 
+This script will convert the AIDB from the old MS Access format supported by
+CBM-CFS3 to the new SQLite format supported by libcbm.
+
 Typically you would run this file from a command line like this:
 
      ipython3.exe -i -- /deploy/libcbm_runner/scripts/conversion/aidb.py
