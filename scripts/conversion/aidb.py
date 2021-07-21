@@ -17,6 +17,13 @@ Typically you would run this file from a command line like this:
 You need to run this on a machine that has a Microsoft Access driver installed.
 So likely this will mean a Windows machine.
 
+If you try on a Unix machine, even with `unixodbc` installed you will get an
+error such as:
+
+    Error: ('01000', "[01000] [unixODBC][Driver Manager]
+    Can't open lib 'Microsoft Access Driver (*.mdb, *.accdb)'
+    : file not found (0) (SQLDriverConnect)")
+
 If you want to run only one country for testing, you can place
 this line in the main loop:
 
@@ -24,6 +31,7 @@ this line in the main loop:
 """
 
 # Built-in modules #
+import os
 
 # Third party modules #
 from tqdm import tqdm
@@ -39,7 +47,8 @@ from libcbm_runner.core.continent import continent as libcbm_continent
 from cbmcfs3_runner.core.continent import continent as cbmcfs3_continent
 
 # Constants #
-ddl_path = "/deploy/cbm_defaults/schema/cbmDefaults.ddl"
+home = os.environ.get('HOME', '~') + '/'
+ddl_path = home + "repos/cbm_defaults/schema/cbmDefaults.ddl"
 
 ###############################################################################
 class ConvertAIDB(object):
