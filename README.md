@@ -4,9 +4,18 @@
 
 This python module uses pandas data frames to manipulate and store most data.
 
-## Prerequisites are `libcbm` and `libcbm_py`
 
-`libcbm` is a C++ library with python binding developed by the Canadian Forest Service.
+## Dependencies
+
+* `libcbm` is a C++ library with python binding developed by the Canadian Forest 
+  Service. It is bundled into the libcbm_py python package available at 
+  https://github.com/cat-cfs/libcbm_py
+
+* `libcbm_aidb` contains the Archive Index Databases in a separate repository located at 
+  https://github.com/xapple/libcbm_aidb 
+
+* `libcbm_data` contains the model's input and output data located at 
+  https://gitlab.com/bioeconomy/libcbm/libcbm_data
 
 
 ## Installation
