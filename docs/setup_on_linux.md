@@ -24,14 +24,6 @@ The first step is to clone the needed git repositories. We will clone all the pr
 Next, we must obtain a copy the European "cbm_defaults" sqlite3 database. As it's a bit larger, it's not included in the `libcbm_data` repository. Instead, it's in a standalone one.
 
     $ git clone git@gitlab.com:bioeconomy/libcbm/libcbm_aidb.git
-    $ mkdir -p ~/repos/libcbm_data/countries/ZZ/orig/config/
-    $ ln -s ~/repos/libcbm_aidb/aidb.db ~/repos/libcbm_data/countries/ZZ/orig/config/aidb.db
-
-For other countries, copy the AIDB in a similar way.
-
-
-    $ ln -s ~/repos/libcbm_aidb/aidb.db ~/repos/libcbm_data/countries/LU/orig/config/aidb.db
-
 
 ## Install pip
 
