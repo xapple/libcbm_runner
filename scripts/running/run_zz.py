@@ -29,4 +29,4 @@ runner   = scenario.runners['ZZ'][-1]
 
 runner.run()
 print(runner.simulation.results)
-print(runner.simulation.inventory)
+print(runner.simulation.inv)
