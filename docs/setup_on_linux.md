@@ -27,6 +27,12 @@ Next, we must obtain a copy the European "cbm_defaults" sqlite3 database. As it'
     $ mkdir -p ~/repos/libcbm_data/countries/ZZ/orig/config/
     $ ln -s ~/repos/libcbm_aidb/aidb.db ~/repos/libcbm_data/countries/ZZ/orig/config/aidb.db
 
+For other countries, copy the AIDB in a similar way.
+
+
+    $ ln -s ~/repos/libcbm_aidb/aidb.db ~/repos/libcbm_data/countries/LU/orig/config/aidb.db
+
+
 ## Install pip
 
 The modules we have developed rely on some third party (as well as first party) packages that you can install easily with `pip`. However, you first need to run a few commands to get `pip` itself as it's not included by default.

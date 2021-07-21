@@ -11,3 +11,7 @@
 # IDE files #
 /.idea
 .spyproject
+
+# Save only the markdown version of notebooks, automatically synchronized with Jupytext
+*.ipynb
+notebooks/.ipynb_checkpoints/*
