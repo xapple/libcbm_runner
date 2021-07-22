@@ -182,7 +182,7 @@ class Runner(object):
         Note: we need to keep the log we are writing to currently.
         """
         # Message #
-        self.log.info("Removing directory '%s'." % self.data_dir)
+        self.log.info("Removing directory '%s'." % self.data_dir.with_tilda)
         # The output directory #
         self.paths.input_dir.remove(safe=False)
         self.paths.output_dir.remove(safe=False)
