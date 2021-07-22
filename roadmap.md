@@ -46,7 +46,7 @@
 - Add a mechanism for the dynamic harvest allocation
 
 
-# Code improvements
+# Future code improvements
 
 - Better error message in the case where the AIDB is absent (or an empty symbolic link).
   Current message is table species missing.
@@ -62,5 +62,18 @@
   simulator? That's mostly useful for debugging anyway.
 
         self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config), db_path=str(db_path))
+
+## AIDB
+
+There are many AIDB because disturbances have different meaning in different countries 
+and because soil decomposition parameters are different. 
+
+- Differences in disturbance definition could be harmonized with a naming scheme and a 
+  single AIDB for all EU.
+- But the soil decomposition parameters are not part of the input data. So if we really 
+  want only one AIDB, there needs to be a mechanism to changes those soil decomposition 
+  parameters for all countries.
+
+
 
 
