@@ -164,7 +164,7 @@ class Runner(object):
         # Create the JSON configuration #
         self.create_json()
         # Run the model #
-        self.simulation.run()
+        self.simulation()
         self.timer.print_elapsed()
         # Post-processing #
         self.output.save()

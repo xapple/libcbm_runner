@@ -52,6 +52,8 @@ class InputData(object):
         Refresh the input data by copying the immutable original
         CSVs from the current country to this runner's input.
         """
+        # Message #
+        self.parent.log.info("Preparing input data.")
         # Get the destination #
         destination_dir = self.paths.csv_dir
         destination_dir.remove()

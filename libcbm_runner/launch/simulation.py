@@ -58,6 +58,16 @@ class Simulation(object):
         return self.rule_based_processor.pre_dynamic_func(timestep, cbm_vars)
 
     #------------------------------- Methods ---------------------------------#
+    # noinspection PyBroadException
+    def __call__(self, interrupt_on_error=True):
+        try:
+            self.run()
+        except Exception:
+            message = "Runner '%s' encountered an exception. See log file."
+            self.runner.log.error(message % self.short_name)
+            self.runner.log.exception("Exception", exc_info=True)
+            if interrupt_on_error: raise
+
     def run(self):
         """
         Call `libcbm_py` to run the cbm simulation.
@@ -65,12 +75,13 @@ class Simulation(object):
         The interaction with `libcbm_py` is decomposed in several calls to pass
         a `.json` config, a default database (also called aidb) and csv files.
         """
-        self.parent.log.info("Prepare input data.")
+        # Message #
+        self.runner.log.info("Setting up the libcbm_py objects.")
         # The 'AIDB' path as it was called previously #
-        db_path = self.parent.country.aidb.paths.db
+        db_path = self.runner.country.aidb.paths.db
         assert db_path
         # Create a SIT object #
-        self.sit = sit_cbm_factory.load_sit(str(self.parent.paths.json),
+        self.sit = sit_cbm_factory.load_sit(str(self.runner.paths.json),
                                             db_path = str(db_path))
         # Do some initialization #
         self.clfrs, self.inv = sit_cbm_factory.initialize_inventory(self.sit)
@@ -82,8 +93,9 @@ class Simulation(object):
         # Create a function to apply rule based events and transition rules #
         self.rule_based_processor = \
             sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
+        # Message #
+        self.runner.log.info("Calling the cbm_simulator.")
         # Run #
-        self.parent.log.info("Start the simulation.")
         cbm_simulator.simulate(
             self.cbm,
             n_steps              = self.runner.num_timesteps,
