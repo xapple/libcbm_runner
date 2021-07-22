@@ -56,7 +56,7 @@ class Scenario(object):
         msg = "You should inherit from this class and implement this property."
         raise NotImplementedError(msg)
 
-    def __call__(self, parallel=True, timer=True):
+    def __call__(self, parallel=False, timer=True):
         """A method to run a scenarios by simulating all countries."""
         # Message #
         print("Running scenario '%s'." % self.short_name)
