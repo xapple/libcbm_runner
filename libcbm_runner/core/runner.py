@@ -106,6 +106,27 @@ class Runner(object):
         msg += self.paths.log.pretty_tail
         return msg
 
+    @property
+    def num_timesteps(self):
+        """
+        Compute the number of year we have to run for.
+        Alternatively, we can just see what is the last disturbance to be
+        applied?
+
+            >>> from libcbm_runner.core.continent import continent
+            >>> scen = continent.scenarios['historical']
+            >>> for code, steps in scen.runners.items():
+            >>>     r = steps[0]
+            >>>     print(code, ': ', r.num_timesteps)
+
+        """
+        # Retrieve parameters that are country specific #
+        base_year      = self.country.base_year
+        inv_start_year = self.country.inventory_start_year
+        period_max     = base_year - inv_start_year + 1
+        # Return #
+        return period_max
+
     #------------------------------- Methods ---------------------------------#
     def run(self, keep_in_ram=True):
         """
