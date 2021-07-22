@@ -166,10 +166,12 @@ class Runner(object):
         # Run the model #
         self.simulation()
         self.timer.print_elapsed()
-        # Post-processing #
+        # Save the results to disk #
         self.output.save()
         # Free memory #
         if not keep_in_ram: del self.simulation
+        # Post-processing #
+        pass
         # Messages #
         self.timer.print_end()
         self.timer.print_total_elapsed()

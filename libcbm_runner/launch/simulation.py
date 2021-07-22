@@ -20,9 +20,7 @@ from libcbm.model.cbm import cbm_simulator
 
 ###############################################################################
 class Simulation(object):
-    """
-    This class will run a `libcbm_py` simulation.
-    """
+    """This class will run a `libcbm_py` simulation."""
 
     def __init__(self, parent):
         # Default attributes #
@@ -70,7 +68,8 @@ class Simulation(object):
 
     def run(self):
         """
-        Call `libcbm_py` to run the cbm simulation.
+        Call `libcbm_py` to run the actual CBM simulation after creating some
+        objects.
 
         The interaction with `libcbm_py` is decomposed in several calls to pass
         a `.json` config, a default database (also called aidb) and csv files.

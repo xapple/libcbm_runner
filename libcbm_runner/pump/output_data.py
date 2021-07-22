@@ -50,4 +50,7 @@ class OutputData(object):
         Save the information of interest from the simulation to disk before
         the whole simulation object is removed from memory.
         """
+        # Message #
+        self.parent.log.info("Saving final simulations results to disk.")
+        # The pools #
         self['pools'] = self.sim.results.pools
