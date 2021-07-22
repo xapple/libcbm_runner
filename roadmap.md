@@ -53,8 +53,13 @@
 
 - Fix version of autopath and plumbing dependencies
 
-- Increase verbosity, display more messages when the model is running. Replace the print
-  statements with a mechanism that enables logging.
+- Since the simulation can take a long time it is useful to know when libcbm starts 
+  loading the data and when each simulation step starts with a short message. To 
+  increase the verbosity, the runner could display messages when the model is running by 
+  for example replacing the print statements with a mechanism that enables logging. 
+  Example of print statements providing information on the status of the run available 
+  on this old commit 
+  [ab62642d6bcb](https://gitlab.com/bioeconomy/libcbm/libcbm_runner/-/commit/ab62642d6bcb13e88f79973814f9a4735f7a2cbf).
 
 - Would it make sense to make sit available before the simulation run?  i.e. Create a
   SIT object before the run method? Maybe it doesn't make sense. An alternative would be
