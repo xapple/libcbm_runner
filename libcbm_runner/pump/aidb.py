@@ -52,6 +52,9 @@ class AIDB(object):
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
+    def __bool__(self):
+        return bool(self.paths.aidb)
+
     #------------------------------- Methods ---------------------------------#
     def symlink_single_aidb(self):
         """

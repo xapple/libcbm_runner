@@ -20,7 +20,6 @@ from plumbing.timer       import Timer
 # Internal modules #
 
 ###############################################################################
-
 class Scenario(object):
     """
     This object represents a harvest and economic scenario.

@@ -68,6 +68,7 @@ class Simulation(object):
         self.parent.log.info("Prepare input data.")
         # The 'AIDB' path as it was called previously #
         db_path = self.parent.country.aidb.paths.db
+        assert db_path
         # Create a SIT object #
         self.sit = sit_cbm_factory.load_sit(str(self.parent.paths.json),
                                             db_path = str(db_path))
