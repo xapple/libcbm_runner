@@ -100,7 +100,12 @@ class Country(object):
         self.iso2_code = self.data_dir.name
         # Load name mappings #
         selector = all_country_codes['iso2_code'] == self.iso2_code
-        row      = all_country_codes.loc[selector].iloc[0]
+        # Check that we know about this country #
+        if not any(selector):
+            msg = "The directory '%s' is not a country that is known."
+            raise ValueError(msg % self.data_dir)
+        # Get the right row #
+        row = all_country_codes.loc[selector].iloc[0]
         # Store all the country references codes #
         self.country_num  = row['country_code']
         self.country_name = row['country']
