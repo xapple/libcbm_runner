@@ -34,8 +34,6 @@ class OutputData(object):
         # Default attributes #
         self.parent = parent
         self.runner = parent
-        # Shortcut #
-        self.sim = self.runner.simulation
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
@@ -53,4 +51,4 @@ class OutputData(object):
         # Message #
         self.parent.log.info("Saving final simulations results to disk.")
         # The pools #
-        self['pools'] = self.sim.results.pools
+        self['pools'] = self.runner.simulation.results.pools
