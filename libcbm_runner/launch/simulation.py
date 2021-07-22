@@ -43,6 +43,8 @@ class Simulation(object):
         """
         # Check the timestep #
         if timestep == 1:
+            self.parent.log.info("Carbon pool initialization period is finished.")
+            self.parent.log.info("Now starting the current period.")
             # The name of our extra classifier #
             key = 'Simulation period (for yields)'
             # Get the corresponding ID in the libcbm simulation #
@@ -60,6 +62,7 @@ class Simulation(object):
         The interaction with `libcbm_py` is decomposed in several calls to pass
         a `.json` config, a default database (also called aidb) and csv files.
         """
+        self.parent.log.info("Prepare input data.")
         # The 'AIDB' path as it was called previously #
         db_path = self.parent.country.aidb.paths.db
         # Create a SIT object #
@@ -76,6 +79,7 @@ class Simulation(object):
         self.rule_based_processor = \
             sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
         # Run #
+        self.parent.log.info("Start the simulation.")
         cbm_simulator.simulate(
             self.cbm,
             n_steps              = 100,
