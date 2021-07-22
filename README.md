@@ -11,7 +11,13 @@ This python module uses pandas data frames to manipulate and store most data.
 
 * `libcbm_data` contains the model's input and output data located at https://gitlab.com/bioeconomy/libcbm/libcbm_data
 
-* `libcbm_aidb` contains the Archive Index Databases in a separate repository located at https://github.com/xapple/libcbm_aidb to link to those aidb inside libcbm_data use the `symlink_all_aidb` method provided in `libcbm_runner/pump/aidb.py`. This temporary solution with an AIDB for all countries is meant to be changed once the AIDBs have been harmonized to a single AIDB for all countries.
+* `libcbm_aidb` contains the Archive Index Databases in a separate repository located at 
+  https://github.com/xapple/libcbm_aidb to link to those aidb inside libcbm_data use the 
+  `symlink_all_aidb` method provided in `libcbm_runner/pump/aidb.py`. This temporary 
+  solution with an AIDB for all countries is meant to be changed once the AIDBs have 
+  been harmonized to a single AIDB for all countries. Alternativelly create symbolic 
+  links with `cp -rs ~/rp/libcbm_aidb/countries/ ~/rp/libcbm_data/`.
+
 
 
 ## Installation
