@@ -96,7 +96,19 @@ class Runner(object):
         Each runner will have its own logger.
         By default we clear the log file when we start logging.
         """
-        return create_file_logger(self.short_name, self.paths.log)
+        # Pick console level #
+        level = 'error'
+        if hasattr(self, 'verbose'):
+            if isinstance(self.verbose, bool):
+                if self.verbose:
+                    level = 'debug'
+            else: level = self.verbose
+        # Create #
+        logger = create_file_logger(self.short_name,
+                                    self.paths.log,
+                                    console_level = level)
+        # Return #
+        return logger
 
     @property
     def tail(self):
@@ -129,13 +141,15 @@ class Runner(object):
         return period_max
 
     #------------------------------- Methods ---------------------------------#
-    def run(self, keep_in_ram=True):
+    def run(self, keep_in_ram=True, verbose=False):
         """
         Run the full modelling pipeline for a given country,
         a given scenario and a given step.
         """
+        # Verbosity level #
+        self.verbose = verbose
         # Messages #
-        self.log.info("Using source at '%s'." % Path(libcbm_runner))
+        self.log.info("Using %s." % Path(libcbm_runner))
         self.log.info("Runner '%s' starting." % self.short_name)
         # Start the timer #
         self.timer = LogTimer(self.log)
