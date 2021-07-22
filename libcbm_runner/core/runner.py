@@ -123,6 +123,7 @@ class Runner(object):
         # Retrieve parameters that are country specific #
         base_year      = self.country.base_year
         inv_start_year = self.country.inventory_start_year
+        # Compute the number of years to simulate #
         period_max     = base_year - inv_start_year + 1
         # Return #
         return period_max

@@ -26,7 +26,9 @@ class Simulation(object):
 
     def __init__(self, parent):
         # Default attributes #
-        self.parent = parent
+        self.parent  = parent
+        self.runner  = parent
+        self.country = self.runner.country
 
     #--------------------------- Special Methods -----------------------------#
     def dynamics_func(self, timestep, cbm_vars):
@@ -83,7 +85,7 @@ class Simulation(object):
         self.parent.log.info("Start the simulation.")
         cbm_simulator.simulate(
             self.cbm,
-            n_steps              = 100,
+            n_steps              = self.runner.num_timesteps,
             classifiers          = self.clfrs,
             inventory            = self.inv,
             pool_codes           = self.sit.defaults.get_pools(),

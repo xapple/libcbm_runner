@@ -27,6 +27,10 @@ from libcbm_runner.pump.aidb           import AIDB
 all_country_codes = libcbm_data_dir + 'common/country_codes.csv'
 all_country_codes = pandas.read_csv(str(all_country_codes))
 
+# Country reference years #
+ref_years = libcbm_data_dir + 'common/reference_years.csv'
+ref_years = pandas.read_csv(str(ref_years))
+
 ###############################################################################
 class Country(object):
     """
@@ -45,6 +49,8 @@ class Country(object):
         self.data_dir = DirectoryPath(data_dir)
         # Set country codes #
         self.set_codes()
+        # Store the reference years #
+        self.set_years()
 
     #---------------------------- Compositions -------------------------------#
     @property_cached
@@ -114,3 +120,13 @@ class Country(object):
         # More crazy codes #
         self.nuts_zero_2006 = row['nuts_zero_2006']
         self.nuts_zero_2016 = row['nuts_zero_2010']
+
+    def set_years(self):
+        """Update all the reference years for this country."""
+        # This is the same for all countries #
+        self.base_year = 2015
+        # This is different for each country.
+        # inventory_start_year is the oldest year in the inventory data
+        # reported by the national forest inventory
+        row = ref_years.loc[ref_years['country'] == self.iso2_code].iloc[0]
+        self.inventory_start_year = row['ref_year']
