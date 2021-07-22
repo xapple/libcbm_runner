@@ -42,6 +42,7 @@ class Simulation(object):
         classifier value of each inventory record.
         """
         # Check the timestep #
+        self.parent.log.info(f"Time step {timestep}")
         if timestep == 1:
             self.parent.log.info("Carbon pool initialization period is finished.")
             self.parent.log.info("Now starting the current period.")
