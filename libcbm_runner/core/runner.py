@@ -141,7 +141,7 @@ class Runner(object):
         return period_max
 
     #------------------------------- Methods ---------------------------------#
-    def run(self, keep_in_ram=False, verbose=True):
+    def run(self, keep_in_ram=False, verbose=True, interrupt_on_error=True):
         """
         Run the full modelling pipeline for a given country,
         a given scenario and a given step.
@@ -164,7 +164,7 @@ class Runner(object):
         # Create the JSON configuration #
         self.create_json()
         # Run the model #
-        self.simulation()
+        self.simulation(interrupt_on_error)
         self.timer.print_elapsed()
         # Save the results to disk #
         self.output.save()
