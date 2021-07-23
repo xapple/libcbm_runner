@@ -1,5 +1,3 @@
-
-
 # Bring libcbm_runner to feature parity with cbmcfs3_runner
 
 - Bring libcbm_runner to feature parity with cbmcfs3_runner in terms of running CBM on
@@ -20,7 +18,7 @@
   8	1 default
 
 - Adding the 9th classifier called `growth_period` to the following input files. As has
-  currently been done manually for Luxemburg. It should take values ̀`init` for the
+  currently been done manually for Luxembourg. It should take values ̀`init` for the
   initialization period and `current` for the current period.
 
     classifiers.csv
@@ -29,7 +27,7 @@
     transitions.csv
     growth_curves.csv
 
-- Check between libcbm-runner and cbmcfs3_data scenraio of the static demand the
+- Check between libcbm_runner and cbmcfs3_data scenario of the static demand the
   consistency of pools for merchantable, Living Biomass, Soil Organic Carbon
 
 - notebooks available
@@ -53,12 +51,12 @@
 
 - Fix version of autopath and plumbing dependencies
 
-- Since the simulation can take a long time it is useful to know when libcbm starts 
-  loading the data and when each simulation step starts with a short message. To 
-  increase the verbosity, the runner could display messages when the model is running by 
-  for example replacing the print statements with a mechanism that enables logging. 
-  Example of print statements providing information on the status of the run available 
-  on this old commit 
+- Since the simulation can take a long time it is useful to know when libcbm starts
+  loading the data and when each simulation step starts with a short message. To
+  increase the verbosity, the runner could display messages when the model is running by
+  for example replacing the print statements with a mechanism that enables logging.
+  Example of print statements providing information on the status of the run available
+  on this old commit
   [ab62642d6bcb](https://gitlab.com/bioeconomy/libcbm/libcbm_runner/-/commit/ab62642d6bcb13e88f79973814f9a4735f7a2cbf).
 
 - Would it make sense to make sit available before the simulation run?  i.e. Create a
@@ -70,13 +68,13 @@
 
 ## AIDB
 
-There are many AIDB because disturbances have different meaning in different countries 
-and because soil decomposition parameters are different. 
+There are many AIDB because disturbances have different meaning in different countries
+and because soil decomposition parameters are different.
 
-- Differences in disturbance definition could be harmonized with a naming scheme and a 
+- Differences in disturbance definition could be harmonized with a naming scheme and a
   single AIDB for all EU.
-- But the soil decomposition parameters are not part of the input data. So if we really 
-  want only one AIDB, there needs to be a mechanism to changes those soil decomposition 
+- But the soil decomposition parameters are not part of the input data. So if we really
+  want only one AIDB, there needs to be a mechanism to changes those soil decomposition
   parameters for all countries.
 
 
