@@ -141,7 +141,7 @@ class Runner(object):
         return period_max
 
     #------------------------------- Methods ---------------------------------#
-    def run(self, keep_in_ram=False, verbose=True, interrupt_on_error=True):
+    def run(self, keep_in_ram=False, verbose=True, interrupt_on_error=False):
         """
         Run the full modelling pipeline for a given country,
         a given scenario and a given step.
@@ -149,7 +149,7 @@ class Runner(object):
         # Verbosity level #
         self.verbose = verbose
         # Messages #
-        self.log.info("Using %s." % Path(libcbm_runner).with_tilda)
+        self.log.info("Using %s." % libcbm_runner)
         self.log.info("Runner '%s' starting." % self.short_name)
         # Start the timer #
         self.timer = LogTimer(self.log)
@@ -179,6 +179,8 @@ class Runner(object):
         if self.simulation.error is not True: msg = "Done."
         else: msg = "Done with errors."
         self.log.info(msg)
+        # Return #
+        return self.output
 
     def remove_directories(self):
         """

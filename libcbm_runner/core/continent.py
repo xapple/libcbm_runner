@@ -66,6 +66,7 @@ class Continent(object):
     def __iter__(self): return iter(self.countries.values())
     def __len__(self):  return len(self.countries.values())
 
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def countries(self):
         """Return a dictionary of country iso2 codes to country objects."""

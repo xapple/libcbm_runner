@@ -9,6 +9,7 @@ A script.
 
 # Third party modules #
 from plumbing.cache import property_cached
+from tqdm import tqdm
 
 # First party modules #
 
@@ -40,13 +41,37 @@ class ComparisonRunner(object):
         # Main attributes #
         self.cbmcfs3_country = cbmcfs3_country
 
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def libcbm_country(self):
         """The matching libcbm country object."""
         return libcbm_continent.countries[self.cbmcfs3_country.iso2_code]
 
+    #---------- Runners -----------#
+    @property
+    def runner_cbmcfs3(self):
+        return self.runner_cbm3.post_processor.pool_indicators_long
+
+    @property
+    def runner_libcbm(self):
+        return self.runner_cbm3.post_processor.pool_indicators_long
+
+    #---------- Pools -----------#
+    @property
+    def pools_cbmcfs3(self):
+        return self.runner_cbm3.post_processor.pool_indicators_long
+
+    @property
+    def pools_cbmcfs3(self):
+        return self.runner_cbm3.post_processor.pool_indicators_long
+
+    #------------------------------- Methods ---------------------------------#
     def __call__(self):
-        pass
+        id_vars = ['identifier', 'timestep', 'Input']
+        pools_libcbm = pools_libcbm_wide.melt(id_vars    = id_vars,
+                                              var_name   = 'pool',
+                                              value_name = 'tc')
+
 
 ###############################################################################
 if __name__ == '__main__':
