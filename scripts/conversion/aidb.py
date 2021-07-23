@@ -15,7 +15,7 @@ Typically you would run this file from a command line like this:
      ipython3.exe -i -- /deploy/libcbm_runner/scripts/conversion/aidb.py
 
 Or on a windows system which has paths defined as such
-    
+
      ipython3.exe -i -- /c/repos/libcbm_runner/scripts/conversion/aidb.py
 
 You need to run this on a machine that has a Microsoft Access driver installed.
@@ -33,26 +33,7 @@ this line in the main loop:
 
         if converter.cbmcfs3_country.iso2_code != 'ZZ': continue
 
-Output of this script as it ran once on 21 July 2021
-
-    Administrator@EC2AMAZ-1E9KPNM MINGW64 /c/repos/libcbm_runner/scripts/conversion (master)
-    $ ipython3.exe -i -- /c/repos/libcbm_runner/scripts/conversion/aidb.py
-      0%|          | 0/27 [00:00<?, ?it/s]Source: \Users\Administrator\repos\cbmcfs3_data\countries\AT\orig\aidb_eu.mdb
-    Destination: \Users\Administrator\deploy\libcbm_data\countries\AT\orig\config\aidb.db
-    -------------
-      4%|?         | 1/27 [00:16<06:57, 16.07s/it]Source: \Users\Administrator\repos\cbmcfs3_data\countries\BE\orig\aidb_eu.mdb
-    Destination: \Users\Administrator\deploy\libcbm_data\countries\BE\orig\config\aidb.db
-    -------------
-    ...
-    ...
-     93%|¦¦¦¦¦¦¦¦¦?| 25/27 [06:27<00:31, 15.84s/it]Source: \Users\Administrator\repos\cbmcfs3_data\countries\SK\orig\aidb_eu.mdb
-    Destination: \Users\Administrator\deploy\libcbm_data\countries\SK\orig\config\aidb.db
-    -------------
-     96%|¦¦¦¦¦¦¦¦¦?| 26/27 [06:42<00:15, 15.76s/it]Source: \Users\Administrator\repos\cbmcfs3_data\countries\ZZ\orig\aidb_eu.mdb
-    Destination: \Users\Administrator\deploy\libcbm_data\countries\ZZ\orig\config\aidb.db
-    -------------
-    100%|¦¦¦¦¦¦¦¦¦¦| 27/27 [06:58<00:00, 15.67s/it]
-
+This script was ran once on 21 July 2021.
 """
 
 # Built-in modules #
