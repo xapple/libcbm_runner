@@ -22,6 +22,18 @@ from cbmcfs3_runner.core.continent import continent as cbmcfs3_continent
 class ComparisonRunner(object):
     """
     This class
+
+    To access the results instead of doing:
+
+        pools_libcbm_wide = runner_libcbm.simulation.results.pools
+
+    You can do:
+
+        pools_libcbm_wide = runner_libcbm.output['pools']
+
+    To check the number of pools:
+
+        pools_libcbm['pool'].unique()
     """
 
     def __init__(self, cbmcfs3_country):
