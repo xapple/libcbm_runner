@@ -167,7 +167,7 @@ class Runner(object):
         self.simulation(interrupt_on_error)
         self.timer.print_elapsed()
         # Save the results to disk #
-        self.output.save()
+        if self.simulation.error is not True: self.output.save()
         # Free memory #
         if not keep_in_ram: self.simulation.clear()
         # Post-processing #
