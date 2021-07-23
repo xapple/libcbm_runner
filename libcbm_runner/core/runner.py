@@ -169,13 +169,16 @@ class Runner(object):
         # Save the results to disk #
         self.output.save()
         # Free memory #
-        if not keep_in_ram: del self.simulation
+        if not keep_in_ram: self.simulation.clear()
         # Post-processing #
         pass
         # Messages #
         self.timer.print_end()
         self.timer.print_total_elapsed()
-        self.log.info("Done.")
+        # Final message #
+        if self.simulation.error is not True: msg = "Done."
+        else: msg = "Done with errors."
+        self.log.info(msg)
 
     def remove_directories(self):
         """

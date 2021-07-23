@@ -27,6 +27,8 @@ class Simulation(object):
         self.parent  = parent
         self.runner  = parent
         self.country = self.runner.country
+        # Record if we ended with an error or not #
+        self.error = None
 
     #--------------------------- Special Methods -----------------------------#
     def dynamics_func(self, timestep, cbm_vars):
@@ -57,13 +59,18 @@ class Simulation(object):
 
     #------------------------------- Methods ---------------------------------#
     # noinspection PyBroadException
-    def __call__(self, interrupt_on_error=True):
+    def __call__(self, interrupt_on_error=False):
+        """
+        Wrap the `run()` method by catching any type of exception
+        and logging it.
+        """
         try:
             self.run()
         except Exception:
             message = "Runner '%s' encountered an exception. See log file."
-            self.runner.log.error(message % self.short_name)
+            self.runner.log.error(message % self.runner.short_name)
             self.runner.log.exception("Exception", exc_info=True)
+            self.error = True
             if interrupt_on_error: raise
 
     def run(self):
@@ -105,5 +112,18 @@ class Simulation(object):
             pre_dynamics_func    = self.dynamics_func,
             reporting_func       = reporting_func
         )
+        # We did not encounter any error #
+        self.error = False
         # Return for convenience #
         return self.results
+
+    def clear(self):
+        """
+        Remove all objects from RAM otherwise the kernel will kill the python
+        process after a couple countries being run.
+        """
+        del self.sit
+        del self.clfrs
+        del self.inv
+        del self.cbm
+        del self.results
