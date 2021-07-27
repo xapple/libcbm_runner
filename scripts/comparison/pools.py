@@ -196,7 +196,7 @@ class Bundle:
         # Where the zip archive will be placed #
         self.archive = FilePath(archive)
 
-    #------------------------------ Running ----------------------------------#
+    #------------------------------- Methods ---------------------------------#
     def __call__(self, verbose=True):
         # Remove the directory if it was created previously #
         self.base_dir.remove()
@@ -211,6 +211,7 @@ class Bundle:
         # Return #
         return self.archive
 
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def rsync(self):
         """
@@ -227,14 +228,14 @@ class Bundle:
 
 ###############################################################################
 if __name__ == '__main__':
-    # Skip #
+    # Skip these countries #
     skip = ['ES', 'HR', 'HU', 'IE', 'IT', 'LT', 'PT', 'RO', 'GB', 'ZZ']
     # Make comparisons objects, one per country #
     comparisons = [ComparisonRunner(c) for c in cbmcfs3_continent
                    if c.iso2_code not in skip]
     # Run them all #
-    #for compare in tqdm(comparisons):
-    #    compare()
+    for compare in tqdm(comparisons):
+        compare()
     # Bundle them #
     bundle = Bundle(comparisons, '~/test/libcbm_comp/')
     bundle()
