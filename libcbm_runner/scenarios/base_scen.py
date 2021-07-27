@@ -46,6 +46,10 @@ class Scenario(object):
     def __iter__(self): return iter(self.runners.values())
     def __len__(self):  return len(self.runners.values())
 
+    def __getitem__(self, key):
+        """Return a runner based on a country code."""
+        return self.runners[key]
+
     #----------------------------- Properties --------------------------------#
     @property
     def scenarios_dir(self):
