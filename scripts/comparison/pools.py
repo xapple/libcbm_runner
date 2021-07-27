@@ -6,12 +6,16 @@ A script.
 """
 
 # Built-in modules #
+import socket, textwrap
 
 # Third party modules #
-from plumbing.cache import property_cached
 from tqdm import tqdm
 
 # First party modules #
+from autopaths.dir_path   import DirectoryPath
+from autopaths.file_path  import FilePath
+from autopaths.auto_paths import AutoPaths
+from plumbing.cache       import property_cached
 
 # Internal modules #
 from libcbm_runner.core.continent import continent as libcbm_continent
@@ -44,8 +48,15 @@ class ComparisonRunner(object):
         >>> from importlib.machinery import SourceFileLoader
         >>> path = home + 'repos/libcbm_runner/scripts/comparison/pools.py'
         >>> comp = SourceFileLoader('pools', path).load_module()
-        >>> from cbmcfs3_runner.core.continent import continent as cbmcfs3_continent
-        >>> comparisons = [ComparisonRunner(c) for c in cbmcfs3_continent]
+        >>> from cbmcfs3_runner.core.continent import continent
+        >>> comparisons = [comp.ComparisonRunner(c) for c in continent]
+        >>> c = comparisons[17]
+        >>> display(c.pools_cbmcfs3)
+        >>> display(c.pools_libcbm)
+    """
+
+    all_paths = """
+    /comp/pools.md
     """
 
     def __init__(self, cbmcfs3_country):
@@ -53,6 +64,10 @@ class ComparisonRunner(object):
         self.cbmcfs3_country = cbmcfs3_country
         # Shortcuts #
         self.iso2_code = cbmcfs3_country.iso2_code
+        # Where the data will be stored for this comparison #
+        self.base_dir = self.cbmcfs3_country.data_dir
+        # Automatically access paths based on a string of many subpaths #
+        self.paths = AutoPaths(self.base_dir, self.all_paths)
 
     def __repr__(self):
         return '%s object code "%s"' % (self.__class__, self.iso2_code)
@@ -67,7 +82,7 @@ class ComparisonRunner(object):
     def title(self):
         msg = "# %s (%s)\n"
         msg = msg % (self.cbmcfs3_country.country_name, self.iso2_code)
-        msg = msg + "### Comparing libcbm -vs- cbmcfs3 \n\n"
+        msg = msg + "## Comparing libcbm -vs- cbmcfs3 \n\n"
         return msg
 
     #--------- Scenarios ----------#
@@ -94,6 +109,8 @@ class ComparisonRunner(object):
         # Load #
         post = self.runner_cbmcfs3.post_processor
         result = post.pool_indicators_long
+        # Rename columns #
+        result = result.rename(columns={'time_step': 'timestep'})
         # Return #
         return result
 
@@ -113,20 +130,115 @@ class ComparisonRunner(object):
     @property_cached
     def df(self):
         # Load #
-        cbmcfs3 = 0
-        libcbm  = 0
-        # Lorem #
+        cbmcfs3 = self.pools_cbmcfs3
+        libcbm  = self.pools_libcbm
+        # Filter years from cbmcfs3 #
+        max_timestep = libcbm['timestep'].max()
+        cbmcfs3 = cbmcfs3.query(f"timestep <= {max_timestep}")
+        # Aggregate both into total carbon, abbreviated total_c #
+        libcbm  = libcbm.groupby(['pool', 'timestep'])
+        libcbm  = libcbm.agg(tc_libcbm = ('tc', sum))
+        libcbm  = libcbm.reset_index()
+        cbmcfs3 = cbmcfs3.groupby(['pool', 'timestep'])
+        cbmcfs3 = cbmcfs3.agg(tc_cbmcfs3 = ('tc', sum))
+        cbmcfs3 = cbmcfs3.reset_index()
+        # Load the mapping of the pools names between the two versions #
+        from cbmcfs3_runner.pump.libcbm_mapping import libcbm_mapping
+        name_map = libcbm_mapping[['libcbm', 'cbmcfs3']]
+        name_map = name_map.rename(columns={'libcbm':  'pool_libcbm'})
+        name_map = name_map.rename(columns={'cbmcfs3': 'pool_cbmcfs3'})
+        # Add the mapping of the pools to libcbm #
+        libcbm = libcbm.rename(columns={'pool': 'pool_libcbm'})
+        # Add the mapping of the pools to cbmcfs3 #
+        cbmcfs3 = cbmcfs3.rename(columns={'pool': 'pool_cbmcfs3'})
+        cbmcfs3 = cbmcfs3.merge(name_map, 'left', 'pool_cbmcfs3')
+        # Join #
+        df = libcbm.merge(cbmcfs3, 'outer', ['pool_libcbm', 'timestep'])
+        # Drop rows if any NaN values in two columns #
+        df = df.dropna(subset=['pool_libcbm', 'pool_cbmcfs3'])
+        # Compute difference #
+        df['diff'] = df['tc_libcbm'] - df['tc_cbmcfs3']
+        # Compute proportion #
+        df['prop'] = (df['tc_libcbm'] / df['tc_cbmcfs3']) - 1
         # Return #
         return df
 
     #------------------------------- Methods ---------------------------------#
     def __call__(self):
-        print(self.title)
+        with self.paths.pools.open('w') as handle:
+            # Make a nice title #
+            handle.write(self.title)
+            # Loop over every timestep #
+            for i, group in self.df.groupby('timestep'):
+                handle.write("### Time step %s\n" % i)
+                data = group.to_string(index=False, float_format='%g')
+                data = textwrap.indent(data, '    ')
+                handle.write(data + '\n')
+        # Return #
+        return self.paths.pools
+
+###############################################################################
+class Bundle:
+    """
+    A bundle object will regroup various result files into a single zip file
+    useful for delivery and distribution.
+    Once the bundle is ready, you can simply download it to your local
+    computer with a simple rsync command.
+    """
+
+    def __init__(self, comps, base_dir, archive=None):
+        # The objects to keep #
+        self.comparisons = comps
+        # Where the results will be aggregated #
+        self.base_dir = DirectoryPath(base_dir)
+        # Default if none specified #
+        if archive is None: archive = self.base_dir.path[:-1] + '.zip'
+        # Where the zip archive will be placed #
+        self.archive = FilePath(archive)
+
+    #------------------------------ Running ----------------------------------#
+    def __call__(self, verbose=True):
+        # Remove the directory if it was created previously #
+        self.base_dir.remove()
+        self.base_dir.create()
+        # Loop every country #
+        for c in self.comparisons:
+            c.paths.pools.copy(self.base_dir + c.iso2_code + '.md')
+        # Zip it #
+        self.base_dir.zip_to(self.archive)
+        # Remove the directory #
+        self.base_dir.remove()
+        # Return #
+        return self.archive
+
+    @property_cached
+    def rsync(self):
+        """
+        Will return an rsync bash command as a string that can be later used
+        to download the bundle.
+        """
+        # Get the hostname #
+        host = socket.gethostname()
+        # Make the command #
+        cmd = 'rsync -avz %s:%s ~/Downloads/%s'
+        cmd = cmd % (host, self.archive, self.archive.name)
+        # Return #
+        return cmd
 
 ###############################################################################
 if __name__ == '__main__':
+    # Skip #
+    skip = ['ES', 'HR', 'HU', 'IE', 'IT', 'LT', 'PT', 'RO', 'GB', 'ZZ']
     # Make comparisons objects, one per country #
-    comparisons = [ComparisonRunner(c) for c in cbmcfs3_continent]
+    comparisons = [ComparisonRunner(c) for c in cbmcfs3_continent
+                   if c.iso2_code not in skip]
     # Run them all #
-    for compare in tqdm(comparisons):
-        compare()
+    #for compare in tqdm(comparisons):
+    #    compare()
+    # Bundle them #
+    bundle = Bundle(comparisons, '~/test/libcbm_comp/')
+    bundle()
+    # Print result #
+    print("\nDone.")
+    print("You can get the results with the following command:")
+    print(bundle.rsync)
