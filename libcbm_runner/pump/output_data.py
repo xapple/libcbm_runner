@@ -27,6 +27,7 @@ class OutputData(object):
 
     all_paths = """
     /output/csv/
+    /output/csv/clasif.csv
     /output/csv/pools.csv
     """
 
@@ -34,6 +35,7 @@ class OutputData(object):
         # Default attributes #
         self.parent = parent
         self.runner = parent
+        self.sim    = self.runner.simulation
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
@@ -43,6 +45,15 @@ class OutputData(object):
     def __setitem__(self, item, df):
         df.to_csv(str(self.paths[item]), index=False, float_format='%g')
 
+    @property
+    def clasif(self):
+        # Load #
+        result = self.sim.sit.classifier_value_ids
+        # Transform #
+        result = pandas.DataFrame(result)
+        # Return #
+        return result
+
     def save(self):
         """
         Save the information of interest from the simulation to disk before
@@ -50,5 +61,7 @@ class OutputData(object):
         """
         # Message #
         self.parent.log.info("Saving final simulations results to disk.")
+        # The classifiers #
+        self['clasif'] = self.clasif
         # The pools #
-        self['pools'] = self.runner.simulation.results.pools
+        self['pools'] = self.sim.simulation.results.pools
