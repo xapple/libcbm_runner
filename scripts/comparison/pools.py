@@ -22,19 +22,30 @@ from cbmcfs3_runner.core.continent import continent as cbmcfs3_continent
 ###############################################################################
 class ComparisonRunner(object):
     """
-    This class
+    This class can compare the results of european forest simulations
+    between the new `libcbm` libarary and the old windows CBM-CFS3 software.
 
     To access the results instead of doing:
 
-        pools_libcbm_wide = runner_libcbm.simulation.results.pools
+        >>> pools_libcbm_wide = runner_libcbm.simulation.results.pools
 
     You can do:
 
-        pools_libcbm_wide = runner_libcbm.output['pools']
+        >>> pools_libcbm_wide = runner_libcbm.output['pools']
 
     To check the number of pools:
 
-        pools_libcbm['pool'].unique()
+        >>> pools_libcbm['pool'].unique()
+
+    To use this class you can do:
+
+        >>> import os
+        >>> home = os.environ.get('HOME', '~') + '/'
+        >>> from importlib.machinery import SourceFileLoader
+        >>> path = home + 'repos/libcbm_runner/scripts/comparison/pools.py'
+        >>> comp = SourceFileLoader('pools', path).load_module()
+        >>> from cbmcfs3_runner.core.continent import continent as cbmcfs3_continent
+        >>> comparisons = [ComparisonRunner(c) for c in cbmcfs3_continent]
     """
 
     def __init__(self, cbmcfs3_country):
@@ -42,6 +53,9 @@ class ComparisonRunner(object):
         self.cbmcfs3_country = cbmcfs3_country
         # Shortcuts #
         self.iso2_code = cbmcfs3_country.iso2_code
+
+    def __repr__(self):
+        return '%s object code "%s"' % (self.__class__, self.iso2_code)
 
     #----------------------------- Properties --------------------------------#
     @property_cached
@@ -59,7 +73,7 @@ class ComparisonRunner(object):
     #--------- Scenarios ----------#
     @property
     def scen_cbmcfs3(self):
-        return cbmcfs3_continent.scenarios['historical']
+        return cbmcfs3_continent.scenarios['static_demand']
 
     @property
     def scen_libcbm(self):
@@ -84,7 +98,7 @@ class ComparisonRunner(object):
         return result
 
     @property
-    def pools_cbmcfs3(self):
+    def pools_libcbm(self):
         # Load #
         result = self.runner_libcbm.output['pools']
         id_vars = ['identifier', 'timestep', 'Input']
@@ -95,10 +109,19 @@ class ComparisonRunner(object):
         # Return #
         return result
 
+    #----------- Joined ------------#
+    @property_cached
+    def df(self):
+        # Load #
+        cbmcfs3 = 0
+        libcbm  = 0
+        # Lorem #
+        # Return #
+        return df
+
     #------------------------------- Methods ---------------------------------#
     def __call__(self):
         print(self.title)
-        
 
 ###############################################################################
 if __name__ == '__main__':
