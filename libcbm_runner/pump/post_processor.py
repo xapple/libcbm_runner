@@ -34,6 +34,6 @@ class PostProcessor(object):
         xxxx.
         """
         # Message #
-        self.parent.log.info("Saving final simulations results to disk.")
+        self.parent.log.info("Post-processing results.")
         # The pools #
         pass
