@@ -135,7 +135,7 @@ class ComparisonRunner(object):
         # Filter years from cbmcfs3 #
         max_timestep = libcbm['timestep'].max()
         cbmcfs3 = cbmcfs3.query(f"timestep <= {max_timestep}")
-        # Aggregate both into total carbon, abbreviated total_c #
+        # Aggregate both into total carbon, abbreviated `tc` #
         libcbm  = libcbm.groupby(['pool', 'timestep'])
         libcbm  = libcbm.agg(tc_libcbm = ('tc', sum))
         libcbm  = libcbm.reset_index()
@@ -215,7 +215,7 @@ class Bundle:
     def rsync(self):
         """
         Will return an rsync bash command as a string that can be later used
-        to download the bundle.
+        to easily download the bundle.
         """
         # Get the hostname #
         host = socket.gethostname()
