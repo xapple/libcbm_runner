@@ -49,7 +49,7 @@ class AfforestationRunner(Runner):
     scenario.
     """
 
-    overwrite_csv = ['events.csv', 'inventory.csv', 'transitions.csv']
+    overwrite_csv = ['events.csv', 'inventory.csv', 'transitions.csv', 'growth_curves.csv']
 
     def modify_input(self):
         """
