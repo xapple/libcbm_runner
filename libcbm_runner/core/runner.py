@@ -156,9 +156,9 @@ class Runner(object):
         # Clean everything from previous run #
         self.remove_directories()
         # Copy the original input data #
-        self.input_data.copy_orig_from_country()
+        self.get_orig_data()
         # Modify input data #
-        self.scen_mod_input()
+        self.modify_input()
         self.timer.print_elapsed()
         # Create the JSON configuration #
         self.create_json()
@@ -196,3 +196,10 @@ class Runner(object):
         for element in self.paths.logs_dir.flat_contents:
             if element != self.paths.log:
                 element.remove()
+
+    #--------------------------- Special Methods -----------------------------#
+    def get_orig_data(self):
+        return self.input_data.copy_orig_from_country()
+
+    def modify_input(self):
+        pass
