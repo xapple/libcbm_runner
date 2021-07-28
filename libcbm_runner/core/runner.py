@@ -89,6 +89,15 @@ class Runner(object):
         return OutputData(self)
 
     #----------------------------- Properties --------------------------------#
+    @property
+    def scen_orig_dir(self):
+        """
+        A directory that contains original data specific only to the current
+        scenario. Typically this can be a directory such as:
+        `libcbm_data/countries/AT/afforestation/`
+        """
+        return self.country.data_dir + self.scenario.short_name + '/'
+
     @property_cached
     def log(self):
         """

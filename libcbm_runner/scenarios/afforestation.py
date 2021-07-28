@@ -43,6 +43,20 @@ class Afforestation(Scenario):
 
 ###############################################################################
 class AfforestationRunner(Runner):
+    """
+    With this class we are able to sub-class any methods from the parent
+    `Runner` class and change their behavior in ways that suit this specific
+    scenario.
+    """
+
+    overwrite_csv = ['events.csv', 'inventory.csv', 'transitions.csv']
 
     def modify_input(self):
-        pass #TODO
+        """
+        We would like to overwrite only three files with our own specific
+        afforestation versions.
+        """
+        for csv_name in self.overwrite_csv:
+            source = self.scen_orig_dir + 'csv/' + csv_name
+            destination = self.input_data.paths.csv_dir + csv_name
+            source.copy(destination)
