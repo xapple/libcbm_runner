@@ -57,7 +57,7 @@ console:
 
     from libcbm_runner.core.continent import continent
     scenario = continent.scenarios['historical']
-    runner_libcbm = scenario.runners['LU'][-1]
+    runner_libcbm = scenario.runners['lu'][-1]
     runner_libcbm.run()
 
 Alternatively

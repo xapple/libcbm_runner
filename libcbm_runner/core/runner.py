@@ -158,7 +158,7 @@ class Runner(object):
         # Copy the original input data #
         self.input_data.copy_orig_from_country()
         # Modify input data #
-        pass
+        self.scen_mod_input()
         self.timer.print_elapsed()
         # Create the JSON configuration #
         self.create_json()
