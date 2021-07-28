@@ -38,7 +38,7 @@ class Scenario(object):
         # Save parent #
         self.continent = continent
         # This scenario dir #
-        self.base_dir = Path(self.output_dir + self.short_name + '/')
+        self.base_dir = Path(self.scenarios_dir + self.short_name + '/')
 
     def __repr__(self):
         return '%s object with %i runners' % (self.__class__, len(self))
@@ -52,9 +52,9 @@ class Scenario(object):
 
     #----------------------------- Properties --------------------------------#
     @property
-    def output_dir(self):
+    def scenarios_dir(self):
         """Shortcut to the scenarios directory."""
-        return self.continent.output_dir
+        return self.continent.scenarios_dir
 
     @property
     def runners(self):

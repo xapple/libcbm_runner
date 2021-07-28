@@ -39,8 +39,8 @@ class Continent(object):
     """
 
     all_paths = """
-    /input/
-    /output/
+    /countries/
+    /scenarios/
     """
 
     def __init__(self, base_dir):
@@ -53,8 +53,8 @@ class Continent(object):
         # Automatically access paths based on a string of many subpaths #
         self.paths = AutoPaths(libcbm_data_dir, self.all_paths)
         # Where the data will be stored for this run #
-        self.input_dir = self.paths.input_dir
-        self.output_dir = self.paths.output_dir
+        self.countries_dir = self.paths.countries_dir
+        self.scenarios_dir = self.paths.scenarios_dir
 
     def __repr__(self):
         return '%s object with %i countries' % (self.__class__, len(self))
@@ -71,7 +71,7 @@ class Continent(object):
     def countries(self):
         """Return a dictionary of country iso2 codes to country objects."""
         all_countries = [Country(self, d)
-                         for d in self.input_dir.flat_directories]
+                         for d in self.countries_dir.flat_directories]
         return {c.iso2_code: c for c in all_countries}
 
     @property_cached
