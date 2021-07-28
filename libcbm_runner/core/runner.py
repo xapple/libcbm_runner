@@ -56,7 +56,7 @@ class Runner(object):
         self.short_name += self.country.iso2_code + '/'
         self.short_name += str(self.num)
         # Where the data will be stored for this run #
-        self.data_dir = self.scenario.scenarios_dir + self.short_name + '/'
+        self.data_dir = self.scenario.output_dir + self.short_name + '/'
         # Automatically access paths based on a string of many subpaths #
         self.paths = AutoPaths(self.data_dir, self.all_paths)
 
