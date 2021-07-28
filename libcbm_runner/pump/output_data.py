@@ -64,4 +64,4 @@ class OutputData(object):
         # The classifiers #
         self['clasif'] = self.clasif
         # The pools #
-        self['pools'] = self.sim.simulation.results.pools
+        self['pools'] = self.sim.results.pools
