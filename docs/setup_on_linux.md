@@ -52,8 +52,17 @@ The next step is to set the environment variable `$PYTHONPATH` so that our inter
 
 ## Run
 
-You should now be ready to run the pipeline with the following command:
+You should now be ready to run the pipeline by entering the following at the python 
+console:
+
+    from libcbm_runner.core.continent import continent
+    scenario = continent.scenarios['historical']
+    runner_libcbm = scenario.runners['LU'][-1]
+    runner_libcbm.run()
+
+Alternatively
 
     $ python3 ~/repos/libcbm_runner/scripts/running/run_zz.py
 
-This will likely result in an error message and the production of a traceback, as the pipeline is still under heavy development.
+
+
