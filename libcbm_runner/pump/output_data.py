@@ -24,14 +24,18 @@ class OutputData(object):
     This class will provide access to the output data of a Runner
     as several pandas data frames.
 
-
-    >>> runner.output['pools']
+    >>> print(runner.output['pools'])
     """
 
     all_paths = """
     /output/csv/
-    /output/csv/clasif.csv
-    /output/csv/pools.csv
+    /output/csv/clasif_val.csv.gz
+    /output/csv/area.csv.gz
+    /output/csv/classifiers.csv.gz
+    /output/csv/flux.csv.gz
+    /output/csv/params.csv.gz
+    /output/csv/pools.csv.gz
+    /output/csv/state.csv.gz
     """
 
     def __init__(self, parent):
@@ -43,13 +47,17 @@ class OutputData(object):
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
     def __getitem__(self, item):
-        return pandas.read_csv(str(self.paths[item]))
+        return pandas.read_csv(str(self.paths[item]),
+                               compression='gzip')
 
     def __setitem__(self, item, df):
-        df.to_csv(str(self.paths[item]), index=False, float_format='%g')
+        df.to_csv(str(self.paths[item]),
+                  index=False,
+                  float_format='%g',
+                  compression='gzip')
 
     @property
-    def clasif(self):
+    def clasif_val(self):
         # Load #
         result = self.sim.sit.classifier_value_ids
         # Transform #
@@ -64,7 +72,13 @@ class OutputData(object):
         """
         # Message #
         self.parent.log.info("Saving final simulations results to disk.")
-        # The classifiers #
-        self['clasif'] = self.clasif
-        # The pools #
-        self['pools'] = self.sim.results.pools
+        # The classifier values #
+        self['clasif_val'] = self.clasif_val
+        # All the tables that are within the SimpleNamespace of `sim.results` #
+        self['area']        = self.sim.results.pools
+        self['classifiers'] = self.sim.results.classifiers
+        self['flux']        = self.sim.results.flux
+        self['params']      = self.sim.results.params
+        self['pools']       = self.sim.results.pools
+        self['state']       = self.sim.results.state
+
