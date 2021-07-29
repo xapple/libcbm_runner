@@ -151,8 +151,8 @@ class Runner(object):
     #------------------------------- Methods ---------------------------------#
     def run(self, keep_in_ram=False, verbose=True, interrupt_on_error=False):
         """
-        Run the full modelling pipeline for a given country,
-        a given scenario and a given step.
+        Run the full modelling pipeline for a given country, a given scenario
+        and a given step.
         """
         # Verbosity level #
         self.verbose = verbose
