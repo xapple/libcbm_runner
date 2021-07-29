@@ -24,7 +24,7 @@ class OutputData(object):
     This class will provide access to the output data of a Runner
     as several pandas data frames.
 
-    >>> print(runner.output['pools'])
+    >>> print(runner.output.load('pools'))
     """
 
     all_paths = """
@@ -49,6 +49,7 @@ class OutputData(object):
     def __repr__(self):
         return '%s object code "%s"' % (self.__class__, self.runner.short_name)
 
+    #--------------------------- Special Methods -----------------------------#
     def __getitem__(self, item):
         return pandas.read_csv(str(self.paths[item]),
                                compression='gzip')
@@ -58,6 +59,8 @@ class OutputData(object):
                   index        = False,
                   float_format = '%g',
                   compression  = 'gzip')
+
+    #----------------------------- Properties --------------------------------#
     @property
     def clasif_val(self):
         # Load #
@@ -67,6 +70,7 @@ class OutputData(object):
         # Return #
         return result
 
+    #------------------------------- Methods ---------------------------------#
     def save(self):
         """
         Save the information of interest from the simulation to disk before
@@ -83,4 +87,18 @@ class OutputData(object):
         self['params']      = self.sim.results.params
         self['pools']       = self.sim.results.pools
         self['state']       = self.sim.results.state
+
+    def load(self, name, with_clfrs=True):
+        """
+        Loads one of the dataframes that was previously saved from the
+        `libcbm_py` simulation.
+        """
+        # Load from CSV #
+        df = self[name]
+        # Join classifiers #
+        if with_clfrs:
+            clfrs = self['classifiers']
+            df = df.merge(clfrs, 'left', ['identifier', 'timestep'])
+        # Return #
+        return df
 
