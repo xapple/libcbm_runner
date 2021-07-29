@@ -6,10 +6,10 @@ default:
   - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/bioeconomy/libcbm/libcbm_aidb.git
   - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/bioeconomy/libcbm/libcbm_data.git
   - ls
-  - ls $HOME
-  - export PYTHONPATH="$HOME/libcbm_py/":$PYTHONPATH
-  - export PYTHONPATH="$HOME/libcbm_runner/":$PYTHONPATH
-  - export LIBCBM_DATA="$HOME/libcbm_data/"
+  - ls $CI_PROJECT_DIR
+  - export PYTHONPATH="$CI_PROJECT_DIR/libcbm_py/":$PYTHONPATH
+  - export PYTHONPATH="$CI_PROJECT_DIR/libcbm_runner/":$PYTHONPATH
+  - export LIBCBM_DATA="$CI_PROJECT_DIR/libcbm_data/"
 
 stages:
   - test
