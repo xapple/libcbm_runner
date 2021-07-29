@@ -28,5 +28,4 @@ scenario = continent.scenarios['historical']
 runner   = scenario.runners['ZZ'][-1]
 
 runner.run()
-print(runner.simulation.results)
-print(runner.simulation.inv)
+

@@ -1,0 +1,15 @@
+default:
+  image: python:buster
+  before_script:
+  - python --version
+  - pip install -r requirements.txt
+  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.instance/group/project.git
+
+stages:
+  - test
+
+libcbm_run:
+  stage: test
+  script: 
+    - python scripts/setup/aidb_symlink.py
+    - python scripts/running/run_zz.py
