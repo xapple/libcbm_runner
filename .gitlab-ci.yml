@@ -13,6 +13,7 @@ default:
   # Tell libcbm_runner where the data are located
   - export LIBCBM_DATA="$CI_PROJECT_DIR/libcbm_data/"
   - export AIDB_REPO="$CI_PROJECT_DIR/libcbm_aidb/"
+  - python scripts/setup/aidb_symlink.py
 
 stages:
   - test
@@ -20,5 +21,4 @@ stages:
 libcbm_run:
   stage: test
   script: 
-    - python scripts/setup/aidb_symlink.py
     - python scripts/running/run_zz.py
