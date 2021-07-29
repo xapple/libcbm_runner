@@ -4,4 +4,4 @@ pandas
 plumbing
 simplejson
 tqdm
-
+numexpr
