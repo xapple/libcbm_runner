@@ -30,6 +30,9 @@ class Simulation(object):
         # Record if we ended with an error or not #
         self.error = None
 
+    def __repr__(self):
+        return '%s object code "%s"' % (self.__class__, self.runner.short_name)
+
     #--------------------------- Special Methods -----------------------------#
     def dynamics_func(self, timestep, cbm_vars):
         """

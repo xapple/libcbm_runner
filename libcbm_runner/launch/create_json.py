@@ -29,6 +29,9 @@ class CreateJSON(object):
         self.parent = parent
         self.runner = parent
 
+    def __repr__(self):
+        return '%s object code "%s"' % (self.__class__, self.runner.short_name)
+
     def __call__(self):
         self.runner.paths.json.write(json.dumps(self.content,
                                                 indent=4,

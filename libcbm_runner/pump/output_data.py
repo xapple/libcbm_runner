@@ -46,16 +46,18 @@ class OutputData(object):
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
+    def __repr__(self):
+        return '%s object code "%s"' % (self.__class__, self.runner.short_name)
+
     def __getitem__(self, item):
         return pandas.read_csv(str(self.paths[item]),
                                compression='gzip')
 
     def __setitem__(self, item, df):
         df.to_csv(str(self.paths[item]),
-                  index=False,
-                  float_format='%g',
-                  compression='gzip')
-
+                  index        = False,
+                  float_format = '%g',
+                  compression  = 'gzip')
     @property
     def clasif_val(self):
         # Load #

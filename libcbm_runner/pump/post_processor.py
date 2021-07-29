@@ -29,6 +29,9 @@ class PostProcessor(object):
         self.parent = parent
         self.runner = parent
 
+    def __repr__(self):
+        return '%s object code "%s"' % (self.__class__, self.runner.short_name)
+
     def xxx(self):
         """
         xxxx.

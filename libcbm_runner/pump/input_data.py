@@ -43,6 +43,9 @@ class InputData(object):
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
+    def __repr__(self):
+        return '%s object code "%s"' % (self.__class__, self.runner.short_name)
+
     def __getitem__(self, item):
         return pandas.read_csv(str(self.paths[item]))
 
