@@ -5,6 +5,9 @@ default:
   - pip install -r requirements.txt
   - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/bioeconomy/libcbm/libcbm_aidb.git
   - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/bioeconomy/libcbm/libcbm_data.git
+  - export PYTHONPATH="$HOME/repos/libcbm_py/":$PYTHONPATH
+  - export PYTHONPATH="$HOME/repos/libcbm_runner/":$PYTHONPATH
+  - export LIBCBM_DATA="$HOME/repos/libcbm_data/"
 
 stages:
   - test
