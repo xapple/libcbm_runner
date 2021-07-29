@@ -122,8 +122,8 @@ class Simulation(object):
         Remove all objects from RAM otherwise the kernel will kill the python
         process after a couple countries being run.
         """
-        del self.sit
-        del self.clfrs
-        del self.inv
-        del self.cbm
-        del self.results
+        if hasattr(self, 'sit'):     del self.sit
+        if hasattr(self, 'clfrs'):   del self.clfrs
+        if hasattr(self, 'inv'):     del self.inv
+        if hasattr(self, 'cbm'):     del self.cbm
+        if hasattr(self, 'results'): del self.results
