@@ -25,6 +25,7 @@ class OutputData(object):
     as several pandas data frames.
 
     >>> print(runner.output.load('pools'))
+    >>> print(runner.output.load('flux'))
     """
 
     all_paths = """
