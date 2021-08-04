@@ -11,11 +11,10 @@ Unit D1 Bioeconomy.
 # Built-in modules #
 import os
 
-# Third party modules #
-
 # First party modules #
-from autopaths.dir_path import DirectoryPath
+from autopaths.dir_path   import DirectoryPath
 from autopaths.auto_paths import AutoPaths
+from plumbing.cache       import property_cached
 
 # Where is the data, default case #
 aidb_repo = DirectoryPath("~/repos/libcbm_aidb/")
@@ -54,6 +53,16 @@ class AIDB(object):
 
     def __bool__(self):
         return bool(self.paths.aidb)
+
+    #----------------------------- Properties --------------------------------#
+    @property_cached
+    def db(self):
+        """
+        Returns a `plumbing.databases.sqlite_database.SQLiteDatabase` object
+        useful for reading and modifying entries and tables.
+        """
+        from plumbing.databases.sqlite_database import SQLiteDatabase
+        return SQLiteDatabase(self.paths.aidb)
 
     #------------------------------- Methods ---------------------------------#
     def symlink_single_aidb(self):

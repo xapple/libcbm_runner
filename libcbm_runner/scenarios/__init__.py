@@ -12,7 +12,7 @@ A list of all scenarios classes.
 # Internal modules #
 from libcbm_runner.scenarios.historical    import Historical
 from libcbm_runner.scenarios.afforestation import Afforestation
-from libcbm_runner.scenarios.products import Products
+from libcbm_runner.scenarios.products      import Products
 
 ###############################################################################
 # List all scenario classes #
