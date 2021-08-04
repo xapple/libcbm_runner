@@ -129,7 +129,7 @@ class Runner(object):
     @property
     def num_timesteps(self):
         """
-        Compute the number of year we have to run for.
+        Compute the number of years we have to run the simlation for.
         Alternatively, we can just see what is the last disturbance to be
         applied?
 

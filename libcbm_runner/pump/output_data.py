@@ -85,10 +85,10 @@ class OutputData(object):
         Produces a dataframe useful for joining classifier values to
         other output dataframes. This dataframe looks like this:
 
-                  identifier timestep Status Forest type Region
-            0            For        0    For          OB   LU00
-            1             NF        0    For          OB   LU00
-            2             AR        0    For          OB   LU00
+                  identifier timestep Status Forest type Region ...
+            0              1        0    For          OB   LU00 ...
+            1              2        0    For          OB   LU00 ...
+            2              3        0    For          OB   LU00 ...
         """
         # Load #
         vals = self['values']
