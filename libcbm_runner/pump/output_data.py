@@ -9,6 +9,7 @@ Unit D1 Bioeconomy.
 """
 
 # Built-in modules #
+import pickle
 
 # Third party modules #
 import pandas
@@ -30,7 +31,7 @@ class OutputData(object):
 
     all_paths = """
     /output/csv/
-    /output/csv/clasif_val.csv.gz
+    /output/csv/values.pickle
     /output/csv/area.csv.gz
     /output/csv/classifiers.csv.gz
     /output/csv/flux.csv.gz
@@ -52,35 +53,64 @@ class OutputData(object):
 
     #--------------------------- Special Methods -----------------------------#
     def __getitem__(self, item):
-        return pandas.read_csv(str(self.paths[item]),
-                               compression='gzip')
+        """Read any CSV or pickle file with the passed name."""
+        # Find the path #
+        path = self.paths[item]
+        # If it is a CSV #
+        if '.csv' in path.name:
+            return pandas.read_csv(str(path), compression='gzip')
+        # If it is a python object #
+        with path.open('rb') as handle: return pickle.load(handle)
 
     def __setitem__(self, item, df):
-        df.to_csv(str(self.paths[item]),
-                  index        = False,
-                  float_format = '%g',
-                  compression  = 'gzip')
+        """
+        Record a dataframe or python object to disk using the file with the
+        passed name.
+        """
+        # Find the path #
+        path = self.paths[item]
+        # If it is a DataFrame #
+        if isinstance(df, pandas.DataFrame):
+            return df.to_csv(str(path),
+                             index        = False,
+                             float_format = '%g',
+                             compression  = 'gzip')
+        # If it is a python object #
+        with path.open('wb') as handle: return pickle.dump(df, handle)
 
     #----------------------------- Properties --------------------------------#
     @property
-    def clasif_val(self):
+    def clasif_df(self):
+        """
+        Produces a dataframe useful for joining classifier values to
+        other output dataframes. This dataframe looks like this:
+
+                  identifier timestep Status Forest type Region
+            0            For        0    For          OB   LU00
+            1             NF        0    For          OB   LU00
+            2             AR        0    For          OB   LU00
+        """
         # Load #
-        result = self.sim.sit.classifier_value_ids
-        # Transform #
-        result = pandas.DataFrame(result)
+        vals = self['values']
+        vals = {v: k for m in vals.values() for k, v in m.items()}
+        # Put actual values such as 'For' instead of numbers like '6' #
+        clfrs = self['classifiers']
+        clfrs = clfrs.set_index(['identifier', 'timestep'])
+        clfrs = clfrs.replace(vals)
+        clfrs = clfrs.reset_index()
         # Return #
-        return result
+        return clfrs
 
     #------------------------------- Methods ---------------------------------#
     def save(self):
         """
-        Save the information of interest from the simulation to disk before
+        Save all the information of interest from the simulation to disk before
         the whole simulation object is removed from memory.
         """
         # Message #
         self.parent.log.info("Saving final simulations results to disk.")
         # The classifier values #
-        self['clasif_val'] = self.clasif_val
+        self['values']      = self.sim.sit.classifier_value_ids
         # All the tables that are within the SimpleNamespace of `sim.results` #
         self['area']        = self.sim.results.pools
         self['classifiers'] = self.sim.results.classifiers
@@ -96,10 +126,8 @@ class OutputData(object):
         """
         # Load from CSV #
         df = self[name]
-        # Join classifiers #
-        if with_clfrs:
-            clfrs = self['classifiers']
-            df = df.merge(clfrs, 'left', ['identifier', 'timestep'])
+        # Optionally join classifiers #
+        cols = ['identifier', 'timestep']
+        if with_clfrs: df = df.merge(self.clasif_df, 'left', cols)
         # Return #
         return df
-
