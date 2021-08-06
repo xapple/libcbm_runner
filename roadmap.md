@@ -49,7 +49,7 @@
 - Better error message in the case where the AIDB is absent (or an empty symbolic link).
   Current message is table species missing.
 
-- Fix version of autopath and plumbing dependencies
+- Fix version of autopaths and plumbing dependencies
 
 - Since the simulation can take a long time it is useful to know when libcbm starts
   loading the data and when each simulation step starts with a short message. To
