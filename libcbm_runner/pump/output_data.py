@@ -80,7 +80,7 @@ class OutputData(object):
 
     #----------------------------- Properties --------------------------------#
     @property
-    def clasif_df(self):
+    def classif_df(self):
         """
         Produces a dataframe useful for joining classifier values to
         other output dataframes. This dataframe looks like this:
@@ -128,6 +128,6 @@ class OutputData(object):
         df = self[name]
         # Optionally join classifiers #
         cols = ['identifier', 'timestep']
-        if with_clfrs: df = df.merge(self.clasif_df, 'left', cols)
+        if with_clfrs: df = df.merge(self.classif_df, 'left', cols)
         # Return #
         return df
