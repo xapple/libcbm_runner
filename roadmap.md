@@ -38,6 +38,18 @@
 
 - Creating a mechanism to define and run scenarios
 
+- Use lower case names for classifier columns
+
+     'Status' =  status
+     'Forest type' =  forest_type
+     'Region' =  region
+     'Management type' = mgmt_type
+     'Management strategy' = mgmt_strategy
+     'Climatic unit' = climate
+     'Conifers/Broadleaves' = con_broad
+     'Site index' = site_index
+     'Simulation period (for yields)'] = growth_period
+
 
 # Dynamic harvest allocation Task
 
