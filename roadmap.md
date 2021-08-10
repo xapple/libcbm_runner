@@ -52,6 +52,8 @@
      'Site index' = site_index
      'Simulation period (for yields)'] = growth_period
 
+- Replace "Input" column to "area" in runner.output.load('area')
+
 
 # Dynamic harvest allocation Task
 
