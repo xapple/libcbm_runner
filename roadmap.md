@@ -39,6 +39,8 @@
 - Creating a mechanism to define and run scenarios
 
 - Use lower case names for classifier columns
+   so that they become available as columns in 
+   runner.input_data['events'] for eample
 
      'Status' =  status
      'Forest type' =  forest_type
