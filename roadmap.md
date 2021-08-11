@@ -26,6 +26,9 @@
   the simulation runs only for 18 years. This could be due to a clause in the historical 
   scenario that limits the length of the simulation to the current year.
 
+- Move def classif_df(self): from pump/output_data to an object that belongs to the 
+  runner
+
 
 ## AIDB to pandas
 
