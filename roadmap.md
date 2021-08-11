@@ -18,6 +18,8 @@
      'Site index' = site_index
      'Simulation period (for yields)'] = growth_period
 
+- All output variables in snake case
+
 - Replace "Input" column to "area" in runner.output.load('area')
 
 - When giving 30 years of disturbances in the input data for the afforestation scenario, 
@@ -29,6 +31,8 @@
 
 - Make tables in the AIDB accessible to be loaded as pandas data frames.
 
+Check the old pipeline for methods to merge and prepare disturbance matrix information
+castanea:~/repos/cbmcfs3_runner/cbmcfs3_runner$ ls pump/aidb.py
 
 
 
