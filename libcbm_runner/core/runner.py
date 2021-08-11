@@ -22,6 +22,7 @@ from libcbm_runner.launch.create_json import CreateJSON
 from libcbm_runner.launch.simulation  import Simulation
 from libcbm_runner.pump.input_data    import InputData
 from libcbm_runner.pump.output_data   import OutputData
+from libcbm_runner.pump.internal_data import InternalData
 
 ###############################################################################
 class Runner(object):
