@@ -13,6 +13,7 @@ Unit D1 Bioeconomy.
 # Third party modules #
 
 # First party modules #
+from plumbing.common import camel_to_snake
 
 # Internal modules #
 
@@ -32,11 +33,21 @@ class InternalData(object):
     def __repr__(self):
         return '%s object code "%s"' % (self.__class__, self.runner.short_name)
 
+    #--------------------------- Special Methods -----------------------------#
+    def __getitem__(self, item):
+        """Read a dataframe from the `results` attribute."""
+        # Load #
+        df = getattr(self.sim.results, item).copy()
+        # Modify #
+        df.columns = df.columns.to_series().apply(camel_to_snake)
+        # Return #
+        return df
+
     #----------------------------- Properties --------------------------------#
     @property
     def classif_df(self):
         return self.make_classif_df(self.sim.sit.classifier_value_ids,
-                                    self.sim.results.classifiers)
+                                    self['classifiers'])
 
     #------------------------------- Methods ---------------------------------#
     def make_classif_df(self, vals, clfrs):

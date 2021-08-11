@@ -95,12 +95,12 @@ class OutputData(object):
         # The classifier values #
         self['values']      = self.sim.sit.classifier_value_ids
         # All the tables that are within the SimpleNamespace of `sim.results` #
-        self['area']        = self.sim.results.pools
-        self['classifiers'] = self.sim.results.classifiers
-        self['flux']        = self.sim.results.flux
-        self['params']      = self.sim.results.params
-        self['pools']       = self.sim.results.pools
-        self['state']       = self.sim.results.state
+        self['area']        = self.runner.internal['pools']
+        self['classifiers'] = self.runner.internal['classifiers']
+        self['flux']        = self.runner.internal['flux']
+        self['params']      = self.runner.internal['params']
+        self['pools']       = self.runner.internal['pools']
+        self['state']       = self.runner.internal['state']
 
     def load(self, name, with_clfrs=True):
         """
