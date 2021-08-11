@@ -12,10 +12,10 @@ Unit D1 Bioeconomy.
 
 # Third party modules #
 import pandas
-from tqdm import tqdm
 
 # First party modules #
 from autopaths.auto_paths import AutoPaths
+from plumbing.cache import property_cached
 
 # Internal modules #
 
@@ -57,7 +57,33 @@ class OrigData(object):
     def __getitem__(self, item):
         return pandas.read_csv(str(self.paths[item]))
 
+    #----------------------------- Properties --------------------------------#
+    @property_cached
+    def classif_names(self):
+        # Load #
+        result = self['classifiers']
+        # Query #
+        result = result.query("classifier_value_id == '_CLASSIFIER'")
+        # Get a series #
+        result = result.set_index('classifier_number')['name']
+        # Link number to name #
+        result = {'_' + str(k): v for k,v in result.items()}
+        # Return #
+        return result
+
     #------------------------------- Methods ---------------------------------#
+    def load(self, name, clfrs_names=True):
+        """
+        Loads one of the dataframes in the orig data and adds information
+        to it.
+        """
+        # Load from CSV #
+        df = self[name]
+        # Optionally rename classifiers #
+        if clfrs_names: df = df.rename(columns=self.classif_names)
+        # Return #
+        return df
+
     # Define what we will copy #
     orig_files_to_copy = {
         'ageclass':           'age_classes',

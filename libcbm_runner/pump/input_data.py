@@ -15,12 +15,12 @@ import pandas
 
 # First party modules #
 from autopaths.auto_paths import AutoPaths
-from plumbing.cache import property_cached
 
 # Internal modules #
+from libcbm_runner.pump.orig_data import OrigData
 
 ###############################################################################
-class InputData(object):
+class InputData(OrigData):
     """
     This class will provide access to the input data of a Runner
     as several pandas data frames.
@@ -50,33 +50,7 @@ class InputData(object):
     def __getitem__(self, item):
         return pandas.read_csv(str(self.paths[item]))
 
-    #----------------------------- Properties --------------------------------#
-    @property_cached
-    def classif_names(self):
-        # Load #
-        result = self['classifiers']
-        # Query #
-        result = result.query("classifier_value_id == '_CLASSIFIER'")
-        # Get a series #
-        result = result.set_index('classifier_number')['name']
-        # Link number to name #
-        result = {'_' + str(k): v for k,v in result.items()}
-        # Return #
-        return result
-
     #------------------------------- Methods ---------------------------------#
-    def load(self, name, clfrs_names=True):
-        """
-        Loads one of the dataframes in the input data and adds information
-        to it.
-        """
-        # Load from CSV #
-        df = self[name]
-        # Optionally rename classifiers #
-        if clfrs_names: df = df.rename(columns=self.classif_names)
-        # Return #
-        return df
-
     def copy_orig_from_country(self):
         """
         Refresh the input data by copying the immutable original
