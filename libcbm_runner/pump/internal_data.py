@@ -38,8 +38,10 @@ class InternalData(object):
         """Read a dataframe from the `results` attribute."""
         # Load #
         df = getattr(self.sim.results, item).copy()
-        # Modify #
+        # Modify column names #
         df.columns = df.columns.to_series().apply(camel_to_snake)
+        # Rename column names #
+        df = df.rename(columns = {'input': 'area'})
         # Return #
         return df
 
@@ -50,6 +52,19 @@ class InternalData(object):
                                     self['classifiers'])
 
     #------------------------------- Methods ---------------------------------#
+    def load(self, name, with_clfrs=True):
+        """
+        Loads one of the dataframes that is available from the
+        `libcbm_py` simulation and adds information to it.
+        """
+        # Load from CSV #
+        df = self[name]
+        # Optionally join classifiers #
+        cols = ['identifier', 'timestep']
+        if with_clfrs: df = df.merge(self.classif_df, 'left', cols)
+        # Return #
+        return df
+
     def make_classif_df(self, vals, clfrs):
         """
         Produces a dataframe useful for joining classifier values to
