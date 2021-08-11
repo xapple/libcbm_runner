@@ -60,6 +60,14 @@ class AIDB(object):
         """
         Returns a `plumbing.databases.sqlite_database.SQLiteDatabase` object
         useful for reading and modifying entries and tables.
+
+        In addition one can also read/write to the AIDB files easily. To do this:
+
+            `df = country.aidb.db.read_df('species')`
+
+        To overwrite a table with a df
+
+            `country.aidb.db.write_df(df, 'species')`
         """
         from plumbing.databases.sqlite_database import SQLiteDatabase
         return SQLiteDatabase(self.paths.aidb)
