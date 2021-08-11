@@ -81,25 +81,8 @@ class OutputData(object):
     #----------------------------- Properties --------------------------------#
     @property
     def classif_df(self):
-        """
-        Produces a dataframe useful for joining classifier values to
-        other output dataframes. This dataframe looks like this:
-
-                  identifier timestep Status Forest type Region ...
-            0              1        0    For          OB   LU00 ...
-            1              2        0    For          OB   LU00 ...
-            2              3        0    For          OB   LU00 ...
-        """
-        # Load #
-        vals = self['values']
-        vals = {v: k for m in vals.values() for k, v in m.items()}
-        # Put actual values such as 'For' instead of numbers like '6' #
-        clfrs = self['classifiers']
-        clfrs = clfrs.set_index(['identifier', 'timestep'])
-        clfrs = clfrs.replace(vals)
-        clfrs = clfrs.reset_index()
-        # Return #
-        return clfrs
+        return self.runner.internal.make_classif_df(self['values'],
+                                                    self['classifiers'])
 
     #------------------------------- Methods ---------------------------------#
     def save(self):
@@ -122,7 +105,7 @@ class OutputData(object):
     def load(self, name, with_clfrs=True):
         """
         Loads one of the dataframes that was previously saved from the
-        `libcbm_py` simulation.
+        `libcbm_py` simulation and adds information to it.
         """
         # Load from CSV #
         df = self[name]

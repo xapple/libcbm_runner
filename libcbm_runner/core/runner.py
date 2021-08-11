@@ -37,6 +37,20 @@ class Runner(object):
         >>> scenario = continent.scenarios['historical']
         >>> runner   = scenario.runners['LU'][0]
         >>> runner.run()
+
+    The runner has an attribute `output` that only deals with final output
+    data that can be reached after closing and reopening your interpreter.
+
+    The runner has an attribute `internal` that only deals with getting the
+    data from the libcbm objects as they are while still in RAM and not
+    written to disk. Examples:
+
+    >>> runner.internal.classif_df
+    If you are running a simluation and want to get the information from RAM.
+
+    >>> runner.output.classif_df
+    If you are analyzing results that were run in the past and want to get the
+    information from disk.
     """
 
     all_paths = """
@@ -87,6 +101,14 @@ class Runner(object):
     def output(self):
         """Create and access the output data to this run."""
         return OutputData(self)
+
+    @property_cached
+    def internal(self):
+        """
+        Access and format data conerning the simulation as it is being
+        run.
+        """
+        return InternalData(self)
 
     #----------------------------- Properties --------------------------------#
     @property
