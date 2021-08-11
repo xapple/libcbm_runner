@@ -50,14 +50,14 @@ class CreateJSON(object):
         "mapping_config": {
             "spatial_units": {
                 "mapping_mode":     "SeparateAdminEcoClassifiers",
-                "admin_classifier": "Region",
-                "eco_classifier":   "Climatic unit",
+                "admin_classifier": "region",
+                "eco_classifier":   "climate",
                 "admin_mapping":    None,
                 "eco_mapping":      None,
             },
             "disturbance_types": None,
             "species": {
-                "species_classifier": "Forest type",
+                "species_classifier": "forest_type",
                 "species_mapping":    None,
             }
         }

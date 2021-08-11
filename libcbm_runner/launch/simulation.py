@@ -49,10 +49,11 @@ class Simulation(object):
         # Check the timestep #
         self.parent.log.info(f"Time step {timestep}")
         if timestep == 1:
-            self.parent.log.info("Carbon pool initialization period is finished.")
-            self.parent.log.info("Now starting the current period.")
+            msg = "Carbon pool initialization period is finished." \
+                  " Now starting the current period."
+            self.parent.log.info(msg)
             # The name of our extra classifier #
-            key = 'Simulation period (for yields)'
+            key = 'growth_period'
             # Get the corresponding ID in the libcbm simulation #
             id_of_cur = self.sit.classifier_value_ids[key]["Cur"]
             # Modify the whole column of the dataframe #

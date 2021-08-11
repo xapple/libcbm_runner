@@ -26,6 +26,5 @@ from libcbm_runner.core.continent import continent
 ################################################################################
 scenario = continent.scenarios['historical']
 runner   = scenario.runners['ZZ'][-1]
-
-runner.run()
+runner.run(True, True, True)
 
