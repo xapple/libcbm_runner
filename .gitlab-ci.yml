@@ -2,11 +2,10 @@ default:
   image: python:buster
   before_script:
   - python --version
-  - pip install -r requirements.txt
+  - pip install .
   - git clone https://github.com/cat-cfs/libcbm_py.git
   - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/bioeconomy/libcbm/libcbm_aidb.git
   - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/bioeconomy/libcbm/libcbm_data.git
-  - ls $CI_PROJECT_DIR
   # Tell python where the libcbm and libcbm_runner packages are located
   - export PYTHONPATH="$CI_PROJECT_DIR/libcbm_py/":$PYTHONPATH
   - export PYTHONPATH="$CI_PROJECT_DIR/libcbm_runner/":$PYTHONPATH
@@ -20,5 +19,5 @@ stages:
 
 libcbm_run:
   stage: test
-  script: 
+  script:
     - python scripts/running/run_zz.py
