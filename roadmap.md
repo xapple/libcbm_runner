@@ -18,17 +18,24 @@
      'Site index' = site_index
      'Simulation period (for yields)'] = growth_period
 
+- All output variables in snake case
+
 - Replace "Input" column to "area" in runner.output.load('area')
 
 - When giving 30 years of disturbances in the input data for the afforestation scenario, 
   the simulation runs only for 18 years. This could be due to a clause in the historical 
   scenario that limits the length of the simulation to the current year.
 
+- Move def classif_df(self): from pump/output_data to an object that belongs to the 
+  runner
+
 
 ## AIDB to pandas
 
 - Make tables in the AIDB accessible to be loaded as pandas data frames.
 
+Check the old pipeline for methods to merge and prepare disturbance matrix information
+castanea:~/repos/cbmcfs3_runner/cbmcfs3_runner$ ls pump/aidb.py
 
 
 

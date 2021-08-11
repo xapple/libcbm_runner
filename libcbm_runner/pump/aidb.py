@@ -67,7 +67,7 @@ class AIDB(object):
 
         To overwrite a table with a df
 
-            `country.aidb.db.write_df(df, 'species')`
+             `country.aidb.db.write_df(df, 'species')`
         """
         from plumbing.databases.sqlite_database import SQLiteDatabase
         return SQLiteDatabase(self.paths.aidb)
