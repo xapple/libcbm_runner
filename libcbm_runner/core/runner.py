@@ -106,7 +106,7 @@ class Runner(object):
     @property_cached
     def internal(self):
         """
-        Access and format data conerning the simulation as it is being
+        Access and format data concerning the simulation as it is being
         run.
         """
         return InternalData(self)
@@ -152,22 +152,14 @@ class Runner(object):
     @property
     def num_timesteps(self):
         """
-        Compute the number of years we have to run the simlation for.
-        Alternatively, we can just see what is the last disturbance to be
-        applied?
-
-            >>> from libcbm_runner.core.continent import continent
-            >>> scen = continent.scenarios['historical']
-            >>> for code, steps in scen.runners.items():
-            >>>     r = steps[0]
-            >>>     print(code, ': ', r.num_timesteps)
-
+        Compute the number of years we have to run the simulation for.
+        To do this, we simply select the disturbance with the highest
+        timestep.
         """
-        # Retrieve parameters that are country specific #
-        base_year      = self.country.base_year
-        inv_start_year = self.country.inventory_start_year
-        # Compute the number of years to simulate #
-        period_max     = base_year - inv_start_year + 1
+        # Load #
+        df = self.input_data.load('events')
+        # Compute #
+        period_max = df['step'].max()
         # Return #
         return period_max
 

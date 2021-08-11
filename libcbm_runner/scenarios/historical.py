@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-This scenarios represents a demand that is pre-calculated and is not a function of the
-maximum wood supply (no interaction yet with the GFTM model).
+This scenarios represents a demand that is pre-calculated and is not a
+function of the maximum wood supply (no interaction yet with the GFTM model).
 """
 
 # Built-in modules #
@@ -26,7 +26,37 @@ class Historical(Scenario):
 
     @property_cached
     def runners(self):
-        """A dictionary of country codes as keys with a list of runners as values."""
-        result = {c.iso2_code: [Runner(self, c, 0)] for c in self.continent}
-        return result
+        """
+        A dictionary of country codes as keys with a list of runners as
+        values.
+        """
+        return {c.iso2_code: [HistoricalRunner(self, c, 0)]
+                for c in self.continent}
 
+###############################################################################
+class HistoricalRunner(Runner):
+    """
+    With this class we are able to sub-class any methods from the parent
+    `Runner` class and change their behavior in ways that suit this specific
+    scenario.
+    """
+
+    @property
+    def num_timesteps(self):
+        """
+        Compute the number of years we have to run the simulation for.
+        Print all resulting years:
+
+            >>> from libcbm_runner.core.continent import continent
+            >>> scen = continent.scenarios['historical']
+            >>> for code, steps in scen.runners.items():
+            >>>     r = steps[0]
+            >>>     print(code, ': ', r.num_timesteps)
+        """
+        # Retrieve parameters that are country specific #
+        base_year      = self.country.base_year
+        inv_start_year = self.country.inventory_start_year
+        # Compute the number of years to simulate #
+        period_max     = base_year - inv_start_year + 1
+        # Return #
+        return period_max

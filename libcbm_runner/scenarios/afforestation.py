@@ -4,15 +4,12 @@
 """
 This scenario represents the additional afforestation.
 
-
 To use this scenario
 
-    from libcbm_runner.core.continent import continent
-    scenario = continent.scenarios['afforestation']
-    r = scenario.runners['AT'][-1]
-
-    r.run()
-
+    >>> from libcbm_runner.core.continent import continent
+    >>> scenario = continent.scenarios['afforestation']
+    >>> r = scenario.runners['AT'][-1]
+    >>> r.run()
 """
 
 # Built-in modules #
@@ -26,9 +23,7 @@ from libcbm_runner.core.runner import Runner
 
 ###############################################################################
 class Afforestation(Scenario):
-    """
-    This scenario simulates additional afforestation scenarios.
-    """
+    """This scenario simulates the additional afforestation scenarios."""
 
     short_name = 'afforestation'
 
@@ -43,17 +38,13 @@ class Afforestation(Scenario):
 
 ###############################################################################
 class AfforestationRunner(Runner):
-    """
-    With this class we are able to sub-class any methods from the parent
-    `Runner` class and change their behavior in ways that suit this specific
-    scenario.
-    """
 
-    overwrite_csv = ['events.csv', 'inventory.csv', 'transitions.csv', 'growth_curves.csv']
+    overwrite_csv = ['events.csv', 'inventory.csv', 'transitions.csv',
+                     'growth_curves.csv']
 
     def modify_input(self):
         """
-        We would like to overwrite only three files with our own specific
+        We would like to overwrite only four files with our own specific
         afforestation versions.
         """
         for csv_name in self.overwrite_csv:
