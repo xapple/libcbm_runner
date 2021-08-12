@@ -34,8 +34,8 @@ class CreateJSON(object):
 
     def __call__(self):
         self.runner.paths.json.write(json.dumps(self.content,
-                                                indent=4,
-                                                ignore_nan=True))
+                                                indent     = 4,
+                                                ignore_nan = True))
 
     template = {
         "import_config": {

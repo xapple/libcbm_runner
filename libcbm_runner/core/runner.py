@@ -18,11 +18,13 @@ from plumbing.timer       import LogTimer
 
 # Internal modules #
 import libcbm_runner
-from libcbm_runner.launch.create_json import CreateJSON
-from libcbm_runner.launch.simulation  import Simulation
-from libcbm_runner.pump.input_data    import InputData
-from libcbm_runner.pump.output_data   import OutputData
-from libcbm_runner.pump.internal_data import InternalData
+from libcbm_runner.launch.create_json  import CreateJSON
+from libcbm_runner.launch.simulation   import Simulation
+from libcbm_runner.pump.input_data     import InputData
+from libcbm_runner.pump.output_data    import OutputData
+from libcbm_runner.pump.internal_data  import InternalData
+from libcbm_runner.pump.pre_processor  import PreProcessor
+from libcbm_runner.pump.post_processor import PostProcessor
 
 # Third party modules
 import pandas
@@ -92,6 +94,16 @@ class Runner(object):
     def simulation(self):
         """The object that can run `libcbm` simulations."""
         return Simulation(self)
+
+    @property_cached
+    def pre_processor(self):
+        """Update the input data to this run using some rules."""
+        return PreProcessor(self)
+
+    @property_cached
+    def post_processor(self):
+        """Update or convert the output data to this run using some rules."""
+        return PostProcessor(self)
 
     @property_cached
     def input_data(self):
@@ -183,13 +195,15 @@ class Runner(object):
         # Clean everything from previous run #
         self.remove_directories()
         # Copy the original input data #
-        self.get_orig_data()
-        # Modify input data #
+        self.input_data.copy_orig_from_country()
+        # Modify input data, scenarios can subclass this #
         self.modify_input()
-        self.timer.print_elapsed()
+        # Pre-processing #
+        self.pre_processor()
         # Create the JSON configuration #
         self.create_json()
         # Run the model #
+        self.timer.print_elapsed()
         self.simulation(interrupt_on_error)
         self.timer.print_elapsed()
         # Save the results to disk #
@@ -197,7 +211,7 @@ class Runner(object):
         # Free memory #
         if not keep_in_ram: self.simulation.clear()
         # Post-processing #
-        pass
+        self.post_processor()
         # Messages #
         self.timer.print_end()
         self.timer.print_total_elapsed()
@@ -255,4 +269,5 @@ class Runner(object):
 
 
     def modify_input(self):
+        """Scenarios can subclass this at will."""
         pass

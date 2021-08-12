@@ -11,10 +11,8 @@ Unit D1 Bioeconomy.
 # Built-in modules #
 
 # Third party modules #
-import pandas
 
 # First party modules #
-from autopaths.auto_paths import AutoPaths
 
 # Internal modules #
 
@@ -32,11 +30,12 @@ class PostProcessor(object):
     def __repr__(self):
         return '%s object code "%s"' % (self.__class__, self.runner.short_name)
 
-    def xxx(self):
+    def __call__(self):
         """
         xxxx.
         """
+        return
         # Message #
         self.parent.log.info("Post-processing results.")
-        # The pools #
+        # Lorem #
         pass
