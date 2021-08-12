@@ -65,4 +65,29 @@ Alternatively
     $ python3 ~/repos/libcbm_runner/scripts/running/run_zz.py
 
 
+## Load output data
+
+Load tables without classifiers
+
+    area_lu = r_lu.output.load('area', with_clfrs=False)
+    params_lu = r_lu.output.load('params', with_clfrs=False)
+    flux_lu = r_lu.output.load('flux', with_clfrs=False)
+    state_lu = r_lu.output.load('state', with_clfrs=False)
+
+Load classifiers with their actual values
+
+    classifiers_lu = r_lu.output.classif_df
+    print(f"No of rows in area_lu: {len(area_lu)}")
+    print(f" No of rows in flux_lu, with NaNs for timestep 0: {len(flux_lu)}")
+    print(f"No of rows in params_lu: {len(params_lu)}")
+
+    index = ['identifier', 'timestep']
+    flux_dist = (params_lu
+                 .merge(area_lu, 'left', on = index) # Join the area information
+                 .merge(flux_lu, 'left', on = index)
+                 .merge(state_lu, 'left', on = index) # Join the age information
+                 .merge(classifiers_lu, 'left', on = index) # Join the classifiers
+                 )
+    len(flux_dist)
+    flux_dist
 
