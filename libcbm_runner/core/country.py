@@ -141,7 +141,7 @@ class Country(object):
         to actual corresponding simulation years such as:
            [1990, 1991, 1992, 1993, 1994]
         """
-        return timestep + self.inventory_start_year - 1
+        return timestep + self.inventory_start_year
 
     def year_to_timestep(self, year):
         """
@@ -158,5 +158,5 @@ class Country(object):
             >>> runner.country.year_to_timestep(year)
             array([1, 2])
         """
-        return year - self.inventory_start_year + 1
+        return year - self.inventory_start_year
 
