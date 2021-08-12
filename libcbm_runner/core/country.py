@@ -130,3 +130,33 @@ class Country(object):
         # reported by the national forest inventory
         row = ref_years.loc[ref_years['country'] == self.iso2_code].iloc[0]
         self.inventory_start_year = row['ref_year']
+
+    def timestep_to_year(self, timestep):
+        """
+        TimeStep 0 is the output of the makelist (so called "spin-up") procedure.
+        It represents the initial state.
+
+        Will convert a Series containing simulation time-steps such as:
+           [1, 2, 3, 4, 5]
+        to actual corresponding simulation years such as:
+           [1990, 1991, 1992, 1993, 1994]
+        """
+        return timestep + self.inventory_start_year - 1
+
+    def year_to_timestep(self, year):
+        """
+        The reverse operation of `timestep_to_year`.
+        Will convert a Series containing years such as:
+           [1990, 1991, 1992, 1993, 1994]
+        to simulation time-steps such as:
+           [1, 2, 3, 4, 5]
+
+        Checking the consistency between the 2 functions:
+
+            >>> runner = continent[('historical', 'ZZ', 0)]
+            >>> year = runner.country.timestep_to_year([1,2])
+            >>> runner.country.year_to_timestep(year)
+            array([1, 2])
+        """
+        return year - self.inventory_start_year + 1
+
