@@ -22,8 +22,6 @@ Check the output pools
 # First party modules #
 from plumbing.cache import property_cached
 
-# Third party modules
-import pandas
 
 # Internal modules #
 from libcbm_runner.scenarios.base_scen import Scenario
@@ -33,8 +31,8 @@ from libcbm_runner.core.runner import Runner
 class Afforestation(Scenario):
     """This scenario simulates the additional afforestation scenarios."""
 
-    name = "Afforestation"
-    short_name = 'ar'
+    short_name = 'afforestation'
+    abbreviation = 'ar'
 
     @property_cached
     def runners(self):
@@ -55,29 +53,17 @@ class AfforestationRunner(Runner):
         We would like to overwrite input files with our own specific
         afforestation versions.
         """
-        # Load the events table
-        file_path = self.scen_orig_dir + 'csv/' + 'events_wide_'
-        file_path += self.scenario.short_name + '.csv'
-        events_wide = pandas.read_csv(file_path)
-
-        # Reshape from wide to long format
-        events_wide["id"] = events_wide.index
-        events = pandas.wide_to_long(events_wide, stubnames="amount ", i="id", j="year")
-        events = events.reset_index()
-
-        # Convert years to time steps
-        events['step'] = self.country.year_to_timestep(events['year'])
-        # Remove the space in the amount column name
-        events = events.rename(columns={"amount ": "amount"})
-        # Reorder columns according to the reference table in the original data
-        colname_order = self.country.orig_data.load('events', clfrs_names=False).columns.tolist()
-        events = events[colname_order]
-
+        # A scenario always has at least an events file
         # Overwrite the input events file
+        events = self.events_wide_to_long()
         events.to_csv(self.input_data.paths.csv_dir + 'events.csv', index=False)
 
-        # Overwrite other input files
+        # Overwrite other input files, only if they are present in the data
         for csv_name in self.overwrite_csv:
-            source = self.scen_orig_dir + 'csv/' + csv_name + '_' + self.scenario.short_name + '.csv'
-            destination = self.input_data.paths.csv_dir + csv_name + '.csv'
-            source.copy(destination)
+            source = self.scen_orig_dir + 'csv/' + csv_name + '_'
+            source += self.scenario.abbreviation + '.csv'
+            if source.exists:
+                destination = self.input_data.paths.csv_dir + csv_name + '.csv'
+                source.copy(destination)
+            else:
+                print(f"Skipping {source} as the file doesn't exist.")

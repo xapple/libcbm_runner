@@ -24,6 +24,9 @@ from libcbm_runner.pump.input_data    import InputData
 from libcbm_runner.pump.output_data   import OutputData
 from libcbm_runner.pump.internal_data import InternalData
 
+# Third party modules
+import pandas
+
 ###############################################################################
 class Runner(object):
     """
@@ -224,6 +227,32 @@ class Runner(object):
     #--------------------------- Special Methods -----------------------------#
     def get_orig_data(self):
         return self.input_data.copy_orig_from_country()
+
+
+
+    def events_wide_to_long(self):
+        """
+        Reshape disturbance events from wide to long Format.
+        """
+        # Load the events table
+        file_path = self.scen_orig_dir + 'csv/' + 'events_wide_'
+        file_path += self.scenario.abbreviation + '.csv'
+        events_wide = pandas.read_csv(file_path)
+
+        # Reshape from wide to long format
+        events_wide["id"] = events_wide.index
+        events = pandas.wide_to_long(events_wide, stubnames="amount ", i="id", j="year")
+        events = events.reset_index()
+
+        # Convert years to time steps
+        events['step'] = self.country.year_to_timestep(events['year'])
+        # Remove the space in the amount column name
+        events = events.rename(columns={"amount ": "amount"})
+        # Reorder columns according to the reference table in the original data
+        colname_order = self.country.orig_data.load('events', clfrs_names=False).columns.tolist()
+        events = events[colname_order]
+        return events
+
 
     def modify_input(self):
         pass
