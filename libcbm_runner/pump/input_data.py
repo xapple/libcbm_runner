@@ -17,10 +17,9 @@ import pandas
 from autopaths.auto_paths import AutoPaths
 
 # Internal modules #
-from libcbm_runner.pump.orig_data import OrigData
 
 ###############################################################################
-class InputData(OrigData):
+class InputData():
     """
     This class will provide access to the input data of a Runner
     as several pandas data frames.
@@ -51,6 +50,13 @@ class InputData(OrigData):
         return pandas.read_csv(str(self.paths[item]))
 
     #------------------------------- Methods ---------------------------------#
+    def load(self, name):
+        """Loads one of the dataframes."""
+        # Load from CSV #
+        df = self[name]
+        # Return #
+        return df
+
     def copy_orig_from_country(self):
         """
         Refresh the input data by copying the immutable original
