@@ -69,17 +69,19 @@ Alternatively
 
 Load tables without classifiers
 
-    area_lu = r_lu.output.load('area', with_clfrs=False)
-    params_lu = r_lu.output.load('params', with_clfrs=False)
-    flux_lu = r_lu.output.load('flux', with_clfrs=False)
-    state_lu = r_lu.output.load('state', with_clfrs=False)
+    area_lu = runner_libcbm.output.load('area', with_clfrs=False)
+    params_lu = runner_libcbm.output.load('params', with_clfrs=False)
+    flux_lu = runner_libcbm.output.load('flux', with_clfrs=False)
+    state_lu = runner_libcbm.output.load('state', with_clfrs=False)
 
-Load classifiers with their actual values
+Load classifiers with their actual values and print the number of rows
 
-    classifiers_lu = r_lu.output.classif_df
+    classifiers_lu = runner_libcbm.output.classif_df
     print(f"No of rows in area_lu: {len(area_lu)}")
     print(f" No of rows in flux_lu, with NaNs for timestep 0: {len(flux_lu)}")
     print(f"No of rows in params_lu: {len(params_lu)}")
+
+Join area, age and fluxes together
 
     index = ['identifier', 'timestep']
     flux_dist = (params_lu
