@@ -72,7 +72,7 @@ class OrigData(object):
         return result
 
     #------------------------------- Methods ---------------------------------#
-    def load(self, name, clfrs_names=True):
+    def load(self, name, clfrs_names=False):
         """
         Loads one of the dataframes in the orig data and adds information
         to it.
