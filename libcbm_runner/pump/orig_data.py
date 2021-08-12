@@ -84,6 +84,7 @@ class OrigData(object):
         # Return #
         return df
 
+    #----------------------------- Conversions -------------------------------#
     # Define what we will copy #
     orig_files_to_copy = {
         'ageclass':           'age_classes',

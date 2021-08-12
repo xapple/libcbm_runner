@@ -83,6 +83,8 @@ class Scenario(object):
         # Timer end #
         timer.print_end()
         timer.print_total_elapsed()
+        # Compile logs #
+        self.compile_logs()
 
     def compile_logs(self, step=-1):
         # Open file #

@@ -11,10 +11,8 @@ Unit D1 Bioeconomy.
 # Built-in modules #
 
 # Third party modules #
-import pandas
 
 # First party modules #
-from autopaths.auto_paths import AutoPaths
 
 # Internal modules #
 
@@ -38,5 +36,5 @@ class PostProcessor(object):
         """
         # Message #
         self.parent.log.info("Post-processing results.")
-        # The pools #
+        # Lorem #
         pass
