@@ -30,10 +30,11 @@ class PostProcessor(object):
     def __repr__(self):
         return '%s object code "%s"' % (self.__class__, self.runner.short_name)
 
-    def xxx(self):
+    def __call__(self):
         """
         xxxx.
         """
+        return
         # Message #
         self.parent.log.info("Post-processing results.")
         # Lorem #

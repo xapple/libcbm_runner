@@ -208,7 +208,7 @@ class Runner(object):
         # Free memory #
         if not keep_in_ram: self.simulation.clear()
         # Post-processing #
-        pass
+        self.post_processor()
         # Messages #
         self.timer.print_end()
         self.timer.print_total_elapsed()

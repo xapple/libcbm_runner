@@ -19,7 +19,7 @@ from libcbm_runner.core.continent import continent
 ###############################################################################
 class ClassifierRenamer(object):
     """
-    `Forest type` becomes `forest_type`.
+    `Forest type` becomes `forest_type` etc.
 
     """
 
