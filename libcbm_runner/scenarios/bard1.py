@@ -29,8 +29,9 @@ from libcbm_runner.core.runner import Runner
 
 ###############################################################################
 class Bard1(Scenario):
-    """ This scenario represents the combination of 
-        base, afforestation, reforestation and deforestation version one.
+    """
+    This scenario represents the combination of base, afforestation,
+    reforestation and deforestation -- version one.
     """
     short_name = 'bard'
 
@@ -45,6 +46,7 @@ class Bard1(Scenario):
 
 ###############################################################################
 class Bard1Runner(Runner):
+    #TODO remove duplicated code bellow
 
     overwrite_csv = ['inventory', 'transitions', 'growth_curves']
 
