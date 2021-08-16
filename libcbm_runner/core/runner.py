@@ -71,6 +71,7 @@ class Runner(object):
         self.scenario = scenario
         self.country  = country
         self.num      = num
+        self.num_timesteps = self.set_num_timesteps
         # How to reference this runner #
         self.short_name  = self.scenario.short_name + '/'
         self.short_name += self.country.iso2_code + '/'
@@ -165,11 +166,10 @@ class Runner(object):
         return msg
 
     @property
-    def num_timesteps(self):
+    def set_num_timesteps(self):
         """
-        Compute the number of years we have to run the simulation for.
-        To do this, we simply select the disturbance with the highest
-        timestep.
+        Compute the default number of years we have to run the simulation for.
+        To do this, we select the disturbance with the highest time step.
         """
         # Load #
         df = self.input_data.load('events')

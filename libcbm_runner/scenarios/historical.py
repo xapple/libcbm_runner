@@ -42,7 +42,7 @@ class HistoricalRunner(Runner):
     """
 
     @property
-    def num_timesteps(self):
+    def set_num_timesteps(self):
         """
         Compute the number of years we have to run the simulation for.
         Print all resulting years:
@@ -51,7 +51,7 @@ class HistoricalRunner(Runner):
             >>> scen = continent.scenarios['historical']
             >>> for code, steps in scen.runners.items():
             >>>     r = steps[0]
-            >>>     print(code, ': ', r.num_timesteps)
+            >>>     print(code, ': ', r.set_num_timesteps)
         """
         # Retrieve parameters that are country specific #
         base_year      = self.country.base_year
