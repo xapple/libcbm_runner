@@ -6,9 +6,6 @@ Written by Lucas Sinclair and Paul Rougieux.
 
 JRC Biomass Project.
 Unit D1 Bioeconomy.
-
-This scenarios represents a demand that is pre-calculated and is not a
-function of the maximum wood supply (no interaction yet with the GFTM model).
 """
 
 # Built-in modules #
@@ -25,6 +22,10 @@ class Historical(Scenario):
     """
     This scenario simulates the historical period ranging from
     the <country.start_year> until 2015, but no further.
+
+    This scenarios represents a demand that is pre-calculated and is not a
+    function of the maximum wood supply. There is no interaction yet with the
+    GFTM model.
     """
 
     short_name = 'historical'

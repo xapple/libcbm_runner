@@ -7,19 +7,7 @@ Written by Lucas Sinclair and Paul Rougieux.
 JRC Biomass Project.
 Unit D1 Bioeconomy.
 
-This scenario represents the combination of base, afforestation, reforestation
-and deforestation. Version number 1.
 
-To use this scenario
-
-    >>> from libcbm_runner.core.continent import continent
-    >>> scenario = continent.scenarios['ar']
-    >>> r = scenario.runners['AT'][-1]
-    >>> r.run()
-
-Check the output pools
-
-    >>> r.output.load('pools')
 """
 
 # Built-in modules #
@@ -36,8 +24,20 @@ from libcbm_runner.core.runner import Runner
 class Bard1(Scenario):
     """
     This scenario represents the combination of base, afforestation,
-    reforestation and deforestation -- version one.
+    reforestation and deforestation. Version number 1.
+
+    To use this scenario:
+
+        >>> from libcbm_runner.core.continent import continent
+        >>> scenario = continent.scenarios['ar']
+        >>> r = scenario.runners['AT'][-1]
+        >>> r.run()
+
+    Check the output pools:
+
+        >>> r.output.load('pools')
     """
+
     short_name = 'bard'
 
     @property_cached

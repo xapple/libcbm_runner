@@ -6,20 +6,6 @@ Written by Lucas Sinclair and Paul Rougieux.
 
 JRC Biomass Project.
 Unit D1 Bioeconomy.
-
-This scenario represents the additional afforestation.
-
-To use this scenario
-
-    >>> from libcbm_runner.core.continent import continent
-    >>> scenario = continent.scenarios['ar']
-    >>> r = scenario.runners['AT'][-1]
-    >>> r.run()
-
-Check the output pools
-
-    >>> r.output.load('pools')
-
 """
 
 # Built-in modules #
@@ -34,7 +20,20 @@ from libcbm_runner.core.runner import Runner
 
 ###############################################################################
 class Afforestation(Scenario):
-    """This scenario simulates the additional afforestation scenarios."""
+    """
+    This scenario simulates the additional afforestation scenarios.
+
+    To use this scenario
+
+        >>> from libcbm_runner.core.continent import continent
+        >>> scenario = continent.scenarios['ar']
+        >>> r = scenario.runners['AT'][-1]
+        >>> r.run()
+
+    Check the output pools:
+
+        >>> r.output.load('pools')
+    """
 
     short_name = 'afforestation'
     abbreviation = 'ar'

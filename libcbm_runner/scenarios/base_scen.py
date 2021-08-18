@@ -24,8 +24,10 @@ from plumbing.timer import Timer
 class Scenario(object):
     """
     This object represents a harvest and economic scenario.
+
     Each Scenario subclass must define a list of Runner instances as
-    the <self.runners> property.
+    the <self.runners> property. This enables the complete customization of
+    any Runner by the Scenario.
 
     You can run a scenario like this:
 
