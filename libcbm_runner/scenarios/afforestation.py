@@ -49,10 +49,9 @@ class AfforestationRunner(Runner):
         # Overwrite the input events file
         events = self.events_wide_to_long()
         events.to_csv(self.input_data.paths.csv_dir + 'events.csv', index=False)
-
         # Overwrite other input files, only if they are present in the data
         for csv_name in self.overwrite_csv:
-            source = self.scen_orig_dir + 'csv/' + csv_name + '_'
-            source += self.scenario.code + '.csv'
+            source = self.scen_orig_dir + 'csv/' + csv_name + '_' +\
+                     self.scenario.code + '.csv'
             destination = self.input_data.paths.csv_dir + csv_name + '.csv'
             if source.exists: source.copy(destination)
