@@ -13,7 +13,6 @@ Unit D1 Bioeconomy.
 # First party modules #
 from plumbing.cache import property_cached
 
-
 # Internal modules #
 from libcbm_runner.scenarios.base_scen import Scenario
 from libcbm_runner.core.runner import Runner
