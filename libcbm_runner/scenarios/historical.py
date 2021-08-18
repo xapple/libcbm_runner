@@ -4,7 +4,7 @@
 """
 Written by Lucas Sinclair and Paul Rougieux.
 
-JRC biomass Project.
+JRC Biomass Project.
 Unit D1 Bioeconomy.
 
 This scenarios represents a demand that is pre-calculated and is not a
