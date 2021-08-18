@@ -23,7 +23,7 @@ from libcbm_runner.core.continent import continent
 
 The purpose of this notebook is to illustrate how the model is run for various scenarios and for individual coutnries. Each country section gives the possibility to provide country specifics details. Additional methods are provided to explore the output. 
 
-Each runner has an associated log file where information about the run is storred. It it located at `libcbm_data/scenarios/scenario_name/country_iso2_code/0/logs/runner.log`.
+Each runner has an associated log file where information about the run is stored. It is located at `libcbm_data/scenarios/scenario_name/country_iso2_code/0/logs/runner.log`.
 
 
 

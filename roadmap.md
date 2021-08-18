@@ -16,7 +16,7 @@
      'Climatic unit' = climate
      'Conifers/Broadleaves' = con_broad
      'Site index' = site_index
-     'Simulation period (for yields)'] = growth_period
+     'Simulation period (for yields)' = growth_period
 
 - All output variables in snake case
 
