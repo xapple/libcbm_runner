@@ -68,7 +68,7 @@ class Bard1Runner(Runner):
         # Overwrite other input files, only if they are present in the data
         for csv_name in self.overwrite_csv:
             source = self.scen_orig_dir + 'csv/' + csv_name + '_'
-            source += self.scenario.abbreviation + '.csv'
+            source += self.scenario.code+'.csv'
             if source.exists:
                 destination = self.input_data.paths.csv_dir + csv_name + '.csv'
                 source.copy(destination)
