@@ -22,17 +22,6 @@ from libcbm_runner.core.runner import Runner
 class Afforestation(Scenario):
     """
     This scenario simulates the additional afforestation scenarios.
-
-    To use this scenario
-
-        >>> from libcbm_runner.core.continent import continent
-        >>> scenario = continent.scenarios['ar']
-        >>> r = scenario.runners['AT'][-1]
-        >>> r.run()
-
-    Check the output pools:
-
-        >>> r.output.load('pools')
     """
 
     short_name = 'afforestation'
@@ -65,7 +54,7 @@ class AfforestationRunner(Runner):
         # Overwrite other input files, only if they are present in the data
         for csv_name in self.overwrite_csv:
             source = self.scen_orig_dir + 'csv/' + csv_name + '_'
-            source += self.scenario.code+'.csv'
+            source += self.scenario.code + '.csv'
             if source.exists:
                 destination = self.input_data.paths.csv_dir + csv_name + '.csv'
                 source.copy(destination)

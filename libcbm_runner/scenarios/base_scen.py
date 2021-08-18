@@ -34,6 +34,18 @@ class Scenario(object):
         >>> from libcbm_runner.core.continent import continent
         >>> scen = continent.scenarios['historical']
         >>> scen()
+
+    You can run a specific runner from a given country like this:
+
+        >>> from libcbm_runner.core.continent import continent
+        >>> scenario = continent.scenarios['historical']
+        >>> r = scenario.runners['AT'][-1]
+        >>> r.run()
+
+    You can then check the output pools:
+
+        >>> r.output.load('pools')
+
     """
 
     def __init__(self, continent):

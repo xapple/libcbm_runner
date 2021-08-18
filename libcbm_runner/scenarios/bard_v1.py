@@ -25,17 +25,6 @@ class Bard1(Scenario):
     """
     This scenario represents the combination of base, afforestation,
     reforestation and deforestation. Version number 1.
-
-    To use this scenario:
-
-        >>> from libcbm_runner.core.continent import continent
-        >>> scenario = continent.scenarios['ar']
-        >>> r = scenario.runners['AT'][-1]
-        >>> r.run()
-
-    Check the output pools:
-
-        >>> r.output.load('pools')
     """
 
     short_name = 'bard'
@@ -68,7 +57,7 @@ class Bard1Runner(Runner):
         # Overwrite other input files, only if they are present in the data
         for csv_name in self.overwrite_csv:
             source = self.scen_orig_dir + 'csv/' + csv_name + '_'
-            source += self.scenario.code+'.csv'
+            source += self.scenario.code + '.csv'
             if source.exists:
                 destination = self.input_data.paths.csv_dir + csv_name + '.csv'
                 source.copy(destination)

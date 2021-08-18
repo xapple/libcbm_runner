@@ -21,13 +21,6 @@ from libcbm_runner.core.runner import Runner
 class Products(Scenario):
     """
     This scenario simulates the additional products scenarios.
-
-    To use this scenario:
-
-        >>> from libcbm_runner.core.continent import continent
-        >>> scenario = continent.scenarios['products']
-        >>> r = scenario.runners['AT'][-1]
-        >>> r.run()
     """
 
     short_name = 'products'

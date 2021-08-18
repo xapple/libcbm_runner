@@ -248,7 +248,7 @@ class Runner(object):
         """
         # Load the events table
         file_path = self.scen_orig_dir + 'csv/' + 'events_wide_'
-        file_path += self.scenario.code+'.csv'
+        file_path += self.scenario.code + '.csv'
         events_wide = pandas.read_csv(file_path)
         # Reshape from wide to long format
         events_wide["id"] = events_wide.index
