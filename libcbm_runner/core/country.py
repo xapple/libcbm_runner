@@ -107,7 +107,7 @@ class Country(object):
         # Load name mappings #
         selector = all_country_codes['iso2_code'] == self.iso2_code
         # Check that we know about this country #
-        if not any(selector):
+        if not selector.any():
             msg = "The directory '%s' is not a country that is known."
             raise ValueError(msg % self.data_dir)
         # Get the right row #

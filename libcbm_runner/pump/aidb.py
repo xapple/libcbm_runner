@@ -79,7 +79,7 @@ class AIDB(object):
         that all countries can share and that is found in another repository.
         """
         # Check it exists #
-        source = aidb_repo + 'aidb.db'
+        source = DirectoryPath(aidb_repo + 'aidb.db')
         assert source
         # Symlink #
         destin = self.paths.aidb

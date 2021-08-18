@@ -45,8 +45,9 @@ class Scenario(object):
     You can then check the output pools:
 
         >>> r.output.load('pools')
-
     """
+
+    short_name = None
 
     def __init__(self, continent):
         # Save parent #

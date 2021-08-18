@@ -9,7 +9,6 @@ file. Replace '_1' and '_2' with the real classifier names.
 # Built-in modules #
 
 # Third party modules #
-import pandas
 from tqdm import tqdm
 
 # First party modules #
