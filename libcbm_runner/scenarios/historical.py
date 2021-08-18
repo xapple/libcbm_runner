@@ -46,17 +46,17 @@ class HistoricalRunner(Runner):
     scenario.
     """
 
-    @property
-    def set_num_timesteps(self):
+    @property_cached
+    def num_timesteps(self):
         """
         Compute the number of years we have to run the simulation for.
-        Print all resulting years:
+        Print all resulting years for each country:
 
             >>> from libcbm_runner.core.continent import continent
             >>> scen = continent.scenarios['historical']
             >>> for code, steps in scen.runners.items():
-            >>>     r = steps[0]
-            >>>     print(code, ': ', r.set_num_timesteps)
+            >>>     r = steps[-1]
+            >>>     print(code, ': ', r.num_timesteps)
         """
         # Retrieve parameters that are country specific #
         base_year      = self.country.base_year
