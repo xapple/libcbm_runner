@@ -35,8 +35,6 @@
 - Make tables in the AIDB accessible to be loaded as pandas data frames.
 
 Check the old pipeline for methods to merge and prepare disturbance matrix information
-castanea:~/repos/cbmcfs3_runner/cbmcfs3_runner$ ls pump/aidb.py
-
 
 
 ## Dynamic harvest allocation Task
