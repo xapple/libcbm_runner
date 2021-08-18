@@ -19,6 +19,7 @@ from autopaths.auto_paths import AutoPaths
 from cbmcfs3_runner.core.continent import continent
 
 ###############################################################################
+# noinspection DuplicatedCode
 class ClassifierAdder(object):
     """
     This class takes many of the CSV files in "export/" and changes them.

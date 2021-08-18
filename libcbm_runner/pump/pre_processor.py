@@ -45,7 +45,8 @@ class PreProcessor(object):
             self.warn_empty_lines(csv_path)
 
     #------------------------------- Methods ---------------------------------#
-    def warn_empty_lines(self, csv_path):
+    @staticmethod
+    def warn_empty_lines(csv_path):
         """Loads one CSV files and warns if there are any empty lines."""
         # Load from disk #
         df = pandas.read_csv(str(csv_path))
