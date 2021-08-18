@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
+Written by Lucas Sinclair and Paul Rougieux.
+
+JRC biomass Project.
+Unit D1 Bioeconomy.
+
 This scenario represents the additional products.
 
 To use this scenario:

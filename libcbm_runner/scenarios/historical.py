@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
+Written by Lucas Sinclair and Paul Rougieux.
+
+JRC biomass Project.
+Unit D1 Bioeconomy.
+
 This scenarios represents a demand that is pre-calculated and is not a
 function of the maximum wood supply (no interaction yet with the GFTM model).
 """

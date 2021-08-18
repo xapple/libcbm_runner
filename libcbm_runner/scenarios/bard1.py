@@ -2,7 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-This scenario represents the combination of base, afforestation, reforestation and deforestation version one.
+Written by Lucas Sinclair and Paul Rougieux.
+
+JRC biomass Project.
+Unit D1 Bioeconomy.
+
+This scenario represents the combination of base, afforestation, reforestation
+and deforestation. Version number 1.
 
 To use this scenario
 
@@ -14,7 +20,6 @@ To use this scenario
 Check the output pools
 
     >>> r.output.load('pools')
-
 """
 
 # Built-in modules #
