@@ -65,7 +65,8 @@ class InternalData(object):
         # Return #
         return df
 
-    def make_classif_df(self, vals, clfrs):
+    @staticmethod
+    def make_classif_df(vals, clfrs):
         """
         Produces a dataframe useful for joining classifier values to
         other output dataframes. This dataframe looks like this:

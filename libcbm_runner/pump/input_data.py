@@ -19,7 +19,7 @@ from autopaths.auto_paths import AutoPaths
 # Internal modules #
 
 ###############################################################################
-class InputData():
+class InputData:
     """
     This class will provide access to the input data of a Runner
     as several pandas data frames.

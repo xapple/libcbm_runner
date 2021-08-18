@@ -143,7 +143,7 @@ class Country(object):
         """
         return timestep + self.inventory_start_year
 
-    def year_to_timestep(self, year):
+    def year_to_timestep(self, input_year):
         """
         The reverse operation of `timestep_to_year`.
         Will convert a Series containing years such as:
@@ -153,10 +153,11 @@ class Country(object):
 
         Checking the consistency between the 2 functions:
 
+            >>> from libcbm_runner.core.continent import continent
             >>> runner = continent[('historical', 'ZZ', 0)]
             >>> year = runner.country.timestep_to_year([1,2])
             >>> runner.country.year_to_timestep(year)
             array([1, 2])
         """
-        return year - self.inventory_start_year
+        return input_year - self.inventory_start_year
 

@@ -49,8 +49,8 @@ class ComparisonRunner(object):
         >>> path = home + 'repos/libcbm_runner/scripts/comparison/pools.py'
         >>> comp = SourceFileLoader('pools', path).load_module()
         >>> from cbmcfs3_runner.core.continent import continent
-        >>> comparisons = [comp.ComparisonRunner(c) for c in continent]
-        >>> c = comparisons[17]
+        >>> comps = [comp.ComparisonRunner(c) for c in continent]
+        >>> c = comps[17]
         >>> display(c.pools_cbmcfs3)
         >>> display(c.pools_libcbm)
     """

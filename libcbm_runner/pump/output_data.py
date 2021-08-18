@@ -25,8 +25,8 @@ class OutputData(object):
     This class will provide access to the output data of a Runner
     as several pandas data frames.
 
-    >>> print(runner.output.load('pools'))
-    >>> print(runner.output.load('flux'))
+        >>> print(runner.output.load('pools'))
+        >>> print(runner.output.load('flux'))
     """
 
     all_paths = """
