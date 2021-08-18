@@ -54,8 +54,5 @@ class AfforestationRunner(Runner):
         for csv_name in self.overwrite_csv:
             source = self.scen_orig_dir + 'csv/' + csv_name + '_'
             source += self.scenario.code + '.csv'
-            if source.exists:
-                destination = self.input_data.paths.csv_dir + csv_name + '.csv'
-                source.copy(destination)
-            else:
-                print(f"Skipping {source} as the file doesn't exist.")
+            destination = self.input_data.paths.csv_dir + csv_name + '.csv'
+            if source.exists: source.copy(destination)
