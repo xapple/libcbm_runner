@@ -1,35 +1,5 @@
 # Current code improvements
 
-## Improve variable names
-
-- Use lower case names for classifier columns in orig/csv/classifiers.csv
-  as well as in corresponding columns of all input files
-  so that the input data has the same column names as the output data for example  
-  `runner.input_data['events']` should have the same column names as
-  `runner.output.classif_df`.
-
-     'Status' =  status
-     'Forest type' =  forest_type
-     'Region' =  region
-     'Management type' = mgmt_type
-     'Management strategy' = mgmt_strategy
-     'Climatic unit' = climate
-     'Conifers/Broadleaves' = con_broad
-     'Site index' = site_index
-     'Simulation period (for yields)' = growth_period
-
-- All output variables in snake case
-
-- Replace "Input" column to "area" in runner.output.load('area')
-
-- When giving 30 years of disturbances in the input data for the afforestation scenario, 
-  the simulation runs only for 18 years. This could be due to a clause in the historical 
-  scenario that limits the length of the simulation to the current year.
-
-- Move def classif_df(self): from pump/output_data to an object that belongs to the 
-  runner
-
-
 ## AIDB to pandas
 
 - Make tables in the AIDB accessible to be loaded as pandas data frames.
@@ -55,7 +25,6 @@ Check the old pipeline for methods to merge and prepare disturbance matrix infor
 
 - Fix version of autopaths and plumbing dependencies
 
-
 - Would it make sense to make sit available before the simulation run?  i.e. Create a
   SIT object before the run method? Maybe it doesn't make sense. An alternative would be
   to decompose the run in 2 one that prepares the run and one that actually calls the
@@ -76,8 +45,15 @@ and because soil decomposition parameters are different.
   want only one AIDB, there needs to be a mechanism to changes those soil decomposition
   parameters for all countries.
 
-# Done
 
+## Wontfix
+
+Clarify the meaning of this
+- Move def classif_df(self): from pump/output_data to an object that belongs to the 
+  runner
+
+
+# Done
 
 ## Bring libcbm_runner to feature parity with cbmcfs3_runner
 
@@ -126,3 +102,34 @@ and because soil decomposition parameters are different.
   Example of print statements providing information on the status of the run available
   on this old commit
   [ab62642d6bcb](https://gitlab.com/bioeconomy/libcbm/libcbm_runner/-/commit/ab62642d6bcb13e88f79973814f9a4735f7a2cbf).
+
+
+## Lower case variable names
+
+## Improve variable names 
+
+Mostly done in August 2021
+
+- Use lower case names for classifier columns in orig/csv/classifiers.csv
+  as well as in corresponding columns of all input files
+  so that the input data has the same column names as the output data for example  
+  `runner.input_data['events']` should have the same column names as
+  `runner.output.classif_df`.
+
+     'Status' =  status
+     'Forest type' =  forest_type
+     'Region' =  region
+     'Management type' = mgmt_type
+     'Management strategy' = mgmt_strategy
+     'Climatic unit' = climate
+     'Conifers/Broadleaves' = con_broad
+     'Site index' = site_index
+     'Simulation period (for yields)' = growth_period
+
+- All output variables in snake case
+
+- Replace "Input" column to "area" in runner.output.load('area')
+
+- When giving 30 years of disturbances in the input data for the afforestation scenario, 
+  the simulation runs only for 18 years. This could be due to a clause in the historical 
+  scenario that limits the length of the simulation to the current year.
