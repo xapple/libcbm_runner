@@ -6,6 +6,20 @@
 - Check between libcbm_runner and cbmcfs3_data scenario of the static demand the
   remaining inconsistency of pools specifically for the DOM and soil pools
 
+  For some reason the AIDB of cbmcfs3 (latest aidb from online) contains different values for the following turnovers:
+
+        cbmcfs3	libcbm
+    SoftwoodBranchTurnOverRate	0.0400000000000	0.0115000000224
+    HardwoodBranchTurnOverRate	0.0400000000000	0.0115000000224
+
+Moreover, for some reason libcbm only shows an unique value of “stem & branch to snag” for both softwoods and hardwoods.
+
+        cbmcfs3	libcbm
+    SoftwoodStemSnagToDOM	0.032000000000	0.032000002
+    HardwoodStemSnagToDOM	0.032000000000	equal to above
+    SoftwoodBranchSnagToDOM	0.100000000000	0.100000001
+    HardwoodBranchSnagToDOM	0.100000000000	equal to above
+
 
 # Current code improvements
 
