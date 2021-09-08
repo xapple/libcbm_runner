@@ -1,10 +1,19 @@
+# Bring libcbm_runner to feature parity with cbmcfs3_runner
+
+- Show comparison of output pool from cbmcfs3 and libcbm. To illustrate the 
+  similarities.
+
+- Check between libcbm_runner and cbmcfs3_data scenario of the static demand the
+  remaining inconsistency of pools specifically for the DOM and soil pools
+
+
 # Current code improvements
 
-## AIDB to pandas
+## Scenarios
 
-- Make tables in the AIDB accessible to be loaded as pandas data frames.
+- Mechanism to combine various elementary scenarios into a scenario
 
-Check the old pipeline for methods to merge and prepare disturbance matrix information
+- Comparison of scenario outputs
 
 
 ## Dynamic harvest allocation Task
@@ -12,28 +21,44 @@ Check the old pipeline for methods to merge and prepare disturbance matrix infor
 - Add a mechanism for the dynamic harvest allocation
 
 
-## Bring libcbm_runner to feature parity with cbmcfs3_runner
 
-- Check between libcbm_runner and cbmcfs3_data scenario of the static demand the
-  remaining inconsistency of pools specifically for the DOM and soil pools
+
+# QAQC Quality assurance quality control
+
+## Pre processing
+
+- Method to compare input data across scenarios
+
+
+## Post processing
+
+- Harvest requested and harvested allocated
 
 
 # Future code improvements
 
+- Fix version of autopaths and plumbing dependencies
+
+- To provide access to the input data, would it make sense to make sit available before 
+  the simulation run?  i.e. Create a SIT object before the run method? Maybe it doesn't 
+  make sense. An alternative would be to decompose the run in 2 one that prepares the 
+  run and one that actually calls the simulator? That's mostly useful for debugging 
+  anyway.
+
+    self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config), db_path=str(db_path))
+
+
+## AIDB 
+
 - Better error message in the case where the AIDB is absent (or an empty symbolic link).
   Current message is table species missing.
 
-- Fix version of autopaths and plumbing dependencies
+Scenarios changing parameters in the AIDB
 
-- Would it make sense to make sit available before the simulation run?  i.e. Create a
-  SIT object before the run method? Maybe it doesn't make sense. An alternative would be
-  to decompose the run in 2 one that prepares the run and one that actually calls the
-  simulator? That's mostly useful for debugging anyway.
+- Changing soil decomposition parameters before the model run for the purpose of a given 
+  scenario.
 
-        self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config), db_path=str(db_path))
-
-
-## AIDB harmonization (long term)
+Harmonization (long term)
 
 There are many AIDB because disturbances have different meaning in different countries
 and because soil decomposition parameters are different.
@@ -45,12 +70,6 @@ and because soil decomposition parameters are different.
   want only one AIDB, there needs to be a mechanism to changes those soil decomposition
   parameters for all countries.
 
-
-## Wontfix
-
-Clarify the meaning of this
-- Move def classif_df(self): from pump/output_data to an object that belongs to the 
-  runner
 
 
 # Done
@@ -133,3 +152,8 @@ Mostly done in August 2021
 - When giving 30 years of disturbances in the input data for the afforestation scenario, 
   the simulation runs only for 18 years. This could be due to a clause in the historical 
   scenario that limits the length of the simulation to the current year.
+
+AIDB to pandas done in  August 2021
+
+- Make tables in the AIDB accessible to be loaded as pandas data frames.
+
