@@ -111,6 +111,15 @@ class OutputData(object):
         df = self[name]
         # Optionally join classifiers #
         cols = ['identifier', 'timestep']
-        if with_clfrs: df = df.merge(self.classif_df, 'left', cols)
-        # Return #
+        if with_clfrs:
+            # Add classifiers
+            df = df.merge(self.classif_df, 'left', cols)
+        # Add year if there is a timestep column
+        if 'timestep' in df.columns:
+            df['year'] = self.runner.country.timestep_to_year(df['timestep'])
+        ## Add age class information to merge with inventory
+        if 'age' in df.columns:
+            df['age_class'] = df.age//10 + 1
+            df['age_class'] = 'AGEID' + df.age_class.astype(str)
+        ## Return #
         return df
