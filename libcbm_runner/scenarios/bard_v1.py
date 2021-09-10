@@ -23,6 +23,7 @@ from plumbing.cache import property_cached
 # Internal modules #
 from libcbm_runner.scenarios.base_scen import Scenario
 from libcbm_runner.core.runner import Runner
+import pandas
 
 ###############################################################################
 class BardV1(Scenario):
@@ -50,11 +51,31 @@ class BardV1Runner(Runner):
 
     def modify_input(self):
         """
-        We would like to append input files to the base scenario with additional details
+        We would like to append events files to the base scenario with additional details
         afforestation versions.
+        We also need to append inventory, growth and transition rules
         """
-        # Concatenate events file
-        events = self.events_wide_to_long()
+        # Parameters
+        afforestation_sub_scenario = "baseline"
+        deforestation_sub_scenario = "baseline"
+        # Base events
+        file_path = self.country.data_dir + "orig/csv/events.csv"
+        events_base = pandas.read_csv(file_path)
+
+        # Afforestation events
+        file_path = self.country.data_dir + "afforestation/csv/events_wide_ar.csv"
+        events_ar_wide = (pandas.read_csv(file_path)
+                          .query(scenario == afforestation_sub_scenario))
+        # Keep only one scenario
+        events_ar = self.events_wide_to_long(events_ar_wide)
+
+        # Deforestation events
+        file_path = self.country.data_dir + "deforestation/csv/events_wide_d.csv"
+        events_d_wide = pandas.read_csv(file_path)
+        events_d = self.events_wide_to_long(events_d_wide)
+
+        # Concatenate events files
+        events = pandas.concat([events_base, events_ar, events_d])
 
         # Write to csv
         events.to_csv(self.input_data.paths.csv_dir + 'events.csv', index=False)
