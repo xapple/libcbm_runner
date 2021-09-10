@@ -9,7 +9,6 @@ Unit D1 Bioeconomy.
 """
 
 # Built-in modules #
-import warnings
 
 # Third party modules #
 import pandas
@@ -42,12 +41,15 @@ class PreProcessor(object):
         for item in self.input.paths._paths:
             csv_path = item.path_obj
             if csv_path.extension != 'csv': continue
-            self.warn_empty_lines(csv_path)
+            self.raise_empty_lines(csv_path)
 
     #------------------------------- Methods ---------------------------------#
     @staticmethod
-    def warn_empty_lines(csv_path):
-        """Loads one CSV files and warns if there are any empty lines."""
+    def raise_empty_lines(csv_path):
+        """
+        Loads one CSV files and raise an exception if there are any empty
+        lines.
+        """
         # Load from disk #
         df = pandas.read_csv(str(csv_path))
         # Get empty lines #
@@ -56,5 +58,4 @@ class PreProcessor(object):
         if not any(empty_lines): return
         # Warn #
         msg = "The file '%s' has %i empty lines."
-        warnings.warn(msg % (csv_path, empty_lines.sum()))
-        return empty_lines
+        raise Exception(msg % (csv_path, empty_lines.sum()))
