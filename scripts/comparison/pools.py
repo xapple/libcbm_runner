@@ -138,10 +138,10 @@ class ComparisonRunner(object):
         cbmcfs3 = cbmcfs3.query(f"timestep <= {max_timestep}")
         # Aggregate both into total carbon, abbreviated `tc` #
         libcbm  = libcbm.groupby(['pool', 'timestep'])
-        libcbm  = libcbm.agg(tc_libcbm = ('tc', sum))
+        libcbm  = libcbm.agg(tc_libcbm=('tc', sum), area=('area', sum))
         libcbm  = libcbm.reset_index()
         cbmcfs3 = cbmcfs3.groupby(['pool', 'timestep'])
-        cbmcfs3 = cbmcfs3.agg(tc_cbmcfs3 = ('tc', sum))
+        cbmcfs3 = cbmcfs3.agg(tc_cbmcfs3=('tc', sum))
         cbmcfs3 = cbmcfs3.reset_index()
         # Load the mapping of the pools names between the two versions #
         from cbmcfs3_runner.pump.libcbm_mapping import libcbm_mapping
@@ -157,14 +157,18 @@ class ComparisonRunner(object):
         df = libcbm.merge(cbmcfs3, 'outer', ['pool_libcbm', 'timestep'])
         # Drop rows if any NaN values in two columns #
         df = df.dropna(subset=['pool_libcbm', 'pool_cbmcfs3'])
-        # Compute difference #
-        df['diff'] = df['tc_libcbm'] - df['tc_cbmcfs3']
-        # Compute proportion #
-        df['prop'] = (df['tc_libcbm'] / df['tc_cbmcfs3']) - 1
+        # Compute difference between the two models #
+        df['tc_diff_tot'] = df['tc_libcbm'] - df['tc_cbmcfs3']
+        # Add a column showing the mass per hectare for libcbm values #
+        df['tc_per_ha'] = df['tc_libcbm'] / df['area']
+        # Compute per hectare total difference #
+        df['tc_diff_per_ha'] = df['tc_diff_tot'] / df['area']
+        # Compute proportion in percent #
+        df['diff_perc'] = 100 * ((df['tc_libcbm'] / df['tc_cbmcfs3']) - 1)
         # Optionally sort based on the proportion #
-        if self.prop_sorted: df = df.sort_values('prop')
+        if self.prop_sorted: df = df.sort_values('diff_perc')
         # If both the percent diff and absolute diff are both high, mark it #
-        df['problems'] = (df['prop'] > 1) & (df['diff'] > 1)
+        df['problems'] = (df['tc_diff_tot'] > 1) & (df['diff_perc'] > 1)
         df['problems'] = df['problems'].replace({False: '', True: '**'})
         # Return #
         return df
