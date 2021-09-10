@@ -193,7 +193,7 @@ class Bundle:
         self.base_dir = DirectoryPath(base_dir)
         # Default if none specified #
         if archive is None: archive = self.base_dir.path[:-1] + '.zip'
-        # Where the zip archive will be placed #
+        # Where the zip archiVE WIll be placed #
         self.archive = FilePath(archive)
 
     #------------------------------- Methods ---------------------------------#

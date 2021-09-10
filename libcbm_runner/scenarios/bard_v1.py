@@ -32,6 +32,7 @@ class BardV1(Scenario):
     """
 
     short_name = 'bard'
+    code = short_name
 
     @property_cached
     def runners(self):
@@ -51,12 +52,11 @@ class BardV1Runner(Runner):
         """
         We would like to append input files to the base scenario with additional details
         afforestation versions.
-
-
         """
-        # A scenario always has at least an events file
-        # Overwrite the input events file
+        # Concatenate events file
         events = self.events_wide_to_long()
+
+        # Write to csv
         events.to_csv(self.input_data.paths.csv_dir + 'events.csv', index=False)
         # Append to the base file
         for csv_name in self.overwrite_csv:
