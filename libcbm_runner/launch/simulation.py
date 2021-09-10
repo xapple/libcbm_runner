@@ -47,7 +47,6 @@ class Simulation(object):
         classifier value of each inventory record.
         """
         # Check the timestep #
-        self.parent.log.info(f"Time step {timestep}")
         if timestep == 1:
             msg = "Carbon pool initialization period is finished." \
                   " Now starting the current period."
@@ -58,6 +57,8 @@ class Simulation(object):
             id_of_cur = self.sit.classifier_value_ids[key]["Cur"]
             # Modify the whole column of the dataframe #
             cbm_vars.classifiers[key] = id_of_cur
+        # Print a message #
+        self.parent.log.info(f"Time step {timestep} is about to run.")
         # Return #
         return self.rule_based_processor.pre_dynamic_func(timestep, cbm_vars)
 
