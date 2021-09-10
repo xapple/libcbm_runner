@@ -245,6 +245,7 @@ class Runner(object):
         """
         Reshape disturbance events from wide to long format.
         #TODO move this method out of the runner. It is specific to scenarios.
+        # Or should it stay in the runner? This is a preprocessing step
         """
         # Load the events table
         file_path = self.scen_orig_dir + 'csv/' + 'events_wide_'
