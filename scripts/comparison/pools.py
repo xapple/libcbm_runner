@@ -107,8 +107,8 @@ class ComparisonRunner(object):
     @property
     def pools_cbmcfs3(self):
         # Load #
-        post = self.runner_cbmcfs3.post_processor
-        result = post.pool_indicators_long
+        post_proc = self.runner_cbmcfs3.post_processor
+        result    = post_proc.pool_indicators_long
         # Rename columns #
         result = result.rename(columns={'time_step': 'timestep'})
         # Return #
@@ -117,8 +117,8 @@ class ComparisonRunner(object):
     @property
     def pools_libcbm(self):
         # Load #
-        result = self.runner_libcbm.output['pools']
-        id_vars = ['identifier', 'timestep', 'Input']
+        result  = self.runner_libcbm.output['pools']
+        id_vars = ['identifier', 'timestep', 'area']
         # Unpivot #
         result = result.melt(id_vars    = id_vars,
                              var_name   = 'pool',
@@ -127,6 +127,7 @@ class ComparisonRunner(object):
         return result
 
     #----------- Joined ------------#
+    prop_sorted = False
     @property_cached
     def df(self):
         # Load #
@@ -160,6 +161,11 @@ class ComparisonRunner(object):
         df['diff'] = df['tc_libcbm'] - df['tc_cbmcfs3']
         # Compute proportion #
         df['prop'] = (df['tc_libcbm'] / df['tc_cbmcfs3']) - 1
+        # Optionally sort based on the proportion #
+        if self.prop_sorted: df = df.sort_values('prop')
+        # If both the percent diff and absolute diff are both high, mark it #
+        df['problems'] = (df['prop'] > 1) & (df['diff'] > 1)
+        df['problems'] = df['problems'].replace({False: '', True: '**'})
         # Return #
         return df
 
@@ -193,7 +199,7 @@ class Bundle:
         self.base_dir = DirectoryPath(base_dir)
         # Default if none specified #
         if archive is None: archive = self.base_dir.path[:-1] + '.zip'
-        # Where the zip archiVE WIll be placed #
+        # Where the zip archive will be placed #
         self.archive = FilePath(archive)
 
     #------------------------------- Methods ---------------------------------#
@@ -229,13 +235,12 @@ class Bundle:
 ###############################################################################
 if __name__ == '__main__':
     # Skip these countries #
-    skip = ['ES', 'HR', 'HU', 'IE', 'IT', 'LT', 'PT', 'RO', 'GB', 'ZZ']
+    skip = ['GB', 'ZZ']
     # Make comparisons objects, one per country #
     comparisons = [ComparisonRunner(c) for c in cbmcfs3_continent
                    if c.iso2_code not in skip]
     # Run them all #
-    for compare in tqdm(comparisons):
-        compare()
+    for compare in tqdm(comparisons): compare()
     # Bundle them #
     bundle = Bundle(comparisons, '~/test/libcbm_comp/')
     bundle()
