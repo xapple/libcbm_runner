@@ -127,7 +127,7 @@ class ComparisonRunner(object):
         return result
 
     #----------- Joined ------------#
-    prop_sorted = False
+    sorted = True
     @property_cached
     def df(self):
         # Load #
@@ -157,6 +157,9 @@ class ComparisonRunner(object):
         df = libcbm.merge(cbmcfs3, 'outer', ['pool_libcbm', 'timestep'])
         # Drop rows if any NaN values in two columns #
         df = df.dropna(subset=['pool_libcbm', 'pool_cbmcfs3'])
+        # Drop rows if both carbon totals are zero #
+        both_zeros = (df['tc_cbmcfs3'] == 0) & (df['tc_libcbm'] == 0)
+        df = df.drop(~both_zeros)
         # Compute difference between the two models #
         df['tc_diff_tot'] = df['tc_libcbm'] - df['tc_cbmcfs3']
         # Add a column showing the mass per hectare for libcbm values #
@@ -166,7 +169,7 @@ class ComparisonRunner(object):
         # Compute proportion in percent #
         df['diff_perc'] = 100 * ((df['tc_libcbm'] / df['tc_cbmcfs3']) - 1)
         # Optionally sort based on the proportion #
-        if self.prop_sorted: df = df.sort_values('diff_perc')
+        if self.sorted: df = df.sort_values('tc_per_ha')
         # If both the percent diff and absolute diff are both high, mark it #
         df['problems'] = (df['tc_diff_tot'] > 1) & (df['diff_perc'] > 1)
         df['problems'] = df['problems'].replace({False: '', True: '**'})
@@ -181,7 +184,7 @@ class ComparisonRunner(object):
             # Loop over every timestep #
             for i, group in self.df.groupby('timestep'):
                 handle.write("### Time step %s\n" % i)
-                data = group.to_string(index=False, float_format='%g')
+                data = group.to_string(index=False, float_format='%.2f')
                 data = textwrap.indent(data, '    ')
                 handle.write(data + '\n')
         # Return #
