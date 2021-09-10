@@ -6,12 +6,21 @@ Written by Lucas Sinclair and Paul Rougieux.
 
 JRC Biomass Project.
 Unit D1 Bioeconomy.
+
+    >>> from libcbm_runner.core.continent import continent
+    >>> scenario = continent.scenarios['afforestation']
+    >>> runner   = scenario.runners['LU'][0]
+    >>> runner.run()
+
 """
 
 # Built-in modules #
 
 # First party modules #
 from plumbing.cache import property_cached
+
+# Third party modules
+import pandas
 
 # Internal modules #
 from libcbm_runner.scenarios.base_scen import Scenario
@@ -46,7 +55,11 @@ class AfforestationRunner(Runner):
         """
         # A scenario always has at least an events file
         # Overwrite the input events file
-        events = self.events_wide_to_long()
+        # Load the events table
+        file_path = self.scen_orig_dir + 'csv/' + 'events_wide_'
+        file_path += self.scenario.code + '.csv'
+        events_wide = pandas.read_csv(file_path)
+        events = self.events_wide_to_long(events_wide)
         events.to_csv(self.input_data.paths.csv_dir + 'events.csv', index=False)
         # Overwrite other input files, only if they are present in the data
         for csv_name in self.overwrite_csv:

@@ -241,16 +241,15 @@ class Runner(object):
     def get_orig_data(self):
         return self.input_data.copy_orig_from_country()
 
-    def events_wide_to_long(self):
+    def events_wide_to_long(self, events_wide):
         """
         Reshape disturbance events from wide to long format.
         #TODO move this method out of the runner. It is specific to scenarios.
         # Or should it stay in the runner? This is a preprocessing step
+
+        This events_wide_to_long is a method with an events data frame as an argument so
+        that it can reshape several events files for combined scenarios.
         """
-        # Load the events table
-        file_path = self.scen_orig_dir + 'csv/' + 'events_wide_'
-        file_path += self.scenario.code + '.csv'
-        events_wide = pandas.read_csv(file_path)
         # Reshape from wide to long format
         events_wide["id"] = events_wide.index
         events = pandas.wide_to_long(events_wide,
