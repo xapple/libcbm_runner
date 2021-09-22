@@ -159,7 +159,7 @@ class ComparisonRunner(object):
         df = df.dropna(subset=['pool_libcbm', 'pool_cbmcfs3'])
         # Drop rows if both carbon totals are zero #
         both_zeros = (df['tc_cbmcfs3'] == 0) & (df['tc_libcbm'] == 0)
-        df = df.drop(~both_zeros)
+        df = df.drop(both_zeros.index)
         # Compute difference between the two models #
         df['tc_diff_tot'] = df['tc_libcbm'] - df['tc_cbmcfs3']
         # Add a column showing the mass per hectare for libcbm values #
@@ -169,7 +169,7 @@ class ComparisonRunner(object):
         # Compute proportion in percent #
         df['diff_perc'] = 100 * ((df['tc_libcbm'] / df['tc_cbmcfs3']) - 1)
         # Optionally sort based on the proportion #
-        if self.sorted: df = df.sort_values('tc_per_ha')
+        if self.sorted: df = df.sort_values('tc_per_ha', ascending=False)
         # If both the percent diff and absolute diff are both high, mark it #
         df['problems'] = (df['tc_diff_tot'] > 1) & (df['diff_perc'] > 1)
         df['problems'] = df['problems'].replace({False: '', True: '**'})
