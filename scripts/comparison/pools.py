@@ -41,7 +41,7 @@ class ComparisonRunner(object):
 
         >>> pools_libcbm['pool'].unique()
 
-    To use this class you can do:
+    To use this class you can do the following to look at just one country:
 
         >>> import os
         >>> home = os.environ.get('HOME', '~') + '/'
