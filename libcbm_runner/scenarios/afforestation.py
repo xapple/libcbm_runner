@@ -31,8 +31,9 @@ class Afforestation(Scenario):
     """
     This scenario simulates the additional afforestation scenarios.
     """
+
     short_name = 'afforestation'
-    code = 'ar'
+    code       = 'ar'
 
     @property_cached
     def runners(self):
@@ -45,7 +46,8 @@ class Afforestation(Scenario):
 
 ###############################################################################
 class AfforestationRunner(Runner):
-    """Modification of the runner to enable overwriting the input data"""
+    """Modification of the runners to enable overwriting the input data."""
+
     overwrite_csv = ['inventory', 'transitions', 'growth_curves']
 
     def modify_input(self):

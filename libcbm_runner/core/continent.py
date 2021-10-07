@@ -52,8 +52,9 @@ class Continent(object):
         self.base_dir = base_dir
         # Automatically access paths based on a string of many subpaths #
         self.paths = AutoPaths(libcbm_data_dir, self.all_paths)
-        # Where the data will be stored for this run #
+        # Where the input data will be stored #
         self.countries_dir = self.paths.countries_dir
+        # Where the output data will be stored #
         self.scenarios_dir = self.paths.scenarios_dir
 
     def __repr__(self):

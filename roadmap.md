@@ -1,12 +1,10 @@
 # Bring libcbm_runner to feature parity with cbmcfs3_runner
 
-- Show comparison of output pool from cbmcfs3 and libcbm. To illustrate the 
-  similarities.
+- Show comparison of output pool from cbmcfs3 and libcbm. To illustrate the similarities.
 
-- Check between libcbm_runner and cbmcfs3_data scenario of the static demand the
-  remaining inconsistency of pools specifically for the DOM and soil pools
+- Check between libcbm_runner and cbmcfs3_data scenario of the static demand the remaining inconsistency of pools specifically for the DOM and soil pools
 
-  For some reason the AIDB of cbmcfs3 (latest aidb from online) contains different values for the following turnovers:
+For some reason the AIDB of cbmcfs3 (latest AIDB from online) contains different values for the following turnovers:
 
                                        cbmcfs3	libcbm
     SoftwoodBranchTurnOverRate	0.0400000000000	0.0115000000224
@@ -40,11 +38,9 @@ HAT (Harvest Allocation Tool)
 
 - Deduce the amount generated fro the amount requested by the economic model
 
+# Quality assurance and quality control (QA/QC)
 
-
-# QAQC Quality assurance quality control
-
-## Pre processing
+## Pre-processing
 
 - Method to compare input data across scenarios
 
@@ -54,28 +50,42 @@ HAT (Harvest Allocation Tool)
 - Harvest requested and harvested allocated
 
 
-
-## AIDB 
-
-- Better error message in the case where the AIDB is absent (or an empty symbolic link).
-  Current message is table species missing.
+## AIDB
 
 Scenarios changing parameters in the AIDB
 
-- Changing soil decomposition parameters before the model run for the purpose of a given 
-  scenario.
+- Changing soil decomposition parameters before the model run for the purpose of a given scenario.
 
-Harmonization (long term)
 
-There are many AIDB because disturbances have different meaning in different countries
-and because soil decomposition parameters are different.
+## Harmonization of AIDB (long term)
 
-- Differences in disturbance definition could be harmonized with a naming scheme and a
-  single AIDB for all EU.
+There are many AIDB because disturbances have different meaning in different countries and because soil decomposition parameters are different.
 
-- But the soil decomposition parameters are not part of the input data. So if we really
-  want only one AIDB, there needs to be a mechanism to changes those soil decomposition
-  parameters for all countries.
+- Differences in disturbance definition could be harmonized with a naming scheme and a single AIDB for all EU.
+
+- But the soil decomposition parameters are not part of the input data. So if we really want only one AIDB, there needs to be a mechanism to changes those soil decomposition parameters for all countries.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Current solution is to use one AIDB dfor each country.
 - Proposed solution would be to have a common AIDB, with country specific parameters  
@@ -92,6 +102,11 @@ Current solution is to use one AIDB dfor each country.
 
 
 # Done
+
+## AIDB
+
+- Better error message in the case where the AIDB is absent (or an empty symbolic link).
+  Current message is table species missing.
 
 ## Bring libcbm_runner to feature parity with cbmcfs3_runner
 
@@ -144,13 +159,13 @@ Current solution is to use one AIDB dfor each country.
 
 ## Lower case variable names
 
-## Improve variable names 
+## Improve variable names
 
 Mostly done in August 2021
 
 - Use lower case names for classifier columns in orig/csv/classifiers.csv
   as well as in corresponding columns of all input files
-  so that the input data has the same column names as the output data for example  
+  so that the input data has the same column names as the output data for example
   `runner.input_data['events']` should have the same column names as
   `runner.output.classif_df`.
 
@@ -168,8 +183,8 @@ Mostly done in August 2021
 
 - Replace "Input" column to "area" in runner.output.load('area')
 
-- When giving 30 years of disturbances in the input data for the afforestation scenario, 
-  the simulation runs only for 18 years. This could be due to a clause in the historical 
+- When giving 30 years of disturbances in the input data for the afforestation scenario,
+  the simulation runs only for 18 years. This could be due to a clause in the historical
   scenario that limits the length of the simulation to the current year.
 
 AIDB to pandas done in  August 2021

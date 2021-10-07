@@ -29,19 +29,7 @@ class ComparisonRunner(object):
     This class can compare the results of european forest simulations
     between the new `libcbm` libarary and the old windows CBM-CFS3 software.
 
-    To access the results instead of doing:
-
-        >>> pools_libcbm_wide = runner_libcbm.simulation.results.pools
-
-    You can do:
-
-        >>> pools_libcbm_wide = runner_libcbm.output['pools']
-
-    To check the number of pools:
-
-        >>> pools_libcbm['pool'].unique()
-
-    To use this class you can do:
+    To use this class you can do the following to look at just one country:
 
         >>> import os
         >>> home = os.environ.get('HOME', '~') + '/'
@@ -50,7 +38,7 @@ class ComparisonRunner(object):
         >>> comp = SourceFileLoader('pools', path).load_module()
         >>> from cbmcfs3_runner.core.continent import continent
         >>> comps = [comp.ComparisonRunner(c) for c in continent]
-        >>> c = comps[17]
+        >>> c = comps[16]
         >>> display(c.pools_cbmcfs3)
         >>> display(c.pools_libcbm)
     """
@@ -82,7 +70,7 @@ class ComparisonRunner(object):
     def title(self):
         msg = "# %s (%s)\n"
         msg = msg % (self.cbmcfs3_country.country_name, self.iso2_code)
-        msg = msg + "## Comparing libcbm -vs- cbmcfs3 \n\n"
+        msg = msg + "## Comparing `libcbm` -vs- `cbmcfs3` \n\n"
         return msg
 
     #--------- Scenarios ----------#
@@ -136,10 +124,11 @@ class ComparisonRunner(object):
         # Filter years from cbmcfs3 #
         max_timestep = libcbm['timestep'].max()
         cbmcfs3 = cbmcfs3.query(f"timestep <= {max_timestep}")
-        # Aggregate both into total carbon, abbreviated `tc` #
+        # Aggregate libcbm into total carbon, abbreviated `tc` #
         libcbm  = libcbm.groupby(['pool', 'timestep'])
         libcbm  = libcbm.agg(tc_libcbm=('tc', sum), area=('area', sum))
         libcbm  = libcbm.reset_index()
+        # Aggregate cbmcfs3 into total carbon, abbreviated `tc` #
         cbmcfs3 = cbmcfs3.groupby(['pool', 'timestep'])
         cbmcfs3 = cbmcfs3.agg(tc_cbmcfs3=('tc', sum))
         cbmcfs3 = cbmcfs3.reset_index()
@@ -155,11 +144,11 @@ class ComparisonRunner(object):
         cbmcfs3 = cbmcfs3.merge(name_map, 'left', 'pool_cbmcfs3')
         # Join #
         df = libcbm.merge(cbmcfs3, 'outer', ['pool_libcbm', 'timestep'])
-        # Drop rows if any NaN values in two columns #
+        # Drop rows if any NaN values in these two columns #
         df = df.dropna(subset=['pool_libcbm', 'pool_cbmcfs3'])
         # Drop rows if both carbon totals are zero #
         both_zeros = (df['tc_cbmcfs3'] == 0) & (df['tc_libcbm'] == 0)
-        df = df.drop(~both_zeros)
+        df = df.drop(df[both_zeros].index)
         # Compute difference between the two models #
         df['tc_diff_tot'] = df['tc_libcbm'] - df['tc_cbmcfs3']
         # Add a column showing the mass per hectare for libcbm values #
@@ -169,10 +158,13 @@ class ComparisonRunner(object):
         # Compute proportion in percent #
         df['diff_perc'] = 100 * ((df['tc_libcbm'] / df['tc_cbmcfs3']) - 1)
         # Optionally sort based on the proportion #
-        if self.sorted: df = df.sort_values('tc_per_ha')
+        if self.sorted: df = df.sort_values('tc_per_ha', ascending=False)
         # If both the percent diff and absolute diff are both high, mark it #
-        df['problems'] = (df['tc_diff_tot'] > 1) & (df['diff_perc'] > 1)
-        df['problems'] = df['problems'].replace({False: '', True: '**'})
+        df['discrep'] = (df['tc_diff_tot'].abs() > 1) & \
+                        (df['diff_perc'].abs()   > 1)
+        df['discrep'] = df['discrep'].replace({False: '', True: '**'})
+        # Put the area column first #
+        df = df[['area'] + [col for col in df.columns if col != 'area']]
         # Return #
         return df
 
@@ -184,9 +176,10 @@ class ComparisonRunner(object):
             # Loop over every timestep #
             for i, group in self.df.groupby('timestep'):
                 handle.write("### Time step %s\n" % i)
-                data = group.to_string(index=False, float_format='%.2f')
-                data = textwrap.indent(data, '    ')
-                handle.write(data + '\n')
+                df = group.drop(columns='timestep')
+                df = df.to_string(index=False, float_format='%.2f')
+                df = textwrap.indent(df, '    ')
+                handle.write(df + '\n')
         # Return #
         return self.paths.pools
 

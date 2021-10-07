@@ -48,13 +48,16 @@ class Simulation(object):
         """
         # Check the timestep #
         if timestep == 1:
+            # Print message #
             msg = "Carbon pool initialization period is finished." \
                   " Now starting the current period."
             self.parent.log.info(msg)
             # The name of our extra classifier #
             key = 'growth_period'
+            # The value that the classifier should take for all timesteps #
+            val = "Cur"
             # Get the corresponding ID in the libcbm simulation #
-            id_of_cur = self.sit.classifier_value_ids[key]["Cur"]
+            id_of_cur = self.sit.classifier_value_ids[key][val]
             # Modify the whole column of the dataframe #
             cbm_vars.classifiers[key] = id_of_cur
         # Print a message #
@@ -117,7 +120,7 @@ class Simulation(object):
             pre_dynamics_func    = self.dynamics_func,
             reporting_func       = reporting_func
         )
-        # We did not encounter any error #
+        # If we got here then we did not encounter any simulation error #
         self.error = False
         # Return for convenience #
         return self.results

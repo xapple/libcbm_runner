@@ -33,7 +33,7 @@ class BardV1(Scenario):
     """
 
     short_name = 'bard'
-    code = short_name
+    code       = 'bard'
 
     @property_cached
     def runners(self):
@@ -44,16 +44,17 @@ class BardV1(Scenario):
         return {c.iso2_code: [BardV1Runner(self, c, 0)]
                 for c in self.continent}
 
+###############################################################################
 class BardV1Runner(Runner):
-    """Modification of the runner to enable appending input data"""
+    """Modification of the runners to enable appending input data."""
 
     append_csv = ['inventory', 'transitions', 'growth_curves']
 
     def modify_input(self):
         """
-        We would like to append events files to the base scenario with additional details
-        afforestation versions.
-        We also need to append inventory, growth and transition rules
+        We would like to append events files to the base scenario with
+        additional details afforestation versions.
+        We also need to append inventory, growth and transition rules.
         """
         # Parameters
         afforestation_sub_scenario = "baseline"
@@ -79,6 +80,7 @@ class BardV1Runner(Runner):
 
         # Write to csv
         events.to_csv(self.input_data.paths.csv_dir + 'events.csv', index=False)
+
         # Append to the base file
         for csv_name in self.overwrite_csv:
             source = self.scen_orig_dir + 'csv/' + csv_name + '_' +\
