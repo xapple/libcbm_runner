@@ -1,3 +1,5 @@
+[[_TOC_]]
+
 # Bring libcbm_runner to feature parity with cbmcfs3_runner
 
 - Show comparison of output pool from cbmcfs3 and libcbm. To illustrate the similarities.
