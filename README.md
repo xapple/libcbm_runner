@@ -27,6 +27,17 @@ Installation instructions are available for two different platforms:
 Some notebooks are available from the `libcbm_py` repository, in the example directory.
 
 
+## Definitions
+
+- Input files (disturbances, yield, inventory) defined in `libcbm_data` contain 
+  scenarios for the activities (afforestation, deforestation, reforestation, 
+  disturbances in forest remaining forest, wood use specified in the silviculture and 
+  product_types.csv tables)
+
+- Scenarios are a combination of several input files defined as python code in 
+  `libcbm_runner/scenarios`
+
+
 ## Extra documentation
 
 More documentation is available at:
