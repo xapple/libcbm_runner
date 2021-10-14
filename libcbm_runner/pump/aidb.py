@@ -87,10 +87,16 @@ class AIDB(object):
 
     def symlink_all_aidb(self):
         """In production, every country has its own AIDB."""
-        # Check it exists #
+        # The source #
         country_dir = aidb_repo + 'countries/' + self.parent.iso2_code
         source = country_dir + '/orig/config/aidb.db'
+        # Check the AIDB exists #
         assert source
-        # Symlink #
+        # The destination #
         destin = self.paths.aidb
+        # Remove destination if it already exists #
+        destin.remove()
+        # Symlink #
         source.link_to(destin)
+        # Return #
+        return 'Symlink success for ' + self.parent.iso2_code + '.'

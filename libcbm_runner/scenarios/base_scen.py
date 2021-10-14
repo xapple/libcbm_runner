@@ -39,8 +39,8 @@ class Scenario(object):
 
         >>> from libcbm_runner.core.continent import continent
         >>> scenario = continent.scenarios['historical']
-        >>> r = scenario.runners['AT'][-1]
-        >>> r.run()
+        >>> r = scenario.runners['LU'][-1]
+        >>> r.run(True, True, True)
 
     You can then check the output pools:
 
