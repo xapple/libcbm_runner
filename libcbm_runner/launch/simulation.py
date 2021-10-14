@@ -64,7 +64,7 @@ class Simulation(object):
         # Print a message #
         self.parent.log.info(f"Time step {timestep} is about to run.")
         # Return #
-        return self.rule_based_processor.pre_dynamic_func(timestep, cbm_vars)
+        return self.rule_based_proc.pre_dynamic_func(timestep, cbm_vars)
 
     #------------------------------- Methods ---------------------------------#
     # noinspection PyBroadException
@@ -96,33 +96,35 @@ class Simulation(object):
         db_path = self.runner.country.aidb.paths.db
         assert db_path
         # Create a SIT object #
-        self.sit = sit_cbm_factory.load_sit(str(self.runner.paths.json),
-                                            db_path = str(db_path))
+        path = str(self.runner.paths.json)
+        self.sit = sit_cbm_factory.load_sit(path, str(db_path))
         # Do some initialization #
-        self.clfrs, self.inv = sit_cbm_factory.initialize_inventory(self.sit)
+        init_inv = sit_cbm_factory.initialize_inventory
+        self.clfrs, self.inv = init_inv(self.sit)
         # Create a CBM object #
-        self.cbm = sit_cbm_factory.initialize_cbm(self.sit)
-        # This will contain results #
-        self.results, reporting_func = \
-            cbm_simulator.create_in_memory_reporting_func()
-        # Create a function to apply rule based events and transition rules #
-        self.rule_based_processor = \
-            sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
-        # Message #
-        self.runner.log.info("Calling the cbm_simulator.")
-        # Run #
-        cbm_simulator.simulate(
-            self.cbm,
-            n_steps              = self.runner.num_timesteps,
-            classifiers          = self.clfrs,
-            inventory            = self.inv,
-            pool_codes           = self.sit.defaults.get_pools(),
-            flux_indicator_codes = self.sit.defaults.get_flux_indicators(),
-            pre_dynamics_func    = self.dynamics_func,
-            reporting_func       = reporting_func
-        )
-        # Free memory #
-        self.cbm.__exit__(*sys.exc_info())
+        with sit_cbm_factory.initialize_cbm(self.sit) as self.cbm:
+            # This will contain results #
+            create_func = cbm_simulator.create_in_memory_reporting_func
+            self.results, reporting_func = create_func()
+            # Create a function to apply rule based events #
+            create_proc = sit_cbm_factory.create_sit_rule_based_processor
+            self.rule_based_proc = create_proc(self.sit, self.cbm)
+            # Get pools and fluxes #
+            self.pools = self.sit.defaults.get_pools()
+            self.fluxes = self.sit.defaults.get_flux_indicators()
+            # Message #
+            self.runner.log.info("Calling the cbm_simulator.")
+            # Run #
+            cbm_simulator.simulate(
+                self.cbm,
+                n_steps              = self.runner.num_timesteps,
+                classifiers          = self.clfrs,
+                inventory            = self.inv,
+                pool_codes           = self.pools,
+                flux_indicator_codes = self.fluxes,
+                pre_dynamics_func    = self.dynamics_func,
+                reporting_func       = reporting_func
+            )
         # If we got here then we did not encounter any simulation error #
         self.error = False
         # Return for convenience #
