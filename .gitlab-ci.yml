@@ -1,5 +1,5 @@
 default:
-  image: python:buster
+  image: python:3.9-buster
   before_script:
   - python --version
   - pip install .[extras]
