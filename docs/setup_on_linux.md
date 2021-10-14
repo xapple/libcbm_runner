@@ -23,6 +23,10 @@ Next, we must obtain a copy the European "cbm_defaults" sqlite3 database. As it'
 
     $ git clone git@gitlab.com:bioeconomy/libcbm/libcbm_aidb.git
 
+ To link to those aidb inside `libcbm_data` use the `symlink_all_aidb` method provided in `libcbm_runner/pump/aidb.py`.
+
+ This temporary solution with a single AIDB for each country is meant to be changed once the AIDBs have been harmonized to a single AIDB for all countries.
+
 ## Install pip
 
 The modules we have developed rely on some third party (as well as first party) packages that you can install easily with `pip`. However, you first need to run a few commands to get `pip` itself as it's not included by default.

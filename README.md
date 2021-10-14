@@ -11,7 +11,7 @@ This python module uses pandas data frames to manipulate and store most data.
 
 * `libcbm_data` contains the model's input and output data located at https://gitlab.com/bioeconomy/libcbm/libcbm_data
 
-* `libcbm_aidb` contains the "Archive Index Databases" in a separate repository located at `https://github.com/xapple/libcbm_aidb` to link to those aidb inside `libcbm_data` use the `symlink_all_aidb` method provided in `libcbm_runner/pump/aidb.py`. This temporary solution with a single AIDB for each country is meant to be changed once the AIDBs have been harmonized to a single AIDB for all countries. Alternatively, one can create symbolic links with `cp -rs ~/repos/libcbm_aidb/countries/ ~/repos/libcbm_data/`.
+* `libcbm_aidb` contains the "Archive Index Databases" in a separate repository located at https://github.com/xapple/libcbm_aidb
 
 
 ## Installation
@@ -22,20 +22,9 @@ Installation instructions are available for two different platforms:
 * [Installation on Windows](docs/setup_on_windows.md)
 
 
-## Notebooks
-
-Some notebooks are available from the `libcbm_py` repository, in the example directory.
-
-
 ## Definitions
 
-- Input files (disturbances, yield, inventory) defined in `libcbm_data` contain 
-  scenarios for the activities (afforestation, deforestation, reforestation, 
-  disturbances in forest remaining forest, wood use specified in the silviculture and 
-  product_types.csv tables)
-
-- Scenarios are a combination of several input files defined as python code in 
-  `libcbm_runner/scenarios`
+- Input files (disturbances, yield, inventory) defined in `libcbm_data` contain scenarios for the activities (afforestation, deforestation, reforestation, disturbances in forest remaining forest, wood use specified in the silviculture and product_types.csv tables)
 
 
 ## Extra documentation
