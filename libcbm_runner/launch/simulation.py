@@ -9,6 +9,7 @@ Unit D1 Bioeconomy.
 """
 
 # Built-in modules #
+import sys
 
 # Third party modules #
 from libcbm.input.sit import sit_cbm_factory
@@ -120,6 +121,8 @@ class Simulation(object):
             pre_dynamics_func    = self.dynamics_func,
             reporting_func       = reporting_func
         )
+        # Free memory #
+        self.cbm.__exit__(*sys.exc_info())
         # If we got here then we did not encounter any simulation error #
         self.error = False
         # Return for convenience #
