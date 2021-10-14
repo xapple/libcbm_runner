@@ -1,4 +1,4 @@
-# `libcbm_runner` version 0.2.2
+# `libcbm_runner` version 0.2.2-compare
 
 `libcbm_runner` is a python package for dealing with the automation and running of a complex series of models involving forest growth, the European economy, carbon budgets and their interactions. It uses the `libcbm` model developed by Canada under the hood.
 
