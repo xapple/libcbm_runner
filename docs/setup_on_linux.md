@@ -1,6 +1,6 @@
 # Installation
 
-## Setup of `libcbm_data` and `libcbm_runner`
+Setup of `libcbm_data` and `libcbm_runner`
 
 This guide shows how to set up the `libcbm_data` and `libcbm_runner` projects together on a fresh Ubuntu system to run the 26 EU carbon budget simulations with `libcbm_py` automatically.
 
@@ -52,7 +52,7 @@ The next step is to set the environment variable `$PYTHONPATH` so that our inter
 
 ## Run
 
-You should now be ready to run the pipeline by entering the following at the python 
+You should now be ready to run the pipeline by entering the following at the python
 console:
 
     from libcbm_runner.core.continent import continent
