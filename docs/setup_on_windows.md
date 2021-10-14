@@ -60,7 +60,7 @@ Set the environment variable that tells `libcbm_runner` where the special AIDBs 
 
 Create symlinks for these special files (requires administrator privileges):
 
-    $ ipython -i -c "from libcbm_runner.core.continent import continent as ct; print([c.aidb.symlink() for c in ct])"
+    $ ipython -i -c "from libcbm_runner.core.continent import continent as ct; print([c.aidb.symlink_all_aidb() for c in ct])"
 
 ## Run the model
 
