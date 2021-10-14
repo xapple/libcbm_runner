@@ -1,7 +1,5 @@
 # Installation
 
-Setup of `libcbm_data` and `libcbm_runner`
-
 This guide shows how to set up the `libcbm_data` and `libcbm_runner` projects together on a fresh Ubuntu system to run the 26 EU carbon budget simulations with `libcbm_py` automatically.
 
 ## Fresh OS
@@ -16,8 +14,8 @@ The first step is to clone the needed git repositories. We will clone all the pr
     $ mkdir repos
     $ cd repos
     $ git clone git@github.com:cat-cfs/libcbm_py.git
-    $ git clone git@github.com:xapple/libcbm_runner.git
-    $ git clone git@github.com:xapple/libcbm_data.git
+    $ git clone https://gitlab.com/bioeconomy/libcbm/libcbm_runner.git
+    $ git clone https://gitlab.com/bioeconomy/libcbm/libcbm_data.git
 
 ## The EU AIDB
 
@@ -32,7 +30,7 @@ The modules we have developed rely on some third party (as well as first party) 
     $ sudo apt update
     $ sudo apt install python3-pip
 
-## Install dependencies
+## Install python modules
 
 These modules themselves have dependencies that will be auto-installed.
 
@@ -49,47 +47,13 @@ The next step is to set the environment variable `$PYTHONPATH` so that our inter
     export PYTHONPATH="$HOME/repos/libcbm_py/":$PYTHONPATH
     export PYTHONPATH="$HOME/repos/libcbm_runner/":$PYTHONPATH
     export LIBCBM_DATA="$HOME/repos/libcbm_data/"
+    export LIBCBM_AIDB="$HOME/repos/libcbm_aidb/"
 
 ## Run
 
-You should now be ready to run the pipeline by entering the following at the python
-console:
+You should now be ready to run the pipeline by entering the following at the python console:
 
     from libcbm_runner.core.continent import continent
     scenario = continent.scenarios['historical']
     runner_libcbm = scenario.runners['LU'][-1]
     runner_libcbm.run(keep_in_ram=True, verbose=True, interrupt_on_error=True)
-
-Alternatively
-
-    $ python3 ~/repos/libcbm_runner/scripts/running/run_zz.py
-
-
-## Load output data
-
-Load tables without classifiers
-
-    area_lu = runner_libcbm.output.load('area', with_clfrs=False)
-    params_lu = runner_libcbm.output.load('params', with_clfrs=False)
-    flux_lu = runner_libcbm.output.load('flux', with_clfrs=False)
-    state_lu = runner_libcbm.output.load('state', with_clfrs=False)
-
-Load classifiers with their actual values and print the number of rows
-
-    classifiers_lu = runner_libcbm.output.classif_df
-    print(f"No of rows in area_lu: {len(area_lu)}")
-    print(f" No of rows in flux_lu, with NaNs for timestep 0: {len(flux_lu)}")
-    print(f"No of rows in params_lu: {len(params_lu)}")
-
-Join area, age and fluxes together
-
-    index = ['identifier', 'timestep']
-    flux_dist = (params_lu
-                 .merge(area_lu, 'left', on = index) # Join the area information
-                 .merge(flux_lu, 'left', on = index)
-                 .merge(state_lu, 'left', on = index) # Join the age information
-                 .merge(classifiers_lu, 'left', on = index) # Join the classifiers
-                 )
-    len(flux_dist)
-    flux_dist
-
