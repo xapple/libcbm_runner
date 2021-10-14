@@ -20,12 +20,100 @@ Moreover, for some reason libcbm only shows an unique value of “stem & branch 
     SoftwoodBranchSnagToDOM	0.100000000000	0.100000001
     HardwoodBranchSnagToDOM	0.100000000000	equal to above
 
+# Interface
 
-# Scenarios
+## Scenarios
 
-- Mechanism to combine various elementary scenarios into a scenario
+These would be a long lists of all available scenarios
+it would be generated automatically from the input files for all activities 
+and for each type of input file (namely: events,transitions,growth_curves)
 
-- Comparison of scenario outputs
+The users has to configure these dictionaries himself:
+
+```
+    events_dict = {'afforestation': 'three_billion_trees',
+                   'mgmt':          'close_to_nature',
+                   'deforestation': 'high_deforestation',
+                   'nd_sr':         'reference',
+                   'nd_nsr':        'major_outbreaks'}
+
+    growth_dict = {'afforestation': 'reference', 
+                   'mgmt':          'right_wood_use',
+                   'deforestation': 'close_to_nature',
+                   'nd_sr':         'reference',
+                   'nd_nsr':        'major_outbreaks'}
+
+    transr_dict = {'afforestation': 'reference', 
+                   'mgmt':          'right_wood_use',
+                   'deforestation': 'close_to_nature',
+                   'nd_sr':         'reference',
+                   'nd_nsr':        'major_outbreaks'}
+```
+
+Not all activities have to be specified in the choice dictionary
+The simulation will still run and will ignore the missing key.
+```
+inventory_dict = { 'mgmt':          'reference',
+                'afforestation': 'reference', 
+                'nd_sr':         'reference',
+                'nd_nsr':        'major_outbreaks',
+                'deforestation': 'reference'}
+
+silv_dict = {'product_type':   'reference', 
+            'silv_practices': 'right_wood_use'}
+
+
+# Run libcbm
+import Combination from libcbm_runner.core.combination
+
+comb = Combination(events_dict, growth_dict, transr_dict, invent_dict, silv_dict, )
+
+comb.run()
+```
+
+Define abbrevations
+nd_sr:  'natural disturbances, with stand replacement (e.g. wild fire)'
+nd_nsr: 'natural disturbances, without stand replacement (e.g. insects)'
+
+
+## File structure
+
+```
+####################################################################
+# This is the option we settle on
+/interface/LU/LU_mgmt_events.csv
+/interface/LU/LU_mgmt_inventory.csv
+/interface/LU/LU_mgmt_transitions.csv
+/interface/LU/LU_afforestation_events.csv
+/interface/LU/LU_afforestation_inventory.csv
+/interface/LU/LU_afforestation_transitions.csv
+/interface/LU/LU_config_product_types.csv
+/interface/LU/LU_config_product_types.csv
+/interface/LU/LU_config_aidb.sql
+/interface/FR/FR_mgmt_events.csv
+/interface/FR/FR_mgmt_inventory.csv
+/interface/FR/FR_mgmt_transitions.csv
+/interface/FR/FR_afforestation_events.csv
+/interface/FR/FR_afforestation_inventory.csv
+/interface/FR/FR_afforestation_transitions.csv
+....
+
+#####################################################################
+# This option is discarded
+/interface/
+/interface/LU_mgmt_events.csv
+/interface/LU_mgmt_inventory.csv
+/interface/LU_mgmt_transitions.csv
+/interface/LU_afforestation_events.csv
+/interface/LU_afforestation_inventory.csv
+/interface/LU_afforestation_transitions.csv
+/interface/FR_mgmt_events.csv
+/interface/FR_mgmt_inventory.csv
+/interface/FR_mgmt_transitions.csv
+/interface/FR_afforestation_events.csv
+/interface/FR_afforestation_inventory.csv
+/interface/FR_afforestation_transitions.csv
+```
 
 
 # Harvest Allocation Tool (HAT)
