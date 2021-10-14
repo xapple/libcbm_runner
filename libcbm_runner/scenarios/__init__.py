@@ -15,10 +15,8 @@ A list of all scenarios classes.
 # First party modules #
 
 # Internal modules #
-from libcbm_runner.scenarios.afforestation import Afforestation
-from libcbm_runner.scenarios.reference     import Reference
-from libcbm_runner.scenarios.historical    import Historical
+from libcbm_runner.scenarios.historical import Historical
 
 ###############################################################################
 # List all scenario classes to be loaded #
-scen_classes = [Historical, Afforestation, Reference]
+scen_classes = [Historical]
