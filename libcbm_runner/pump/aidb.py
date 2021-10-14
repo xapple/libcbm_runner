@@ -20,8 +20,8 @@ from plumbing.cache       import property_cached
 aidb_repo = DirectoryPath("~/repos/libcbm_aidb/")
 
 # But you can override that with an environment variable #
-if os.environ.get("AIDB_REPO"):
-    aidb_repo = DirectoryPath(os.environ['AIDB_REPO'])
+if os.environ.get("LIBCBM_AIDB"):
+    aidb_repo = DirectoryPath(os.environ['LIBCBM_AIDB'])
 
 ###############################################################################
 class AIDB(object):
@@ -86,6 +86,7 @@ class AIDB(object):
         source.link_to(destin)
 
     def symlink_all_aidb(self):
+        """In production, every country has its own AIDB."""
         # Check it exists #
         country_dir = aidb_repo + 'countries/' + self.parent.iso2_code
         source = country_dir + '/orig/config/aidb.db'
