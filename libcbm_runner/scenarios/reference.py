@@ -26,10 +26,10 @@ from libcbm_runner.core.runner import Runner
 import pandas
 
 ###############################################################################
-class BardV1(Scenario):
+class Reference(Scenario):
     """
     This scenario represents the combination of base, afforestation,
-    reforestation and deforestation. Version number 1.
+    reforestation and deforestation.
     """
 
     short_name = 'bard'
@@ -41,11 +41,11 @@ class BardV1(Scenario):
         A dictionary of country codes as keys with a list of runners as
         values.
         """
-        return {c.iso2_code: [BardV1Runner(self, c, 0)]
+        return {c.iso2_code: [ReferenceRunner(self, c, 0)]
                 for c in self.continent}
 
 ###############################################################################
-class BardV1Runner(Runner):
+class ReferenceRunner(Runner):
     """Modification of the runners to enable appending input data."""
 
     append_csv = ['inventory', 'transitions', 'growth_curves']
