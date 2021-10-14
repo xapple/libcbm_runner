@@ -32,7 +32,7 @@ setup(
                         'pymarktex>=1.4.6', 'pandas', 'simplejson',
                         'tqdm', 'p_tqdm'],
     extras_require   = {'extras': ['pystache', 'matplotlib', 'numexpr']},
-    python_requires  = ">=3.8",
+    python_requires  = ">=3.8,!=3.10.*",
     long_description = readme,
     long_description_content_type = 'text/markdown',
     include_package_data = True,
