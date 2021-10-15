@@ -91,15 +91,17 @@ class Scenario(object):
                 return runner.run()
         # Run countries sequentially #
         if not parallel:
-            return t_map(run_country, self.runners.items())
+            result = t_map(run_country, self.runners.items())
         # Run countries in parallel #
         if parallel:
-            return p_umap(run_country, self.runners.items(), num_cpus=4)
+            result = p_umap(run_country, self.runners.items(), num_cpus=4)
         # Timer end #
         timer.print_end()
         timer.print_total_elapsed()
         # Compile logs #
         self.compile_logs()
+        # Return #
+        return result
 
     def compile_logs(self, step=-1):
         # Open file #
