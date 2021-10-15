@@ -5,7 +5,7 @@ default:
   - pip install .[extras]
   - git clone https://github.com/cat-cfs/libcbm_py.git
   - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/bioeconomy/libcbm/libcbm_aidb.git
-  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/bioeconomy/libcbm/libcbm_data.git
+  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/bioeconomy/libcbm/libcbm_data.git -b compare
   # Tell python where the libcbm and libcbm_runner packages are located
   - export PYTHONPATH="$CI_PROJECT_DIR/libcbm_py/":$PYTHONPATH
   - export PYTHONPATH="$CI_PROJECT_DIR/libcbm_runner/":$PYTHONPATH
