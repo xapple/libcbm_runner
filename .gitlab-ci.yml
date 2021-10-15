@@ -11,7 +11,7 @@ default:
   - export PYTHONPATH="$CI_PROJECT_DIR/libcbm_runner/":$PYTHONPATH
   # Tell libcbm_runner where the data are located
   - export LIBCBM_DATA="$CI_PROJECT_DIR/libcbm_data/"
-  - export AIDB_REPO="$CI_PROJECT_DIR/libcbm_aidb/"
+  - export LIBCBM_AIDB="$CI_PROJECT_DIR/libcbm_aidb/"
   - python scripts/setup/aidb_symlink.py
 
 stages:
