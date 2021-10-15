@@ -23,9 +23,6 @@ from libcbm_runner.core.continent import continent as libcbm_continent
 # Continents #
 from cbmcfs3_runner.core.continent import continent as cbmcfs3_continent
 
-# Constants #
-home = os.environ.get('HOME', '~') + '/'
-
 ###############################################################################
 class CompareAIDB(object):
     """
@@ -43,8 +40,8 @@ class CompareAIDB(object):
     Then you can inspect object as so:
 
         >>> comp = comparisons[3]
-        >>> print(comp.libcbm_aidb.db.read_df('species'))
-        >>> print(comp.cbmcfs3_aidb.database['tblSpeciesTypeDefault'])
+        >>> print(comp.libcbm_aidb.db.read_df('slow_mixing_rate'))
+        >>> print(comp.cbmcfs3_aidb.database['tblSlowAGtoBGTransferRate'])
     """
 
     def __init__(self, cbmcfs3_country):
