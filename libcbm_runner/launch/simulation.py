@@ -54,7 +54,7 @@ class Simulation(object):
                   " Now starting the current period."
             self.parent.log.info(msg)
             # The name of our extra classifier #
-            key = 'growth_period'
+            key = 'Simulation period (for yields)'
             # The value that the classifier should take for all timesteps #
             val = "Cur"
             # Get the corresponding ID in the libcbm simulation #
