@@ -78,9 +78,14 @@ class AIDB(object):
         During development, and for testing purposes we have a single AIDB
         that all countries can share and that is found in another repository.
         """
-        # Check it exists #
+        # The path to the SQLite3 file #
         source = DirectoryPath(aidb_repo + 'aidb.db')
-        assert source
+        # Check it exists #
+        try:
+            assert source
+        except AssertionError:
+            msg = "The sqlite3 database at '%s' does not seems to exist."
+            raise AssertionError(msg % source)
         # Symlink #
         destin = self.paths.aidb
         source.link_to(destin)
