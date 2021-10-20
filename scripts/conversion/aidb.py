@@ -45,6 +45,7 @@ from tqdm import tqdm
 # First party modules #
 import cbm_defaults.app
 from plumbing.cache import property_cached
+from plumbing.timer import Timer
 
 # Internal modules #
 from libcbm_runner.core.continent import continent as libcbm_continent
@@ -115,9 +116,16 @@ class ConvertAIDB(object):
 if __name__ == '__main__':
     # Make converter objects, one per country #
     converters = [ConvertAIDB(c) for c in cbmcfs3_continent]
+    # Show which version of the repository we are using #
+    print("Using %s." % cbm_defaults.app)
+    print("-------------")
+    # Print timer start #
+    timer = Timer()
+    timer.print_start()
     # Run them all #
     for converter in tqdm(converters):
         converter()
-
-
+    # Print end #
+    timer.print_end()
+    timer.print_total_elapsed()
 
