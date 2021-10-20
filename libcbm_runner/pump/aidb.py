@@ -96,7 +96,11 @@ class AIDB(object):
         country_dir = aidb_repo + 'countries/' + self.parent.iso2_code
         source = country_dir + '/orig/config/aidb.db'
         # Check the AIDB exists #
-        assert source
+        try:
+            assert source
+        except AssertionError:
+            msg = "The sqlite3 database at '%s' does not seems to exist."
+            raise AssertionError(msg % source)
         # The destination #
         destin = self.paths.aidb
         # Remove destination if it already exists #
