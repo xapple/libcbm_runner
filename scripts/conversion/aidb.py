@@ -16,7 +16,7 @@ Typically you would run this file from a command line like this:
 
 Or on a windows system which has paths defined as such
 
-     ipython3.exe -i -- /c/repos/libcbm_runner/scripts/conversion/aidb.py
+     ipython3 -i -- %HOMEPATH%/repos/libcbm_runner/scripts/conversion/aidb.py
 
 You need to run this on a machine that has a Microsoft Access driver installed.
 So likely this will mean a Windows machine.
@@ -53,8 +53,8 @@ from libcbm_runner.core.continent import continent as libcbm_continent
 from cbmcfs3_runner.core.continent import continent as cbmcfs3_continent
 
 # Constants #
-home = os.environ.get('HOME', '~') + '/'
-ddl_path = home + "repos/cbm_defaults/schema/cbmDefaults.ddl"
+home = os.path.expanduser("~")
+ddl_path = home + r"\repos\cbm_defaults\schema\cbmDefaults.ddl"
 
 ###############################################################################
 class ConvertAIDB(object):
@@ -82,7 +82,7 @@ class ConvertAIDB(object):
         ]
     }
 
-    def __init__(self, cbmcfs3_country):
+    def __init__(self, cbmcfs3_country):\
         # Main attributes #
         self.cbmcfs3_country = cbmcfs3_country
 
@@ -97,12 +97,13 @@ class ConvertAIDB(object):
         destin = self.libcbm_country.aidb.paths.db
         # Messages #
         if verbose:
+            print("\nCountry: " + self.cbmcfs3_country.iso2_code)
             print("Source: " + source)
             print("Destination: " + destin)
             print("-------------")
-        # Make a copy of the template #
+        # Make a copy of the template dictionary #
         config = self.template.copy()
-        # Specify paths #
+        # Specify paths in this dictonary #
         config['archive_index_data'][0]['path'] = source
         config['output_path'] = destin
         # Delete previous version of the database #
