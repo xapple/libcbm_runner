@@ -51,7 +51,7 @@ class Simulation(object):
         if timestep == 1:
             # Print message #
             msg = "Carbon pool initialization period is finished." \
-                  " Now starting the current period."
+                  " Now starting the `current` period."
             self.parent.log.info(msg)
             # The name of our extra classifier #
             key = 'growth_period'
@@ -71,7 +71,9 @@ class Simulation(object):
     def __call__(self, interrupt_on_error=False):
         """
         Wrap the `run()` method by catching any type of exception
-        and logging it.
+        and logging it. This is useful when running all countries one after
+        each other and not wanting that process to be interrupted even if a few
+        countries fail along the way.
         """
         try:
             self.run()
@@ -86,7 +88,6 @@ class Simulation(object):
         """
         Call `libcbm_py` to run the actual CBM simulation after creating some
         objects.
-
         The interaction with `libcbm_py` is decomposed in several calls to pass
         a `.json` config, a default database (also called aidb) and csv files.
         """
@@ -96,8 +97,8 @@ class Simulation(object):
         db_path = self.runner.country.aidb.paths.db
         assert db_path
         # Create a SIT object #
-        path = str(self.runner.paths.json)
-        self.sit = sit_cbm_factory.load_sit(path, str(db_path))
+        json_path = str(self.runner.paths.json)
+        self.sit = sit_cbm_factory.load_sit(json_path, str(db_path))
         # Do some initialization #
         init_inv = sit_cbm_factory.initialize_inventory
         self.clfrs, self.inv = init_inv(self.sit)

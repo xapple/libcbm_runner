@@ -79,14 +79,14 @@ class Country(object):
 
     #----------------------------- Properties --------------------------------#
     @property_cached
-    def scenarios(self):
+    def combos(self):
         """
-        A dictionary linking scenario names to a list of runners
+        A dictionary linking combo names to a list of runners
         that concern only this country.
         """
         from cbmcfs3_runner.core.continent import continent
         return {n: s.runners[self.iso2_code]
-                for n, s in continent.scenarios.items()}
+                for n, s in continent.combos.items()}
 
     #------------------------------- Methods ---------------------------------#
     def set_codes(self):

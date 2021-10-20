@@ -28,7 +28,7 @@ setup(
     author           = 'Lucas Sinclair',
     author_email     = 'lucas.sinclair@me.com',
     packages         = find_namespace_packages(),
-    install_requires = ['autopaths>=1.5.6', 'plumbing>=2.11.1',
+    install_requires = ['autopaths>=1.5.7', 'plumbing>=2.11.1',
                         'pymarktex>=1.4.6', 'pandas', 'simplejson',
                         'tqdm', 'p_tqdm'],
     extras_require   = {'extras': ['pystache', 'matplotlib', 'numexpr']},

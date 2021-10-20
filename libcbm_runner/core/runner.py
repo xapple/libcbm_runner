@@ -37,11 +37,11 @@ class Runner(object):
     and to bring this data all the way to the predicted carbon stock and
     fluxes.
 
-    You can run a scenario like this:
+    You can run a combo like this:
 
         >>> from libcbm_runner.core.continent import continent
-        >>> scenario = continent.scenarios['historical']
-        >>> runner   = scenario.runners['LU'][0]
+        >>> combo  = continent.combos['historical']
+        >>> runner = combo.runners['LU'][0]
         >>> runner.run()
 
     The runner has an attribute `output` that only deals with final output
@@ -66,17 +66,17 @@ class Runner(object):
     /logs/runner.log
     """
 
-    def __init__(self, scenario, country, num):
+    def __init__(self, combo, country, num):
         # Base attributes #
-        self.scenario = scenario
-        self.country  = country
-        self.num      = num
+        self.combo   = combo
+        self.country = country
+        self.num     = num
         # How to reference this runner #
-        self.short_name  = self.scenario.short_name + '/'
+        self.short_name  = self.combo.short_name + '/'
         self.short_name += self.country.iso2_code + '/'
         self.short_name += str(self.num)
         # Where the data will be stored for this run #
-        self.data_dir = self.scenario.scenarios_dir + self.short_name + '/'
+        self.data_dir = self.combo.combos_dir + self.short_name + '/'
         # Automatically access paths based on a string of many subpaths #
         self.paths = AutoPaths(self.data_dir, self.all_paths)
 
@@ -128,13 +128,13 @@ class Runner(object):
 
     #----------------------------- Properties --------------------------------#
     @property
-    def scen_orig_dir(self):
+    def combo_data_dir(self):
         """
         A directory that contains original data specific only to the current
-        scenario. Typically this can be a directory such as:
-        `libcbm_data/countries/AT/afforestation/`
+        combo. Typically this can be a directory such as:
+        `libcbm_data/countries/AT/combos/mixed_policies/`
         """
-        return self.country.data_dir + self.scenario.short_name + '/'
+        return self.country.data_dir + 'combos/' + self.combo.short_name + '/'
 
     @property_cached
     def log(self):
@@ -180,7 +180,7 @@ class Runner(object):
     #------------------------------- Methods ---------------------------------#
     def run(self, keep_in_ram=False, verbose=True, interrupt_on_error=False):
         """
-        Run the full modelling pipeline for a given country, a given scenario
+        Run the full modelling pipeline for a given country, a given combo
         and a given step.
         """
         # Verbosity level #
@@ -195,7 +195,7 @@ class Runner(object):
         self.remove_directories()
         # Copy the original input data #
         self.input_data.copy_orig_from_country()
-        # Modify input data, scenarios can subclass this #
+        # Modify input data, combos can subclass this #
         self.modify_input()
         # Pre-processing #
         self.pre_processor()
@@ -244,11 +244,11 @@ class Runner(object):
     def events_wide_to_long(self, events_wide):
         """
         Reshape disturbance events from wide to long format.
-        #TODO move this method out of the runner. It is specific to scenarios.
+        #TODO move this method out of the runner. It is specific to combos.
         # Or should it stay in the runner? This is a preprocessing step
 
         This events_wide_to_long is a method with an events data frame as an argument so
-        that it can reshape several events files for combined scenarios.
+        that it can reshape several events files for combined combos.
         """
         # Reshape from wide to long format
         events_wide["id"] = events_wide.index
@@ -268,5 +268,5 @@ class Runner(object):
         return events
 
     def modify_input(self):
-        """Scenarios can subclass this at will."""
+        """Combos can subclass this at will."""
         pass

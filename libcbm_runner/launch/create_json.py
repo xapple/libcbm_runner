@@ -22,6 +22,10 @@ class CreateJSON(object):
 
     The mapping mode "SeparateAdminEcoClassifiers" is used by
     libcbm/input/sit/sit_mapping.py to assign the spatial unit IDs.
+
+    We use the same keys as defined in the dictionary below, except
+    for `yield` being translated to `growth_curves` since `yield` is a
+    reserved keyword in python.
     """
 
     def __init__(self, parent):
@@ -37,15 +41,16 @@ class CreateJSON(object):
                                                 indent     = 4,
                                                 ignore_nan = True))
 
+    #-------------------------- Class attributes -----------------------------#
     template = {
         "import_config": {
+            "age_classes":       {"type": "csv", "params": {"path": None}},
             "classifiers":       {"type": "csv", "params": {"path": None}},
             "disturbance_types": {"type": "csv", "params": {"path": None}},
-            "age_classes":       {"type": "csv", "params": {"path": None}},
-            "inventory":         {"type": "csv", "params": {"path": None}},
-            "yield":             {"type": "csv", "params": {"path": None}},
             "events":            {"type": "csv", "params": {"path": None}},
+            "inventory":         {"type": "csv", "params": {"path": None}},
             "transitions":       {"type": "csv", "params": {"path": None}},
+            "yield":             {"type": "csv", "params": {"path": None}},
           },
         "mapping_config": {
             "spatial_units": {
@@ -63,6 +68,7 @@ class CreateJSON(object):
         }
     }
 
+    #----------------------------- Properties --------------------------------#
     @property
     def content(self):
         # Make a copy of the template #
@@ -81,8 +87,11 @@ class CreateJSON(object):
         all_files_names = config['import_config'].keys()
         # Finally set the paths to all the CSVs #
         for file_name in all_files_names:
+            # Special case for the `yields` file #
             name = file_name if file_name != 'yield' else 'growth_curves'
+            # Get the path #
             full_path = self.runner.input_data.paths[name]
+            # Set it in the dictionary #
             config['import_config'][file_name]['params']['path'] = full_path
         # Return result #
         return config

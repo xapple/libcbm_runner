@@ -42,7 +42,7 @@ class AIDB(object):
     """
 
     all_paths = """
-    /orig/config/aidb.db
+    /orig/aidb.db
     """
 
     def __init__(self, parent):

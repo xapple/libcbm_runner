@@ -32,8 +32,6 @@ If you want to run only one country for testing, you can place
 this line in the main loop:
 
         if converter.cbmcfs3_country.iso2_code != 'ZZ': continue
-
-This script was ran once on 21 July 2021.
 """
 
 # Built-in modules #
@@ -83,7 +81,7 @@ class ConvertAIDB(object):
         ]
     }
 
-    def __init__(self, cbmcfs3_country):\
+    def __init__(self, cbmcfs3_country):
         # Main attributes #
         self.cbmcfs3_country = cbmcfs3_country
 
@@ -104,7 +102,7 @@ class ConvertAIDB(object):
             print("-------------")
         # Make a copy of the template dictionary #
         config = self.template.copy()
-        # Specify paths in this dictonary #
+        # Specify paths in this dictionary #
         config['archive_index_data'][0]['path'] = source
         config['output_path'] = destin
         # Delete previous version of the database #

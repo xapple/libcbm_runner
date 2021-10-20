@@ -27,7 +27,7 @@ if os.environ.get("LIBCBM_DATA"):
 
 # Internal modules #
 from libcbm_runner.core.country import Country
-from libcbm_runner.scenarios    import scen_classes
+from libcbm_runner.combos       import combo_classes
 
 ###############################################################################
 class Continent(object):
@@ -40,13 +40,13 @@ class Continent(object):
 
     all_paths = """
     /countries/
-    /scenarios/
+    /combos/
     """
 
     def __init__(self, base_dir):
         """
         Store the directory paths where there is a directory for every
-        country and for every scenario.
+        country and for every combo.
         """
         # The base directory #
         self.base_dir = base_dir
@@ -55,13 +55,13 @@ class Continent(object):
         # Where the input data will be stored #
         self.countries_dir = self.paths.countries_dir
         # Where the output data will be stored #
-        self.scenarios_dir = self.paths.scenarios_dir
+        self.combos_dir = self.paths.combos_dir
 
     def __repr__(self):
         return '%s object with %i countries' % (self.__class__, len(self))
 
     def __getitem__(self, key):
-        """Return a runner based on a tuple of scenario, country and step."""
+        """Return a runner based on a tuple of combo, country and step."""
         return self.get_runner(*key)
 
     def __iter__(self): return iter(self.countries.values())
@@ -76,15 +76,15 @@ class Continent(object):
         return {c.iso2_code: c for c in all_countries}
 
     @property_cached
-    def scenarios(self):
-        """Return a dictionary of scenario names to Scenario objects."""
-        all_scenarios = [Scen(self) for Scen in scen_classes]
-        return {s.short_name: s for s in all_scenarios}
+    def combos(self):
+        """Return a dictionary of combination names to Combination objects."""
+        all_combos = [combo(self) for combo in combo_classes]
+        return {s.short_name: s for s in all_combos}
 
     #------------------------------- Methods ---------------------------------#
-    def get_runner(self, scenario, country, step):
-        """Return a runner based on scenario, country and step."""
-        return self.scenarios[scenario].runners[country][step]
+    def get_runner(self, combo, country, step):
+        """Return a runner based on combo, country and step."""
+        return self.combos[combo].runners[country][step]
 
 ###############################################################################
 # Create singleton #
