@@ -20,7 +20,7 @@ from plumbing.timer       import LogTimer
 import libcbm_runner
 from libcbm_runner.launch.create_json  import CreateJSON
 from libcbm_runner.launch.simulation   import Simulation
-from libcbm_runner.pump.input_data     import InputData
+from libcbm_runner.info.input_data     import InputData
 from libcbm_runner.pump.output_data    import OutputData
 from libcbm_runner.pump.internal_data  import InternalData
 from libcbm_runner.pump.pre_processor  import PreProcessor
@@ -238,35 +238,6 @@ class Runner(object):
                 element.remove()
 
     #--------------------------- Special Methods -----------------------------#
-    def get_orig_data(self):
-        return self.input_data.copy_orig_from_country()
-
-    def events_wide_to_long(self, events_wide):
-        """
-        Reshape disturbance events from wide to long format.
-        #TODO move this method out of the runner. It is specific to combos.
-        # Or should it stay in the runner? This is a preprocessing step
-
-        This events_wide_to_long is a method with an events data frame as an argument so
-        that it can reshape several events files for combined combos.
-        """
-        # Reshape from wide to long format
-        events_wide["id"] = events_wide.index
-        events = pandas.wide_to_long(events_wide,
-                                     stubnames = "amount ",
-                                     i         = "id",
-                                     j         = "year")
-        events = events.reset_index()
-        # Convert years to time steps
-        events['step'] = self.country.year_to_timestep(events['year'])
-        # Remove the space in the amount column name
-        events = events.rename(columns={"amount ": "amount"})
-        # Reorder columns according to the reference table in the orig data
-        col_name_order = self.country.orig_data.load('events', False)
-        events         = events[col_name_order.columns.tolist()]
-        # Return #
-        return events
-
     def modify_input(self):
         """Combos can subclass this at will."""
         pass
