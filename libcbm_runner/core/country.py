@@ -20,8 +20,8 @@ from plumbing.cache       import property_cached
 # Internal modules #
 from libcbm_runner.core.continent      import libcbm_data_dir
 from libcbm_runner.launch.associations import Associations
-from libcbm_runner.pump.orig_data      import OrigData
-from libcbm_runner.pump.aidb           import AIDB
+from libcbm_runner.info.orig_data      import OrigData
+from libcbm_runner.info.aidb           import AIDB
 
 # Country codes #
 all_country_codes = libcbm_data_dir + 'common/country_codes.csv'
