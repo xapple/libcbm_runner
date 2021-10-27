@@ -110,7 +110,7 @@ class ConvertAIDB(object):
         config['archive_index_data'][0]['path'] = source
         config['output_path'] = destin
         # Delete previous version of the database #
-        self.libcbm_country.aidb.paths.db.remove()
+        destin.remove()
         # Call method in `cbm_defaults` #
         cbm_defaults.app.run(config)
 
