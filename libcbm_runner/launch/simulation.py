@@ -102,17 +102,14 @@ class Simulation(object):
         # Do some initialization #
         init_inv = sit_cbm_factory.initialize_inventory
         self.clfrs, self.inv = init_inv(self.sit)
+        # This will contain results #
+        create_func = cbm_simulator.create_in_memory_reporting_func
+        self.results, reporting_func = create_func()
         # Create a CBM object #
         with sit_cbm_factory.initialize_cbm(self.sit) as self.cbm:
-            # This will contain results #
-            create_func = cbm_simulator.create_in_memory_reporting_func
-            self.results, reporting_func = create_func()
             # Create a function to apply rule based events #
             create_proc = sit_cbm_factory.create_sit_rule_based_processor
             self.rule_based_proc = create_proc(self.sit, self.cbm)
-            # Get pools and fluxes #
-            self.pools = self.sit.defaults.get_pools()
-            self.fluxes = self.sit.defaults.get_flux_indicators()
             # Message #
             self.runner.log.info("Calling the cbm_simulator.")
             # Run #
@@ -121,8 +118,6 @@ class Simulation(object):
                 n_steps              = self.runner.num_timesteps,
                 classifiers          = self.clfrs,
                 inventory            = self.inv,
-                pool_codes           = self.pools,
-                flux_indicator_codes = self.fluxes,
                 pre_dynamics_func    = self.dynamics_func,
                 reporting_func       = reporting_func
             )
