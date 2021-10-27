@@ -50,6 +50,9 @@ class AIDB(object):
         self.parent = parent
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
+        # Path to the database in a separate repository #
+        self.repo_file = aidb_repo + 'countries/' + self.parent.iso2_code \
+                         + '/orig/config/aidb.db'
 
     def __bool__(self):
         return bool(self.paths.aidb)
@@ -61,13 +64,13 @@ class AIDB(object):
         Returns a `plumbing.databases.sqlite_database.SQLiteDatabase` object
         useful for reading and modifying entries and tables.
 
-        In addition one can also read/write to the AIDB files easily. To do this:
+        In addition one can also read/write to the AIDB files easily:
 
-            `df = country.aidb.db.read_df('species')`
+            >>> df = country.aidb.db.read_df('species')
 
-        To overwrite a table with a df
+        To overwrite a table with a df:
 
-             `country.aidb.db.write_df(df, 'species')`
+            >>> country.aidb.db.write_df(df, 'species')
         """
         from plumbing.databases.sqlite_database import SQLiteDatabase
         return SQLiteDatabase(self.paths.aidb)
@@ -92,20 +95,17 @@ class AIDB(object):
 
     def symlink_all_aidb(self):
         """In production, every country has its own AIDB."""
-        # The source #
-        country_dir = aidb_repo + 'countries/' + self.parent.iso2_code
-        source = country_dir + '/orig/config/aidb.db'
         # Check the AIDB exists #
         try:
-            assert source
+            assert self.repo_file
         except AssertionError:
             msg = "The sqlite3 database at '%s' does not seems to exist."
-            raise AssertionError(msg % source)
+            raise AssertionError(msg % self.repo_file)
         # The destination #
         destin = self.paths.aidb
         # Remove destination if it already exists #
         destin.remove()
         # Symlink #
-        source.link_to(destin)
+        self.repo_file.link_to(destin)
         # Return #
         return 'Symlink success for ' + self.parent.iso2_code + '.'
