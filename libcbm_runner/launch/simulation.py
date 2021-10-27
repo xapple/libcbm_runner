@@ -64,7 +64,7 @@ class Simulation(object):
         # Print a message #
         self.parent.log.info(f"Time step {timestep} is about to run.")
         # Return #
-        return self.rule_based_proc.pre_dynamic_func(timestep, cbm_vars)
+        return self.rule_based_proc.pre_dynamics_func(timestep, cbm_vars)
 
     #------------------------------- Methods ---------------------------------#
     # noinspection PyBroadException
@@ -103,7 +103,7 @@ class Simulation(object):
         self.clfrs, self.inv = init_inv(self.sit)
         # This will contain results #
         create_func = cbm_simulator.create_in_memory_reporting_func
-        self.results, reporting_func = create_func()
+        self.results, self.reporting_func = create_func()
         # Create a CBM object #
         with sit_cbm_factory.initialize_cbm(self.sit) as self.cbm:
             # Create a function to apply rule based events #
@@ -114,11 +114,11 @@ class Simulation(object):
             # Run #
             cbm_simulator.simulate(
                 self.cbm,
-                n_steps              = self.runner.num_timesteps,
-                classifiers          = self.clfrs,
-                inventory            = self.inv,
-                pre_dynamics_func    = self.dynamics_func,
-                reporting_func       = reporting_func
+                n_steps           = self.runner.num_timesteps,
+                classifiers       = self.clfrs,
+                inventory         = self.inv,
+                pre_dynamics_func = self.dynamics_func,
+                reporting_func    = self.reporting_func
             )
         # If we got here then we did not encounter any simulation error #
         self.error = False
@@ -130,8 +130,8 @@ class Simulation(object):
         Remove all objects from RAM otherwise the kernel will kill the python
         process after a couple countries being run.
         """
+        if hasattr(self, 'cbm'):     del self.cbm
         if hasattr(self, 'sit'):     del self.sit
         if hasattr(self, 'clfrs'):   del self.clfrs
         if hasattr(self, 'inv'):     del self.inv
-        if hasattr(self, 'cbm'):     del self.cbm
         if hasattr(self, 'results'): del self.results
