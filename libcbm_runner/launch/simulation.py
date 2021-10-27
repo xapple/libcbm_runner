@@ -95,7 +95,9 @@ class Simulation(object):
         self.runner.log.info("Setting up the libcbm_py objects.")
         # The 'AIDB' path as it was called previously #
         db_path = self.runner.country.aidb.paths.db
-        assert db_path
+        if not db_path:
+            msg = "The database file at '%s' was not found."
+            raise FileNotFoundError(msg % self.runner.country.aidb.paths.db)
         # Create a SIT object #
         json_path = str(self.runner.paths.json)
         self.sit = sit_cbm_factory.load_sit(json_path, str(db_path))
