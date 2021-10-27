@@ -83,7 +83,7 @@ class ConvertAIDB(object):
         ]
     }
 
-    def __init__(self, cbmcfs3_country):\
+    def __init__(self, cbmcfs3_country):
         # Main attributes #
         self.cbmcfs3_country = cbmcfs3_country
 
@@ -106,11 +106,11 @@ class ConvertAIDB(object):
             print("-------------")
         # Make a copy of the template dictionary #
         config = self.template.copy()
-        # Specify paths in this dictonary #
+        # Specify paths in this dictionary #
         config['archive_index_data'][0]['path'] = source
         config['output_path'] = destin
         # Delete previous version of the database #
-        self.libcbm_country.aidb.paths.db.remove()
+        destin.remove()
         # Call method in `cbm_defaults` #
         cbm_defaults.app.run(config)
 
