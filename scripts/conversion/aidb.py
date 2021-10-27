@@ -90,10 +90,12 @@ class ConvertAIDB(object):
         """The matching libcbm country object."""
         return libcbm_continent.countries[self.cbmcfs3_country.iso2_code]
 
-    def __call__(self, verbose=True):
-        # Get paths #
+    def __call__(self, verbose=True, aidb_repo=True):
+        # Get the source path #
         source = self.cbmcfs3_country.paths.aidb_eu
-        destin = self.libcbm_country.aidb.paths.db
+        # Get the destination path #
+        if aidb_repo: destin = self.libcbm_country.aidb.repo_file
+        else:         destin = self.libcbm_country.aidb.paths.db
         # Messages #
         if verbose:
             print("\nCountry: " + self.cbmcfs3_country.iso2_code)
