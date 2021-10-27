@@ -35,7 +35,7 @@ class OutputData(object):
     /output/csv/area.csv.gz
     /output/csv/classifiers.csv.gz
     /output/csv/flux.csv.gz
-    /output/csv/params.csv.gz
+    /output/csv/parameters.csv.gz
     /output/csv/pools.csv.gz
     /output/csv/state.csv.gz
     """
@@ -98,7 +98,7 @@ class OutputData(object):
         self['area']        = self.runner.internal['pools']
         self['classifiers'] = self.runner.internal['classifiers']
         self['flux']        = self.runner.internal['flux']
-        self['params']      = self.runner.internal['params']
+        self['parameters']  = self.runner.internal['parameters']
         self['pools']       = self.runner.internal['pools']
         self['state']       = self.runner.internal['state']
 
