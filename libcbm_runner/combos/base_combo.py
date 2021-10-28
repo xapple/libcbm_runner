@@ -120,5 +120,8 @@ class Combination(object):
             summary.handle.write(content)
         # Close #
         summary.close()
+        # Message #
+        msg = "Log files compiled at:\n\n%s\n"
+        print(msg % summary)
         # Return #
         return summary
