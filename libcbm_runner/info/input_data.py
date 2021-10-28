@@ -93,12 +93,14 @@ class InputData:
                 # Get the path to the file we will read #
                 in_path = self.act_dir + activity + '/' + input_file + '.csv'
                 # Read the file #
-                df = pandas.read_csv(str(in_path))
+                try:
+                    df = pandas.read_csv(str(in_path))
+                except (FileNotFoundError, pandas.errors.EmptyDataError):
+                    continue
                 # The scenario chosen for this activity and this input #
                 scenario = choices[activity]
                 # Filter rows to take only this scenario #
                 df = df.query("scenario == '%s'" % scenario)
-                #if input_file == 'transition': 1/0
                 # Append #
                 result = result.append(df)
             # Remove the scenario column #

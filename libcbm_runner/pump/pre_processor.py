@@ -58,7 +58,9 @@ class PreProcessor(object):
         lines.
         """
         # Load from disk #
-        df = pandas.read_csv(str(csv_path))
+        try: df = pandas.read_csv(str(csv_path))
+        # If the file is empty we can skip it #
+        except pandas.errors.EmptyDataError: return
         # Get empty lines #
         empty_lines = df.isnull().all(1)
         # Check if there are any #
@@ -78,7 +80,7 @@ class PreProcessor(object):
         # Reshape from wide to long format #
         df = pandas.wide_to_long(df,
                                  stubnames = "amount",
-                                 i         = cols + ['scenario'],
+                                 i         = cols,
                                  j         = "year",
                                  sep       = '_')
         # Drop rows that don't have an amount #
