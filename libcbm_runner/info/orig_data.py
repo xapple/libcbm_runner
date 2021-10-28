@@ -39,7 +39,7 @@ class OrigData(object):
     """
 
     all_paths = """
-    /orig/associations.csv                 # Static
+    /config/associations.csv               # Static
     /common/age_classes.csv                # Static
     /common/classifiers.csv                # Static
     /common/disturbance_types.csv          # Static
