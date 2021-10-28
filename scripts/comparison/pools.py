@@ -181,11 +181,11 @@ class ComparisonRunner(object):
             handle.write(self.title)
             # Loop over every timestep #
             for i, group in self.df.groupby('timestep'):
-                handle.write("### Time step %s\n" % i)
+                handle.write("### Time step %s\n\n" % i)
                 df = group.drop(columns='timestep')
                 df = df.to_string(index=False, float_format='%.2f')
                 df = textwrap.indent(df, '    ')
-                handle.write(df + '\n')
+                handle.write(df + '\n\n')
         # Return #
         return self.paths.pools
 
