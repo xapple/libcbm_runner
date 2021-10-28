@@ -29,6 +29,8 @@ class PreProcessor(object):
         self.parent  = parent
         self.runner  = parent
         self.country = parent.country
+        # Shortcuts #
+        self.input = self.runner.input_data
 
     def __repr__(self):
         return '%s object code "%s"' % (self.__class__, self.runner.short_name)
@@ -37,11 +39,16 @@ class PreProcessor(object):
     def __call__(self):
         # Message #
         self.parent.log.info("Pre-processing input data.")
-        # Check empty lines in all inputs #
-        for item in self.runner.input_data.paths._paths:
-            csv_path = item.path_obj
-            if csv_path.extension != 'csv': continue
-            self.raise_empty_lines(csv_path)
+        # Get all CSV inputs in a list #
+        all_csv = [item.path_obj for item in self.input.paths._paths
+                   if item.path_obj.extension == 'csv']
+        # Check empty lines in all CSV inputs #
+        for csv_path in all_csv: self.raise_empty_lines(csv_path)
+        # Reshape the events file from the wide to the long format #
+        path = self.input.paths.events
+        wide = pandas.read_csv(str(path))
+        long = self.events_wide_to_long(wide)
+        long.to_csv(str(path), index=False)
 
     #------------------------------- Methods ---------------------------------#
     @staticmethod
