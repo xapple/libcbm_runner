@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
+Written by Lucas Sinclair and Paul Rougieux.
+
+JRC Biomass Project.
+Unit D1 Bioeconomy.
+
 A script to add a ninth classifier to every country in order to separate
 the initialization period from the historical period. This is useful for
 instance to switch all the yield curves of every species as soon as we hit

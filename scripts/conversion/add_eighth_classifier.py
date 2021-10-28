@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
+Written by Lucas Sinclair and Paul Rougieux.
+
+JRC Biomass Project.
+Unit D1 Bioeconomy.
+
 A script to add an eighth classifier to every country except Bulgaria in order
 to harmonize the number of classifiers in every country.
 """

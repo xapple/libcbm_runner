@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-A script.
+Written by Lucas Sinclair and Paul Rougieux.
+
+JRC Biomass Project.
+Unit D1 Bioeconomy.
 """
 
 # Built-in modules #
