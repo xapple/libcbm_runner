@@ -14,7 +14,7 @@ Typically you would run this file from a command line like this:
 
      ipython3.exe -i -- /deploy/libcbm_runner/scripts/conversion/aidb.py
 
-Or on a windows system which has paths defined as such
+Or on a windows system which has repositories in the home directory:
 
      ipython3 -i -- %HOMEPATH%/repos/libcbm_runner/scripts/conversion/aidb.py
 
