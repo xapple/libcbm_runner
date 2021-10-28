@@ -62,6 +62,25 @@ Create symlinks for these special files (requires administrator privileges):
 
     $ ipython -i -c "from libcbm_runner.core.continent import continent as ct; print([c.aidb.symlink_all_aidb() for c in ct])"
 
-## Run the model
+## Run one country
+
+Run a given country from the historical scenario.
+
+You can use these commands in python:
+
+    >>> from libcbm_runner.core.continent import continent
+    >>> scenario = continent.scenarios['historical']
+    >>> runner_libcbm = scenario.runners['LU'][-1]
+    >>> runner_libcbm.run(keep_in_ram=True, verbose=True, interrupt_on_error=True)
+
+## Run all countries
+
+To run a full scenario, proceed as so:
+
+     >>> from libcbm_runner.core.continent import continent
+     >>> scen = continent.scenarios['historical']
+     >>> scen()
+
+## More information
 
 You can refer to [this guide](setup_on_linux.md#Run) for the next steps.
