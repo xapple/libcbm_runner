@@ -11,7 +11,9 @@ Unit D1 Bioeconomy.
 # Built-in modules #
 
 # Third party modules #
+from libcbm_runner.pump.pre_processor import PreProcessor
 from tqdm import tqdm
+import pandas
 
 # First party modules #
 from autopaths.auto_paths import AutoPaths
@@ -28,6 +30,7 @@ class MakeActivities(object):
     This class will change the structure of the input data directory for
     each country, and set it up for the new features containing both
     activities, scenarios and combinations of the latter.
+
     More information is contained in the notebooks of the `bioeconomy_notes`
     repository. An example directory structure is the following:
 
@@ -131,6 +134,8 @@ class MakeActivities(object):
         self.create_activities()
         # Makes lots of flat symlinks #
         self.make_interface()
+        # Switch events files to the wide format #
+        self.make_events_wide()
         # Return #
         return self.country_interface_dir
 
@@ -189,9 +194,22 @@ class MakeActivities(object):
             for file in subdir.flat_files:
                 file.link_to(base + act + '_' + file.name)
 
+    def make_events_wide(self):
+        # The path to the mgmt events file #
+        path = self.new_paths.events
+        # Read it #
+        long = pandas.read_csv(str(path))
+        # Get a pre-processor #
+        pre_proc = PreProcessor(type('X', (), {'country': self.country}))
+        # Transform it #
+        wide = pre_proc.events_long_to_wide(long)
+        # Write it #
+        wide.to_csv(str(path), index=False)
+        # Return #
+        return str(path)
+
 ###############################################################################
 if __name__ == '__main__':
     makers = [MakeActivities(c) for c in continent]
     for maker in tqdm(makers):
         maker()
-        break
