@@ -114,6 +114,9 @@ class MakeActivities(object):
     """
 
     #------------------------------- Methods ---------------------------------#
+    def __repr__(self):
+        return '%s object code "%s"' % (self.__class__, self.country.iso2_code)
+
     def __init__(self, country):
         # Default attributes #
         self.country = country

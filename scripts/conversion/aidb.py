@@ -81,6 +81,10 @@ class ConvertAIDB(object):
         ]
     }
 
+    def __repr__(self):
+        return '%s object code "%s"' % (self.__class__,
+                                        self.cbmcfs3_country.iso2_code)
+
     def __init__(self, cbmcfs3_country):
         # Main attributes #
         self.cbmcfs3_country = cbmcfs3_country
