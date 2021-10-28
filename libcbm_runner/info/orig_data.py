@@ -45,12 +45,15 @@ class OrigData(object):
     /common/disturbance_types.csv          # Static
     /extras/product_types.csv              # Dynamic
     /extras/silvicultural_practices.csv    # Dynamic
+    /activities/                           # Dynamic
     """
 
-    files_to_be_generated = ['growth_curves.csv',
-                             'transitions.csv',
-                             'events.csv',
-                             'inventory.csv']
+    # These files are not listed in the paths above because they depend on
+    # different activities.
+    files_to_be_generated = ['growth_curves',
+                             'transitions',
+                             'events',
+                             'inventory']
 
     def __init__(self, parent):
         # Default attributes #
@@ -63,6 +66,11 @@ class OrigData(object):
         return pandas.read_csv(str(self.paths[item]))
 
     #----------------------------- Properties --------------------------------#
+    @property_cached
+    def activities(self):
+        """All the activities that exist for the current country."""
+        return [d.name for d in self.paths.activities_dir.flat_directories]
+
     @property_cached
     def classif_names(self):
         # Load #
