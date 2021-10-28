@@ -20,8 +20,8 @@ from plumbing.cache       import property_cached
 # Internal modules #
 from libcbm_runner.core.continent      import libcbm_data_dir
 from libcbm_runner.launch.associations import Associations
-from libcbm_runner.pump.orig_data      import OrigData
-from libcbm_runner.pump.aidb           import AIDB
+from libcbm_runner.info.orig_data      import OrigData
+from libcbm_runner.info.aidb           import AIDB
 
 # Country codes #
 all_country_codes = libcbm_data_dir + 'common/country_codes.csv'
@@ -79,14 +79,14 @@ class Country(object):
 
     #----------------------------- Properties --------------------------------#
     @property_cached
-    def scenarios(self):
+    def combos(self):
         """
-        A dictionary linking scenario names to a list of runners
+        A dictionary linking combo names to a list of runners
         that concern only this country.
         """
         from cbmcfs3_runner.core.continent import continent
         return {n: s.runners[self.iso2_code]
-                for n, s in continent.scenarios.items()}
+                for n, s in continent.combos.items()}
 
     #------------------------------- Methods ---------------------------------#
     def set_codes(self):

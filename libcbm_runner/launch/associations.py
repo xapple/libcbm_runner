@@ -30,11 +30,34 @@ class Associations(object):
         # Default attributes #
         self.parent = parent
 
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def df(self):
-        """Load the CSV that is the original 'associations.csv' from cbmcfs3."""
+        """
+        Load the CSV that is the original 'associations.csv' from cbmcfs3.
+        The path is taken from the OrigData class.
+        """
         return pandas.read_csv(str(self.parent.orig_data.paths.associations))
 
+    @property_cached
+    def all_mappings(self):
+        """Return a dictionary for creation of the JSON file."""
+        return {
+           'map_admin_bound': self.rows_to_list('MapAdminBoundary',
+                                                'user_admin_boundary',
+                                                'default_admin_boundary'),
+           'map_eco_bound':   self.rows_to_list('MapEcoBoundary',
+                                                'user_eco_boundary',
+                                                'default_eco_boundary'),
+           'map_species':     self.rows_to_list('MapSpecies',
+                                                'user_species',
+                                                'default_species'),
+           'map_disturbance': self.rows_to_list('MapDisturbanceType',
+                                                'user_dist_type',
+                                                'default_dist_type'),
+        }
+
+    #------------------------------- Methods ---------------------------------#
     def key_to_rows(self, mapping_name):
         """
         The *mapping_name* has to be one of "keys".
@@ -66,20 +89,3 @@ class Associations(object):
         return [{user: k, default: v}
                 for k, v in self.key_to_rows(mapping_name).items()]
 
-    @property_cached
-    def all_mappings(self):
-        """Return a dictionary for creation of the JSON file."""
-        return {
-           'map_admin_bound': self.rows_to_list('MapAdminBoundary',
-                                                'user_admin_boundary',
-                                                'default_admin_boundary'),
-           'map_eco_bound':   self.rows_to_list('MapEcoBoundary',
-                                                'user_eco_boundary',
-                                                'default_eco_boundary'),
-           'map_species':     self.rows_to_list('MapSpecies',
-                                                'user_species',
-                                                'default_species'),
-           'map_disturbance': self.rows_to_list('MapDisturbanceType',
-                                                'user_dist_type',
-                                                'default_dist_type'),
-        }

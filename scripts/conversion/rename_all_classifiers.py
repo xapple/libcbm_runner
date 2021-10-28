@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
+Written by Lucas Sinclair and Paul Rougieux.
+
+JRC Biomass Project.
+Unit D1 Bioeconomy.
+
 A script to harmonize the names of classifiers in every country to snake_case.
 """
 
@@ -20,7 +25,6 @@ from libcbm_runner.core.continent import continent
 class ClassifierRenamer(object):
     """
     `Forest type` becomes `forest_type` etc.
-
     """
 
     mapping = {

@@ -9,7 +9,6 @@ Unit D1 Bioeconomy.
 """
 
 # Built-in modules #
-import sys
 
 # Third party modules #
 from libcbm.input.sit import sit_cbm_factory
@@ -51,7 +50,7 @@ class Simulation(object):
         if timestep == 1:
             # Print message #
             msg = "Carbon pool initialization period is finished." \
-                  " Now starting the current period."
+                  " Now starting the `current` period."
             self.parent.log.info(msg)
             # The name of our extra classifier #
             key = 'growth_period'
@@ -64,14 +63,16 @@ class Simulation(object):
         # Print a message #
         self.parent.log.info(f"Time step {timestep} is about to run.")
         # Return #
-        return self.rule_based_proc.pre_dynamic_func(timestep, cbm_vars)
+        return self.rule_based_proc.pre_dynamics_func(timestep, cbm_vars)
 
     #------------------------------- Methods ---------------------------------#
     # noinspection PyBroadException
     def __call__(self, interrupt_on_error=False):
         """
         Wrap the `run()` method by catching any type of exception
-        and logging it.
+        and logging it. This is useful when running all countries one after
+        each other and not wanting that process to be interrupted even if a few
+        countries fail along the way.
         """
         try:
             self.run()
@@ -86,7 +87,6 @@ class Simulation(object):
         """
         Call `libcbm_py` to run the actual CBM simulation after creating some
         objects.
-
         The interaction with `libcbm_py` is decomposed in several calls to pass
         a `.json` config, a default database (also called aidb) and csv files.
         """
@@ -94,36 +94,33 @@ class Simulation(object):
         self.runner.log.info("Setting up the libcbm_py objects.")
         # The 'AIDB' path as it was called previously #
         db_path = self.runner.country.aidb.paths.db
-        assert db_path
+        if not db_path:
+            msg = "The database file at '%s' was not found."
+            raise FileNotFoundError(msg % self.runner.country.aidb.paths.db)
         # Create a SIT object #
-        path = str(self.runner.paths.json)
-        self.sit = sit_cbm_factory.load_sit(path, str(db_path))
+        json_path = str(self.runner.paths.json)
+        self.sit = sit_cbm_factory.load_sit(json_path, str(db_path))
         # Do some initialization #
         init_inv = sit_cbm_factory.initialize_inventory
         self.clfrs, self.inv = init_inv(self.sit)
+        # This will contain results #
+        create_func = cbm_simulator.create_in_memory_reporting_func
+        self.results, self.reporting_func = create_func()
         # Create a CBM object #
         with sit_cbm_factory.initialize_cbm(self.sit) as self.cbm:
-            # This will contain results #
-            create_func = cbm_simulator.create_in_memory_reporting_func
-            self.results, reporting_func = create_func()
             # Create a function to apply rule based events #
             create_proc = sit_cbm_factory.create_sit_rule_based_processor
             self.rule_based_proc = create_proc(self.sit, self.cbm)
-            # Get pools and fluxes #
-            self.pools = self.sit.defaults.get_pools()
-            self.fluxes = self.sit.defaults.get_flux_indicators()
             # Message #
             self.runner.log.info("Calling the cbm_simulator.")
             # Run #
             cbm_simulator.simulate(
                 self.cbm,
-                n_steps              = self.runner.num_timesteps,
-                classifiers          = self.clfrs,
-                inventory            = self.inv,
-                pool_codes           = self.pools,
-                flux_indicator_codes = self.fluxes,
-                pre_dynamics_func    = self.dynamics_func,
-                reporting_func       = reporting_func
+                n_steps           = self.runner.num_timesteps,
+                classifiers       = self.clfrs,
+                inventory         = self.inv,
+                pre_dynamics_func = self.dynamics_func,
+                reporting_func    = self.reporting_func
             )
         # If we got here then we did not encounter any simulation error #
         self.error = False
@@ -135,8 +132,9 @@ class Simulation(object):
         Remove all objects from RAM otherwise the kernel will kill the python
         process after a couple countries being run.
         """
-        if hasattr(self, 'sit'):     del self.sit
-        if hasattr(self, 'clfrs'):   del self.clfrs
-        if hasattr(self, 'inv'):     del self.inv
-        if hasattr(self, 'cbm'):     del self.cbm
-        if hasattr(self, 'results'): del self.results
+        if hasattr(self, 'cbm'):            del self.cbm
+        if hasattr(self, 'sit'):            del self.sit
+        if hasattr(self, 'clfrs'):          del self.clfrs
+        if hasattr(self, 'inv'):            del self.inv
+        if hasattr(self, 'results'):        del self.results
+        if hasattr(self, 'reporting_func'): del self.reporting_func

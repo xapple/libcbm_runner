@@ -14,21 +14,50 @@ Unit D1 Bioeconomy.
 from plumbing.cache import property_cached
 
 # Internal modules #
-from libcbm_runner.scenarios.base_scen import Scenario
+from libcbm_runner.combos.base_combo import Combination
 from libcbm_runner.core.runner import Runner
 
 ###############################################################################
-class Historical(Scenario):
+class Historical(Combination):
     """
-    This scenario simulates the historical period ranging from
+    This combo simulates the historical period ranging from
     the <country.start_year> until 2015, but no further.
 
-    This scenarios represents a demand that is pre-calculated and is not a
+    It uses the `reference` scenario for all activities.
+
+    This combo represents a demand that is pre-calculated and is not a
     function of the maximum wood supply. There is no interaction yet with the
     GFTM model.
     """
 
     short_name = 'historical'
+
+    silv = {'product_type':   'reference',
+            'silv_practices': 'reference'}
+
+    inventory   = {'afforestation': 'reference',
+                   'deforestation': 'reference',
+                   'mgmt':          'reference',
+                   'nd_nsr':        'reference',
+                   'nd_sr':         'reference'}
+
+    events      = {'afforestation': 'reference',
+                   'deforestation': 'reference',
+                   'mgmt':          'reference',
+                   'nd_nsr':        'reference',
+                   'nd_sr':         'reference'}
+
+    growth      = {'afforestation': 'reference',
+                   'deforestation': 'reference',
+                   'mgmt':          'reference',
+                   'nd_nsr':        'reference',
+                   'nd_sr':         'reference'}
+
+    transitions = {'afforestation': 'reference',
+                   'deforestation': 'reference',
+                   'mgmt':          'reference',
+                   'nd_nsr':        'reference',
+                   'nd_sr':         'reference'}
 
     @property_cached
     def runners(self):
@@ -42,9 +71,7 @@ class Historical(Scenario):
 ###############################################################################
 class HistoricalRunner(Runner):
     """
-    With this class we are able to sub-class any methods from the parent
-    `Runner` class and change their behavior in ways that suit this specific
-    scenario.
+    Like a normal runner, but we redefine the num_timesteps property.
     """
 
     @property_cached
@@ -54,8 +81,8 @@ class HistoricalRunner(Runner):
         Print all resulting years for each country:
 
             >>> from libcbm_runner.core.continent import continent
-            >>> scen = continent.scenarios['historical']
-            >>> for code, steps in scen.runners.items():
+            >>> combo = continent.combos['historical']
+            >>> for code, steps in combo.runners.items():
             >>>     r = steps[-1]
             >>>     print(code, ': ', r.num_timesteps)
         """

@@ -26,26 +26,34 @@ class OrigData(object):
     as several pandas data frames.
 
     This data was taken from the original cbmcfs3 dataset composed by
-    Roberto P. and thus depends on the `cbmcfs3_runner` python module
-    to be generated.
+    Roberto P.
 
     To copy all the data from the `cbmcfs3_data` repository do the following:
 
         >>> from libcbm_runner.core.continent import continent
         >>> for country in continent: country.orig_data.copy_from_cbmcfs3()
+
+    This was done at some point before the data was reorganized and changed
+    by Viorel B. It can still be seen in `f42fb77` and it depends on the
+    `cbmcfs3_runner` python module to be run.
     """
 
     all_paths = """
-    /orig/config/associations.csv
-    /orig/csv/
-    /orig/csv/growth_curves.csv
-    /orig/csv/transitions.csv
-    /orig/csv/events.csv
-    /orig/csv/inventory.csv
-    /orig/csv/classifiers.csv
-    /orig/csv/disturbance_types.csv
-    /orig/csv/age_classes.csv
+    /orig/associations.csv                 # Static
+    /common/age_classes.csv                # Static
+    /common/classifiers.csv                # Static
+    /common/disturbance_types.csv          # Static
+    /extras/product_types.csv              # Dynamic
+    /extras/silvicultural_practices.csv    # Dynamic
+    /activities/                           # Dynamic
     """
+
+    # These files are not listed in the paths above because they depend on
+    # different activities.
+    files_to_be_generated = ['growth_curves',
+                             'transitions',
+                             'events',
+                             'inventory']
 
     def __init__(self, parent):
         # Default attributes #
@@ -58,6 +66,11 @@ class OrigData(object):
         return pandas.read_csv(str(self.paths[item]))
 
     #----------------------------- Properties --------------------------------#
+    @property_cached
+    def activities(self):
+        """All the activities that exist for the current country."""
+        return [d.name for d in self.paths.activities_dir.flat_directories]
+
     @property_cached
     def classif_names(self):
         # Load #
@@ -83,34 +96,3 @@ class OrigData(object):
         if clfrs_names: df = df.rename(columns=self.classif_names)
         # Return #
         return df
-
-    #----------------------------- Conversions -------------------------------#
-    # Define what we will copy #
-    orig_files_to_copy = {
-        'ageclass':           'age_classes',
-        'classifiers':        'classifiers',
-        'disturbance_events': 'events',
-        'disturbance_types':  'disturbance_types',
-        'inventory':          'inventory',
-        'transition_rules':   'transitions',
-    }
-
-    def copy_from_cbmcfs3(self):
-        """
-        A method to copy over the data from the cbmcfs3_data repository to the
-        libcbm_data repository for this particular country.
-        """
-        # The two country objects #
-        lib_country = self.parent
-        cbm_country = self.parent.cbmcfs3_country
-        # Check we are pairing countries correctly #
-        assert lib_country.iso2_code == cbm_country.iso2_code
-        # Main loop #
-        for old_name, new_name in self.orig_files_to_copy.items():
-            source = cbm_country.orig_data.paths[old_name]
-            destin = lib_country.orig_data.paths[new_name]
-            source.copy(destin)
-        # We also need the 'associations' file #
-        source = cbm_country.paths.associations
-        destin = lib_country.orig_data.paths.associations
-        source.copy(destin)

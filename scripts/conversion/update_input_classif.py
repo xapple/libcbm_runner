@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
+Written by Lucas Sinclair and Paul Rougieux.
+
+JRC Biomass Project.
+Unit D1 Bioeconomy.
+
 A script to update the names of classifiers in every original csv input
 file. Replace '_1' and '_2' with the real classifier names.
 """

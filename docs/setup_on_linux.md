@@ -53,11 +53,21 @@ The next step is to set the environment variable `$PYTHONPATH` so that our inter
     export LIBCBM_DATA="$HOME/repos/libcbm_data/"
     export LIBCBM_AIDB="$HOME/repos/libcbm_aidb/"
 
-## Run
+## Run one country
 
-You should now be ready to run the pipeline by entering the following at the python console:
+Run a given country from the historical scenario.
 
-    from libcbm_runner.core.continent import continent
-    scenario = continent.scenarios['historical']
-    runner_libcbm = scenario.runners['LU'][-1]
-    runner_libcbm.run(keep_in_ram=True, verbose=True, interrupt_on_error=True)
+You can use these commands in python:
+
+    >>> from libcbm_runner.core.continent import continent
+    >>> scenario = continent.scenarios['historical']
+    >>> runner_libcbm = scenario.runners['LU'][-1]
+    >>> runner_libcbm.run(keep_in_ram=True, verbose=True, interrupt_on_error=True)
+
+## Run all countries
+
+To run a full scenario, proceed as so:
+
+     >>> from libcbm_runner.core.continent import continent
+     >>> scen = continent.scenarios['historical']
+     >>> scen()

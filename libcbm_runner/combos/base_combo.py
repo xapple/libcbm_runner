@@ -16,30 +16,33 @@ from p_tqdm import p_umap, t_map
 
 # First party modules #
 from autopaths      import Path
+from plumbing.cache import property_cached
 from plumbing.timer import Timer
 
 # Internal modules #
+from libcbm_runner.core.runner import Runner
 
 ###############################################################################
-class Scenario(object):
+class Combination(object):
     """
-    This object represents a harvest and economic scenario.
+    This object represents a combination of specific scenarios for different
+    activities and includes any other customization of a given model run.
 
-    Each Scenario subclass must define a list of Runner instances as
+    Each Combination subclass must define a list of Runner instances as
     the <self.runners> property. This enables the complete customization of
-    any Runner by the Scenario.
+    any Runner by the specific Combination instance.
 
-    You can run a scenario like this:
+    You can run a combo like this:
 
         >>> from libcbm_runner.core.continent import continent
-        >>> scen = continent.scenarios['historical']
-        >>> scen()
+        >>> combo = continent.combos['historical']
+        >>> combo()
 
     You can run a specific runner from a given country like this:
 
         >>> from libcbm_runner.core.continent import continent
-        >>> scenario = continent.scenarios['historical']
-        >>> r = scenario.runners['LU'][-1]
+        >>> combo = continent.combos['historical']
+        >>> r = combo.runners['LU'][-1]
         >>> r.run(True, True, True)
 
     You can then check the output pools:
@@ -52,8 +55,10 @@ class Scenario(object):
     def __init__(self, continent):
         # Save parent #
         self.continent = continent
-        # This scenario dir #
-        self.base_dir = Path(self.scenarios_dir + self.short_name + '/')
+        # The combos dir used for all output #
+        self.combos_dir = self.continent.combos_dir
+        # The base dir for our output #
+        self.base_dir = Path(self.combos_dir + self.short_name + '/')
 
     def __repr__(self):
         return '%s object with %i runners' % (self.__class__, len(self))
@@ -66,21 +71,19 @@ class Scenario(object):
         return self.runners[key]
 
     #----------------------------- Properties --------------------------------#
-    @property
-    def scenarios_dir(self):
-        """Shortcut to the scenarios directory."""
-        return self.continent.scenarios_dir
-
-    @property
+    @property_cached
     def runners(self):
-        msg = "You should inherit from this class and implement this property."
-        raise NotImplementedError(msg)
+        """
+        A dictionary of country codes as keys with a list of runners as
+        values.
+        """
+        return {c.iso2_code: [Runner(self, c, 0)] for c in self.continent}
 
     #------------------------------- Methods ---------------------------------#
     def __call__(self, parallel=False, timer=True):
-        """A method to run a scenarios by simulating all countries."""
+        """A method to run a combo by simulating all countries."""
         # Message #
-        print("Running scenario '%s'." % self.short_name)
+        print("Running combo '%s'." % self.short_name)
         # Timer start #
         timer = Timer()
         timer.print_start()
@@ -119,5 +122,8 @@ class Scenario(object):
             summary.handle.write(content)
         # Close #
         summary.close()
+        # Message #
+        msg = "Log files compiled at:\n\n%s\n"
+        print(msg % summary)
         # Return #
         return summary

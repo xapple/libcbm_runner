@@ -24,7 +24,7 @@ Typically you would run this file from a command line like this:
 from libcbm_runner.core.continent import continent
 
 ################################################################################
-scenario = continent.scenarios['historical']
-runner   = scenario.runners['ZZ'][-1]
-runner.run(True, True, True)
+combo  = continent.combos['historical']
+runner = combo.runners['ZZ'][-1]
+runner.run(keep_in_ram=True, verbose=True, interrupt_on_error=True)
 
