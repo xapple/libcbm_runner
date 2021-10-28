@@ -136,6 +136,10 @@ class MakeActivities(object):
         self.make_interface()
         # Switch events files to the wide format #
         self.make_events_wide()
+        # Add the scenario column to every file #
+        self.add_scen_column()
+        # Fix the transitions file #
+        self.restore_header()
         # Return #
         return self.country_interface_dir
 
@@ -207,6 +211,42 @@ class MakeActivities(object):
         wide.to_csv(str(path), index=False)
         # Return #
         return str(path)
+
+    def add_scen_column(self):
+        # LU was already done previously #
+        if self.country.iso2_code == 'LU': return
+        # The files #
+        files_to_be_modify = ['growth_curves',
+                              'transitions',
+                              'inventory']
+        # Create the four dynamic files #
+        for input_file in files_to_be_modify:
+            # The path to the file that we will modify #
+            path = self.new_paths[input_file]
+            # Read the file #
+            df = pandas.read_csv(str(path))
+            # Add column #
+            df.insert(0, 'scenario', 'reference')
+            # Write output #
+            df.to_csv(str(path), index=False, float_format='%g')
+
+    #-------------------------- Post-processing -------------------------------#
+    def restore_header(self):
+        """
+        In a pandas dataframe, the column names have to be unique, because
+        they are implemented as an index. However in the file
+        "transition_rules", column names are repeated. So we have to restore
+        these headers afterwards.
+        """
+        # Read from disk #
+        header = self.new_paths.transitions.first
+        # Modify #
+        header = header.split(',')
+        header = [n.replace('.1', '') for n in header]
+        header = ','.join(header)
+        # Write to disk #
+        self.new_paths.transitions.remove_first_line()
+        self.new_paths.transitions.prepend(header)
 
 ###############################################################################
 if __name__ == '__main__':
