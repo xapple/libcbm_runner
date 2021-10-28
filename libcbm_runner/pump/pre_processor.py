@@ -29,8 +29,6 @@ class PreProcessor(object):
         self.parent  = parent
         self.runner  = parent
         self.country = parent.country
-        # Shortcuts #
-        self.input  = self.runner.input_data
 
     def __repr__(self):
         return '%s object code "%s"' % (self.__class__, self.runner.short_name)
@@ -40,7 +38,7 @@ class PreProcessor(object):
         # Message #
         self.parent.log.info("Pre-processing input data.")
         # Check empty lines in all inputs #
-        for item in self.input.paths._paths:
+        for item in self.runner.input_data.paths._paths:
             csv_path = item.path_obj
             if csv_path.extension != 'csv': continue
             self.raise_empty_lines(csv_path)
