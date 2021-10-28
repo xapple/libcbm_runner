@@ -11,7 +11,6 @@ Unit D1 Bioeconomy.
 # Built-in modules #
 
 # Third party modules #
-import pandas
 
 # First party modules #
 

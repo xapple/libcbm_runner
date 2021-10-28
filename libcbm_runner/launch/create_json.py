@@ -75,7 +75,7 @@ class CreateJSON(object):
         config = self.template.copy()
         # Get the mapping config sub dictionary #
         maps = config['mapping_config']
-        # Retrieve the four classifiers mappings #
+        # Retrieve the four classifiers mappings as a dict #
         mappings = self.runner.country.associations.all_mappings
         # Set the admin and eco classifiers #
         maps['spatial_units']['admin_mapping'] = mappings['map_admin_bound']

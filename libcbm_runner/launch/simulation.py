@@ -9,7 +9,6 @@ Unit D1 Bioeconomy.
 """
 
 # Built-in modules #
-import sys
 
 # Third party modules #
 from libcbm.input.sit import sit_cbm_factory

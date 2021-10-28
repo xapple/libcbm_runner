@@ -26,5 +26,5 @@ from libcbm_runner.core.continent import continent
 ################################################################################
 combo  = continent.combos['historical']
 runner = combo.runners['ZZ'][-1]
-runner.run(True, True, True)
+runner.run(keep_in_ram=True, verbose=True, interrupt_on_error=True)
 
