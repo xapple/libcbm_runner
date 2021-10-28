@@ -127,15 +127,6 @@ class Runner(object):
         return InternalData(self)
 
     #----------------------------- Properties --------------------------------#
-    @property
-    def combo_data_dir(self):
-        """
-        A directory that contains original data specific only to the current
-        combo. Typically this can be a directory such as:
-        `libcbm_data/countries/AT/combos/mixed_policies/`
-        """
-        return self.country.data_dir + 'combos/' + self.combo.short_name + '/'
-
     @property_cached
     def log(self):
         """
@@ -193,8 +184,8 @@ class Runner(object):
         self.timer.print_start()
         # Clean everything from previous run #
         self.remove_directories()
-        # Copy the original input data #
-        self.input_data.copy_orig_from_country()
+        # Create the input data #
+        self.input_data()
         # Modify input data, combos can subclass this #
         self.modify_input()
         # Pre-processing #
