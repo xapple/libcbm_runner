@@ -23,12 +23,41 @@ class Historical(Combination):
     This combo simulates the historical period ranging from
     the <country.start_year> until 2015, but no further.
 
+    It uses the `reference` scenario for all activities.
+
     This combo represents a demand that is pre-calculated and is not a
     function of the maximum wood supply. There is no interaction yet with the
     GFTM model.
     """
 
     short_name = 'historical'
+
+    silv = {'product_type':   'reference',
+            'silv_practices': 'reference'}
+
+    inventory  = {'mgmt':          'reference',
+                  'afforestation': 'reference',
+                  'nd_sr':         'reference',
+                  'nd_nsr':        'reference',
+                  'deforestation': 'reference'}
+
+    events     = {'afforestation': 'reference',
+                  'mgmt':          'reference',
+                  'deforestation': 'reference',
+                  'nd_sr':         'reference',
+                  'nd_nsr':        'reference'}
+
+    growth     = {'afforestation': 'reference',
+                  'mgmt':          'reference',
+                  'deforestation': 'reference',
+                  'nd_sr':         'reference',
+                  'nd_nsr':        'reference'}
+
+    transition = {'afforestation': 'reference',
+                  'mgmt':          'reference',
+                  'deforestation': 'reference',
+                  'nd_sr':         'reference',
+                  'nd_nsr':        'reference'}
 
     @property_cached
     def runners(self):
@@ -42,9 +71,7 @@ class Historical(Combination):
 ###############################################################################
 class HistoricalRunner(Runner):
     """
-    With this class we are able to sub-class any methods from the parent
-    `Runner` class and change their behavior in ways that suit this specific
-    combo.
+    Like a normal runner, but we redefine the num_timesteps property.
     """
 
     @property_cached

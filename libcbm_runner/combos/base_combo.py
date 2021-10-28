@@ -16,9 +16,11 @@ from p_tqdm import p_umap, t_map
 
 # First party modules #
 from autopaths      import Path
+from plumbing.cache import property_cached
 from plumbing.timer import Timer
 
 # Internal modules #
+from libcbm_runner.core.runner import Runner
 
 ###############################################################################
 class Combination(object):
@@ -53,7 +55,9 @@ class Combination(object):
     def __init__(self, continent):
         # Save parent #
         self.continent = continent
-        # This combos dir #
+        # The combos dir used for all output #
+        self.combos_dir = self.continent.combos_dir
+        # The base dir for our output #
         self.base_dir = Path(self.combos_dir + self.short_name + '/')
 
     def __repr__(self):
@@ -67,15 +71,13 @@ class Combination(object):
         return self.runners[key]
 
     #----------------------------- Properties --------------------------------#
-    @property
-    def combos_dir(self):
-        """Shortcut to the combos directory."""
-        return self.continent.combos_dir
-
-    @property
+    @property_cached
     def runners(self):
-        msg = "You should inherit from this class and implement this property."
-        raise NotImplementedError(msg)
+        """
+        A dictionary of country codes as keys with a list of runners as
+        values.
+        """
+        return {c.iso2_code: [Runner(self, c, 0)] for c in self.continent}
 
     #------------------------------- Methods ---------------------------------#
     def __call__(self, parallel=False, timer=True):
