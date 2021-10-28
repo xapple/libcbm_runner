@@ -22,3 +22,11 @@ class Special(Combination):
     """
 
     short_name = 'special'
+
+    transitions = {'afforestation': 'enhanced_growth',
+                   'mgmt':          'reference',
+                   'nd_nsr':        'insect_outbreak',
+                   'nd_sr':         'high_windstorms'}
+
+    inventory   = {'afforestation': 'more_afforestation',
+                   'mgmt':          'reference'}

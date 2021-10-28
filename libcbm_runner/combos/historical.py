@@ -35,29 +35,29 @@ class Historical(Combination):
     silv = {'product_type':   'reference',
             'silv_practices': 'reference'}
 
-    inventory  = {'mgmt':          'reference',
-                  'afforestation': 'reference',
-                  'nd_sr':         'reference',
-                  'nd_nsr':        'reference',
-                  'deforestation': 'reference'}
+    inventory   = {'afforestation': 'reference',
+                   'deforestation': 'reference',
+                   'mgmt':          'reference',
+                   'nd_nsr':        'reference',
+                   'nd_sr':         'reference'}
 
-    events     = {'afforestation': 'reference',
-                  'mgmt':          'reference',
-                  'deforestation': 'reference',
-                  'nd_sr':         'reference',
-                  'nd_nsr':        'reference'}
+    events      = {'afforestation': 'reference',
+                   'deforestation': 'reference',
+                   'mgmt':          'reference',
+                   'nd_nsr':        'reference',
+                   'nd_sr':         'reference'}
 
-    growth     = {'afforestation': 'reference',
-                  'mgmt':          'reference',
-                  'deforestation': 'reference',
-                  'nd_sr':         'reference',
-                  'nd_nsr':        'reference'}
+    growth      = {'afforestation': 'reference',
+                   'deforestation': 'reference',
+                   'mgmt':          'reference',
+                   'nd_nsr':        'reference',
+                   'nd_sr':         'reference'}
 
-    transition = {'afforestation': 'reference',
-                  'mgmt':          'reference',
-                  'deforestation': 'reference',
-                  'nd_sr':         'reference',
-                  'nd_nsr':        'reference'}
+    transitions = {'afforestation': 'reference',
+                   'deforestation': 'reference',
+                   'mgmt':          'reference',
+                   'nd_nsr':        'reference',
+                   'nd_sr':         'reference'}
 
     @property_cached
     def runners(self):
