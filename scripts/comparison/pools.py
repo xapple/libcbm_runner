@@ -79,7 +79,7 @@ class ComparisonRunner(object):
     #--------- Scenarios ----------#
     @property
     def scen_cbmcfs3(self):
-        return cbmcfs3_continent.scenarios['static_demand']
+        return cbmcfs3_continent.scenarios['historical']
 
     @property
     def scen_libcbm(self):
@@ -173,6 +173,9 @@ class ComparisonRunner(object):
 
     #------------------------------- Methods ---------------------------------#
     def __call__(self):
+        # Make sure the directory exists #
+        self.paths.pools.directory.create_if_not_exists()
+        # Open the file for writing #
         with self.paths.pools.open('w') as handle:
             # Make a nice title #
             handle.write(self.title)
@@ -237,8 +240,11 @@ class Bundle:
 
 ###############################################################################
 if __name__ == '__main__':
+    # Print message #
+    msg = "Comparing pool values between: \n* %s\n* %s"
+    print(msg % (cbmcfs3_continent.base_dir, libcbm_continent.base_dir))
     # Skip these countries #
-    skip = ['GB', 'ZZ']
+    skip = ['ZZ']
     # Make comparisons objects, one per country #
     comparisons = [ComparisonRunner(c) for c in cbmcfs3_continent
                    if c.iso2_code not in skip]
