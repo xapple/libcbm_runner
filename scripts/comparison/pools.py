@@ -241,7 +241,7 @@ class Bundle:
 ###############################################################################
 if __name__ == '__main__':
     # Print message #
-    msg = "Comparing pool values between: \n* %s\n* %s"
+    msg = "Comparing pool values between: \n\n* %s\n* %s\n"
     print(msg % (cbmcfs3_continent.base_dir, libcbm_continent.base_dir))
     # Skip these countries #
     skip = ['ZZ']
