@@ -52,7 +52,7 @@ class AIDB(object):
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
         # Path to the database in a separate repository #
         self.repo_file = aidb_repo + 'countries/' + self.parent.iso2_code \
-                         + '/orig/config/aidb.db'
+                         + '/aidb.db'
 
     def __bool__(self):
         return bool(self.paths.aidb)
