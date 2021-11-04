@@ -47,6 +47,7 @@ class InputData:
         # Shortcuts #
         self.orig    = self.runner.country.orig_data
         self.combo   = self.runner.combo
+        self.code    = self.runner.country.iso2_code
         self.act_dir = self.orig.paths.activities_dir
 
     def __repr__(self):
@@ -63,7 +64,7 @@ class InputData:
         # Return #
         return df
 
-    def __call__(self):
+    def __call__(self, debug=False):
         """
         Create the input data files based on the scenario chosen for each
         different activity in the current combination.
@@ -84,6 +85,10 @@ class InputData:
             choices = getattr(self.combo, input_file, {})
             # Initialize #
             result = pandas.DataFrame()
+            # Optional debug message #
+            msg = "Input file '%s' and combo '%s' for country '%s':"
+            params = (input_file, self.combo.short_name, self.code)
+            if debug: print(msg % params)
             # Iterate over every activity that is defined #
             for activity in choices:
                 # Check it exists #
@@ -101,10 +106,15 @@ class InputData:
                 scenario = choices[activity]
                 # Filter rows to take only this scenario #
                 df = df.query("scenario == '%s'" % scenario)
+                # Optional debug message #
+                msg = "   * for activity '%s', scenario '%s': %i rows"
+                if debug: print(msg % (activity, scenario, len(df)))
                 # Append #
                 result = result.append(df)
             # Remove the scenario column #
             if not result.empty: result = result.drop(columns=['scenario'])
+            # Optional debug message #
+            if debug: print("   * result -> %i rows total\n" % len(result))
             # Write output #
             result.to_csv(str(out_path), index=False)
         # Filter the rows for the `extras` files #
