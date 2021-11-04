@@ -132,14 +132,14 @@ class MakeActivities(object):
         self.move_stuff()
         # Create empty files for all possible activities #
         self.create_activities()
-        # Makes lots of flat symlinks #
-        self.make_interface()
         # Switch events files to the wide format #
         self.make_events_wide()
         # Add the scenario column to every file #
         self.add_scen_column()
         # Fix the transitions file #
         self.restore_header()
+        # Makes lots of flat symlinks #
+        self.make_interface()
         # Return #
         return self.country_interface_dir
 
@@ -170,33 +170,6 @@ class MakeActivities(object):
                 directory.create_if_not_exists()
                 file = directory + item
                 file.touch()
-
-    @property
-    def country_interface_dir(self):
-        return interface_dir + self.country.iso2_code + '/'
-
-    def make_interface(self):
-        # Create the directory #
-        self.country_interface_dir.create_if_not_exists()
-        # Shortcut #
-        base = self.country_interface_dir + self.country.iso2_code + '_'
-        # Common #
-        for item in self.common_list:
-            file = self.new_paths[item]
-            file.link_to(base + 'config_' + file.name)
-        # Silv #
-        for item in self.silv_list:
-            file = self.new_paths[item]
-            file.link_to(base + 'config_' + file.name)
-        # Config #
-        for item in self.config_list:
-            file = self.new_paths[item]
-            file.link_to(base + 'config_' + file.name)
-        # Activities #
-        for subdir in self.new_paths.activities_dir.flat_directories:
-            act = subdir.name
-            for file in subdir.flat_files:
-                file.link_to(base + act + '_' + file.name)
 
     def make_events_wide(self):
         # The path to the mgmt events file #
@@ -248,8 +221,38 @@ class MakeActivities(object):
         self.new_paths.transitions.remove_first_line()
         self.new_paths.transitions.prepend(header)
 
+    #------------------------- The flat symlinks ------------------------------#
+    @property
+    def country_interface_dir(self):
+        return interface_dir + self.country.iso2_code + '/'
+
+    def make_interface(self):
+        # Create the directory #
+        self.country_interface_dir.create_if_not_exists()
+        # Shortcut #
+        base = self.country_interface_dir + self.country.iso2_code + '_'
+        # Common #
+        for item in self.common_list:
+            file = self.new_paths[item]
+            file.link_to(base + 'config_' + file.name)
+        # Silv #
+        for item in self.silv_list:
+            file = self.new_paths[item]
+            file.link_to(base + 'config_' + file.name)
+        # Config #
+        for item in self.config_list:
+            file = self.new_paths[item]
+            file.link_to(base + 'config_' + file.name)
+        # Activities #
+        for subdir in self.new_paths.activities_dir.flat_directories:
+            act = subdir.name
+            for file in subdir.flat_files:
+                file.link_to(base + act + '_' + file.name)
+        # Return #
+        return base
+
 ###############################################################################
 if __name__ == '__main__':
     makers = [MakeActivities(c) for c in continent]
-    for maker in tqdm(makers):
-        maker()
+    print([maker.make_interface() for maker in tqdm(makers)])
+
