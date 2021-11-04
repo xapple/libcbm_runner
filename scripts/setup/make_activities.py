@@ -9,6 +9,7 @@ Unit D1 Bioeconomy.
 """
 
 # Built-in modules #
+import os
 
 # Third party modules #
 from libcbm_runner.pump.pre_processor import PreProcessor
@@ -69,6 +70,11 @@ class MakeActivities(object):
     providing a user interface to the input data which is compatible with
     Excel that has the ridiculous limitation of not being able to open two
     files with the same name.
+
+    In the case of windows, symbolic links don't overcome this limitation and
+    Excel still complains when it opens two symbolic links that point to
+    different files. If using windows, refer to the script
+    "update_win_interface.py" that makes hard links instead of soft links.
     """
 
     #------------------------------ File lists -------------------------------#
@@ -226,41 +232,32 @@ class MakeActivities(object):
     def country_interface_dir(self):
         return interface_dir + self.country.iso2_code + '/'
 
-    def make_interface(self):
+    def make_interface(self, hardlinks_windows=False, debug=False):
         # Create the directory #
         self.country_interface_dir.create_if_not_exists()
         # Shortcut #
         base = self.country_interface_dir + self.country.iso2_code + '_'
-        # Common #
-        for item in self.common_list:
+        # Same case for all of: "Common, Silv, Config" #
+        for item in self.common_list + self.silv_list + self.config_list:
             file = self.new_paths[item]
             dest = base + 'config_' + file.name
             dest.remove()
-            file.link_to(dest)
-        # Silv #
-        for item in self.silv_list:
-            file = self.new_paths[item]
-            dest = base + 'config_' + file.name
-            dest.remove()
-            file.link_to(dest)
-        # Config #
-        for item in self.config_list:
-            file = self.new_paths[item]
-            dest = base + 'config_' + file.name
-            dest.remove()
-            file.link_to(dest)
-        # Activities #
+            if debug: print(str(file), " -> ", str(dest))
+            if hardlinks_windows: os.link(str(file), str(dest))
+            else:                 file.link_to(dest)
+        # Different case for "Activities" #
         for subdir in self.new_paths.activities_dir.flat_directories:
             act = subdir.name
             for file in subdir.flat_files:
                 dest = base + act + '_' + file.name
                 dest.remove()
-                file.link_to(dest)
+                if debug: print(str(file), " -> ", str(dest))
+                if hardlinks_windows: os.link(str(file), str(dest))
+                else:                 file.link_to(dest)
         # Return #
         return base
 
 ###############################################################################
-if __name__ == '__main__':
-    makers = [MakeActivities(c) for c in continent]
-    print([maker.make_interface() for maker in tqdm(makers)])
+makers = [MakeActivities(c) for c in continent]
+if __name__ == '__main__': print([maker() for maker in tqdm(makers)])
 
