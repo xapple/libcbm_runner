@@ -44,11 +44,8 @@ class PreProcessor(object):
                    if item.path_obj.extension == 'csv']
         # Check empty lines in all CSV inputs #
         for csv_path in all_csv: self.raise_empty_lines(csv_path)
-        # Reshape the events file from the wide to the long format #
-        path = self.input.paths.events
-        wide = pandas.read_csv(str(path))
-        long = self.events_wide_to_long(wide)
-        long.to_csv(str(path), index=False)
+        # Reshape the events file #
+        self.reshape_events()
 
     #------------------------------- Methods ---------------------------------#
     @staticmethod
@@ -68,6 +65,13 @@ class PreProcessor(object):
         # Warn #
         msg = "The file '%s' has %i empty lines."
         raise Exception(msg % (csv_path, empty_lines.sum()))
+
+    def reshape_events(self):
+        """Reshape the events file from the wide to the long format"""
+        path = self.input.paths.events
+        wide = pandas.read_csv(str(path))
+        long = self.events_wide_to_long(wide)
+        long.to_csv(str(path), index=False)
 
     #------------------------ Dataframe conversions --------------------------#
     def events_wide_to_long(self, events):
