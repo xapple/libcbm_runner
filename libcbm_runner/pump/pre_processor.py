@@ -39,13 +39,19 @@ class PreProcessor(object):
     def __call__(self):
         # Message #
         self.parent.log.info("Pre-processing input data.")
-        # Get all CSV inputs in a list #
-        all_csv = [item.path_obj for item in self.input.paths._paths
-                   if item.path_obj.extension == 'csv']
         # Check empty lines in all CSV inputs #
-        for csv_path in all_csv: self.raise_empty_lines(csv_path)
+        for csv_path in self.all_csv: self.raise_empty_lines(csv_path)
         # Reshape the events file #
         self.reshape_events()
+        # Check there are no negative timesteps #
+        self.raise_bad_timestep()
+
+    #----------------------------- Properties --------------------------------#
+    @property
+    def all_csv(self):
+        """Get all CSV inputs in a list."""
+        return [item.path_obj for item in self.input.paths._paths
+                if item.path_obj.extension == 'csv']
 
     #------------------------------- Methods ---------------------------------#
     @staticmethod
@@ -78,6 +84,26 @@ class PreProcessor(object):
         long = self.events_wide_to_long(wide)
         # Write to disk #
         long.to_csv(str(path), index=False)
+
+    def raise_bad_timestep(self):
+        """
+        Raise an Exception if there are are timesteps with a value below 0.
+        """
+        # Path to the file we want to check #
+        path = str(self.input.paths.events)
+        # Load from disk #
+        try: df = pandas.read_csv(path)
+        # If the file is empty we can skip it #
+        except pandas.errors.EmptyDataError: return
+        # Get negative values #
+        negative_values = df['step'] < 0
+        # Check if there are any #
+        if not any(negative_values): return
+        # Warn #
+        msg = "The file '%s' has %i negative values for the timestep column." \
+              " This means you are attempting to apply disturbances to a" \
+              " year that is anterior to the inventory start year configured."
+        raise Exception(msg % (path, negative_values.sum()))
 
     #------------------------ Dataframe conversions --------------------------#
     def events_wide_to_long(self, events):
