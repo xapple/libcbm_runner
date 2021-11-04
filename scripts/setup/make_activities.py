@@ -234,20 +234,28 @@ class MakeActivities(object):
         # Common #
         for item in self.common_list:
             file = self.new_paths[item]
-            file.link_to(base + 'config_' + file.name)
+            dest = base + 'config_' + file.name
+            dest.remove()
+            file.link_to(dest)
         # Silv #
         for item in self.silv_list:
             file = self.new_paths[item]
-            file.link_to(base + 'config_' + file.name)
+            dest = base + 'config_' + file.name
+            dest.remove()
+            file.link_to(dest)
         # Config #
         for item in self.config_list:
             file = self.new_paths[item]
-            file.link_to(base + 'config_' + file.name)
+            dest = base + 'config_' + file.name
+            dest.remove()
+            file.link_to(dest)
         # Activities #
         for subdir in self.new_paths.activities_dir.flat_directories:
             act = subdir.name
             for file in subdir.flat_files:
-                file.link_to(base + act + '_' + file.name)
+                dest = base + act + '_' + file.name
+                dest.remove()
+                file.link_to(dest)
         # Return #
         return base
 
