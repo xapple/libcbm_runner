@@ -25,6 +25,14 @@ class InputData:
     as several pandas data frames.
     The files listed here are the ones used to create the JSON that is
     consumed by `libcbm`.
+
+    Example use:
+
+        >>> from libcbm_runner.core.continent import continent
+        >>> combo = continent.combos['historical']
+        >>> r = combo.runners['LU'][-1]
+        >>> print(r.input_data.classifiers_list)
+
     """
 
     all_paths = """
@@ -63,6 +71,12 @@ class InputData:
         df = self[name]
         # Return #
         return df
+
+    @property
+    def classifiers_list(self):
+        """Get the list of classifiers for index computation purposes"""
+        df = self["classifiers"].query("classifier_value_id == '_CLASSIFIER'")
+        return df["name"].to_list()
 
     def __call__(self, debug=False):
         """
