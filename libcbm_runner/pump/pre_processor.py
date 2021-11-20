@@ -72,8 +72,8 @@ class PreProcessor(object):
         msg = "The file '%s' has %i empty lines."
         raise Exception(msg % (csv_path, empty_lines.sum()))
 
-    def reshape_events(self, debug=True):
-        """Reshape the events file from the wide to the long format"""
+    def reshape_events(self, debug=False):
+        """Reshape the events file from the wide to the long format."""
         # The events file #
         path = self.input.paths.events
         # Optionally make a copy #
@@ -87,7 +87,7 @@ class PreProcessor(object):
 
     def raise_bad_timestep(self):
         """
-        Raise an Exception if there are are timesteps with a value below 0.
+        Raise an Exception if there are are timesteps with a value below zero.
         """
         # Path to the file we want to check #
         path = str(self.input.paths.events)
