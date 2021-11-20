@@ -64,13 +64,6 @@ class InputData:
     def __getitem__(self, item):
         return pandas.read_csv(str(self.paths[item]))
 
-    #----------------------------- Properties --------------------------------#
-    @property
-    def classifiers_list(self):
-        """Get the list of classifiers for index computation purposes."""
-        df = self["classifiers"].query("classifier_value_id == '_CLASSIFIER'")
-        return df["name"].to_list()
-
     #------------------------------- Methods ---------------------------------#
     def load(self, name):
         """Loads one of the dataframes."""
