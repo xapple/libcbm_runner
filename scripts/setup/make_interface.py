@@ -16,10 +16,11 @@ from tqdm import tqdm
 # First party modules #
 
 # Internal modules #
-from make_activities import makers
+from libcbm_runner.core.continent import continent
+from activities_creation import MakeActivities
 
 ###############################################################################
-# See script "make_activities.py" for documentation
+makers = [MakeActivities(c) for c in continent]
 if __name__ == '__main__':
-    print([maker.make_interface(True, True) for maker in tqdm(makers)])
+    print([maker.make_interface() for maker in tqdm(makers)])
 

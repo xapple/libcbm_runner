@@ -12,7 +12,6 @@ Unit D1 Bioeconomy.
 import os
 
 # Third party modules #
-from libcbm_runner.pump.pre_processor import PreProcessor
 from tqdm import tqdm
 import pandas
 
@@ -21,6 +20,7 @@ from autopaths.auto_paths import AutoPaths
 
 # Internal modules #
 from libcbm_runner.core.continent import continent, libcbm_data_dir
+from libcbm_runner.pump.pre_processor import PreProcessor
 
 # Constants #
 interface_dir = libcbm_data_dir + 'interface/'
@@ -35,7 +35,7 @@ class MakeActivities(object):
     More information is contained in the notebooks of the `bioeconomy_notes`
     repository. An example directory structure is the following:
 
-        LU
+        ZZ
         ├── activities
         │   ├── afforestation
         │   │   ├── events.csv
@@ -60,21 +60,11 @@ class MakeActivities(object):
         │   ├── classifiers.csv
         │   └── disturbance_types.csv
         ├── orig
-        │   ├── aidb.db -> libcbm_aidb/countries/LU/orig/config/aidb.db
+        │   ├── aidb.db -> libcbm_aidb/countries/ZZ/orig/config/aidb.db
         │   └── associations.csv
         └── silv
             ├── product_types.csv
             └── silvicultural_practices.csv
-
-    It will also create symlinks to these files in a flat hierarchy, in essence
-    providing a user interface to the input data which is compatible with
-    Excel that has the ridiculous limitation of not being able to open two
-    files with the same name.
-
-    In the case of windows, symbolic links don't overcome this limitation and
-    Excel still complains when it opens two symbolic links that point to
-    different files. If using windows, refer to the script
-    "update_win_interface.py" that makes hard links instead of soft links.
     """
 
     #------------------------------ File lists -------------------------------#
@@ -87,6 +77,8 @@ class MakeActivities(object):
 
     mgmt_list = ['events.csv', 'inventory.csv', 'transitions.csv',
                  'growth_curves.csv']
+
+    activities = ['afforestation', 'deforestation', 'mgmt', 'nd_nsr', 'nd_sr']
 
     #------------------------------ Autopaths --------------------------------#
     old_all_paths = """
@@ -122,7 +114,7 @@ class MakeActivities(object):
     /silv/silvicultural_practices.csv
     """
 
-    #------------------------------- Methods ---------------------------------#
+    #--------------------------- Special Methods -----------------------------#
     def __repr__(self):
         return '%s object code "%s"' % (self.__class__, self.country.iso2_code)
 
@@ -144,11 +136,8 @@ class MakeActivities(object):
         self.add_scen_column()
         # Fix the transitions file #
         self.restore_header()
-        # Makes lots of flat symlinks #
-        self.make_interface()
-        # Return #
-        return self.country_interface_dir
 
+    #------------------------------- Methods ---------------------------------#
     def move_stuff(self):
         # Common #
         for item in self.common_list:
@@ -164,8 +153,6 @@ class MakeActivities(object):
             self.old_paths[item].move_to(self.new_paths[item])
         # Remove old directories #
         self.country.data_dir.remove_empty_dirs()
-
-    activities = ['afforestation', 'deforestation', 'mgmt', 'nd_nsr', 'nd_sr']
 
     def create_activities(self):
         # Other activities #
@@ -209,13 +196,12 @@ class MakeActivities(object):
             # Write output #
             df.to_csv(str(path), index=False, float_format='%g')
 
-    #-------------------------- Post-processing -------------------------------#
     def restore_header(self):
         """
         In a pandas dataframe, the column names have to be unique, because
         they are implemented as an index. However in the file
-        "transition_rules", column names are repeated. So we have to restore
-        these headers afterwards.
+        "transition_rules.csv", column names are repeated.
+        So we have to restore these headers afterwards.
         """
         # Read from disk #
         header = self.new_paths.transitions.first
@@ -227,35 +213,78 @@ class MakeActivities(object):
         self.new_paths.transitions.remove_first_line()
         self.new_paths.transitions.prepend(header)
 
-    #------------------------- The flat symlinks ------------------------------#
+    #------------------------- The flat symlinks -----------------------------#
     @property
     def country_interface_dir(self):
         return interface_dir + self.country.iso2_code + '/'
 
-    def make_interface(self, hardlinks_windows=False, debug=False):
+    @property
+    def interface_base(self):
+        return  self.country_interface_dir + self.country.iso2_code + '_'
+
+    def make_interface(self, hardlinks=True, debug=False):
+        """
+        This method can create symlinks to the input files in a flat hierarchy,
+        in essence providing a user interface to the input data.
+
+        This was originally developed to be compatible with Excel. The Excel
+        software has the ridiculous limitation of not being able to open two
+        files with the same name.
+
+        Moreover, in the case of windows, symbolic links don't overcome this
+        limitation and Excel still complains when it opens two symbolic links that
+        point to different files.
+
+        This issue is not fixed by using hard links instead of symbolic links.
+        This is because Excel never modifies a given file. When saving, it creates
+        a temporary file in the same directory, then deletes the original file and
+        renames the temporary file to the name of the original file. This destroys
+        the hard links upon every save operation.
+        """
         # Create the directory #
         self.country_interface_dir.create_if_not_exists()
-        # Shortcut #
-        base = self.country_interface_dir + self.country.iso2_code + '_'
         # Same case for all of: "Common, Silv, Config" #
         for item in self.common_list + self.silv_list + self.config_list:
             file = self.new_paths[item]
-            dest = base + 'config_' + file.name
+            dest = self.interface_base + 'config_' + file.name
             dest.remove()
             if debug: print(str(file), " -> ", str(dest))
-            if hardlinks_windows: os.link(str(file), str(dest))
+            if hardlinks: os.link(str(file), str(dest))
             else:                 file.link_to(dest)
         # Different case for "Activities" #
         for subdir in self.new_paths.activities_dir.flat_directories:
             act = subdir.name
             for file in subdir.flat_files:
-                dest = base + act + '_' + file.name
+                dest = self.interface_base + act + '_' + file.name
                 dest.remove()
                 if debug: print(str(file), " -> ", str(dest))
-                if hardlinks_windows: os.link(str(file), str(dest))
+                if hardlinks: os.link(str(file), str(dest))
                 else:                 file.link_to(dest)
         # Return #
-        return base
+        return self.interface_base
+
+    #------------------------ Copying files back -----------------------------#
+    def save_interface(self, debug=False):
+        """
+        In the end, the only way to make this `interface` work is to have a script
+        copy every file in the flat hierarchy back to it's expected place within
+        the `libcbm_data` repository.
+        """
+        # Same case for all of: "Common, Silv, Config" #
+        for item in self.common_list + self.silv_list + self.config_list:
+            file = self.new_paths[item]
+            source = self.interface_base + 'config_' + file.name
+            if debug: print(str(source), " -> ", str(file))
+            source.copy_to(file)
+        # Different case for "Activities" #
+        for subdir in self.new_paths.activities_dir.flat_directories:
+            act = subdir.name
+            for file in subdir.flat_files:
+                source = self.interface_base + act + '_' + file.name
+                if debug: print(str(source), " -> ", str(file))
+                source.copy_to(file)
+        # Return #
+        return self.interface_base
 
 ###############################################################################
 makers = [MakeActivities(c) for c in continent]
