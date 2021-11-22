@@ -19,8 +19,8 @@ replaced by "growth".
 
 * /export/growth_curves.csv
 
-This is useful to switch all the yield curves of every species as soon as we hit
-the country start year.
+This is useful to switch all the yield curves of every species as soon as we
+hit the country start year.
 """
 
 # Built-in modules #

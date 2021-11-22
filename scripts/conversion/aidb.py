@@ -10,16 +10,13 @@ Unit D1 Bioeconomy.
 This script will convert the AIDB from the old MS Access format supported by
 CBM-CFS3 to the new SQLite format supported by libcbm.
 
-Typically you would run this file from a command line like this:
+Typically you would run this file from a command line like this on a windows
+ system which has repositories in the home directory:
 
-     ipython3.exe -i -- /deploy/libcbm_runner/scripts/conversion/aidb.py
-
-Or on a windows system which has repositories in the home directory:
-
-     ipython3 -i -- %HOMEPATH%/repos/libcbm_runner/scripts/conversion/aidb.py
+     ipython3.exe -i -- %HOMEPATH%/repos/libcbm_runner/scripts/conversion/aidb.py
 
 You need to run this on a machine that has a Microsoft Access driver installed.
-So likely this will mean a Windows machine.
+So likely this will require a Windows machine.
 
 If you try on a Unix machine, even with `unixodbc` installed you will get an
 error such as:

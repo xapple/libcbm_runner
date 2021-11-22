@@ -44,9 +44,13 @@ class ClassifierRenamer(object):
         self.country = country
 
     def __call__(self):
+        # Get path #
         path = self.country.orig_data.paths.classifiers
+        # Load dataframe #
         df = pandas.read_csv(str(path))
+        # Modify dataframe #
         df['name'] = df['name'].replace(self.mapping)
+        # Write dataframe back to disk #
         df.to_csv(str(path), index=False, float_format='%g')
 
 ###############################################################################
