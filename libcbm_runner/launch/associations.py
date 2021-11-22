@@ -66,11 +66,11 @@ class Associations(object):
         >>> self.key_to_rows('MapDisturbanceType')
 
         {'10% commercial thinning': '10% Commercial thinning',
-         'Deforestation': 'Deforestation',
-         'Fire': 'Wild Fire',
-         'Generic 15%': 'generic 15% mortality',
-         'Generic 20%': 'generic 20% mortality',
-         'Generic 30%': 'generic 30% mortality'}
+         'Deforestation':           'Deforestation',
+         'Fire':                    'Wild Fire',
+         'Generic 15%':             'generic 15% mortality',
+         'Generic 20%':             'generic 20% mortality',
+         'Generic 30%':             'generic 30% mortality'}
         """
         # The query to filter results #
         query = "category == '%s'" % mapping_name
