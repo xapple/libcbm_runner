@@ -72,8 +72,13 @@ class Associations(object):
          'Generic 20%': 'generic 20% mortality',
          'Generic 30%': 'generic 30% mortality'}
         """
-        query   = "A == '%s'" % mapping_name
-        mapping = self.df.query(query).set_index('B')['C'].to_dict()
+        # The query to filter results #
+        query = "category == '%s'" % mapping_name
+        # Run query #
+        df = self.df.query(query).set_index('name_input')
+        # Get names that match the AIDB #
+        mapping = df['name_aidb'].to_dict()
+        # Return #
         return mapping
 
     def rows_to_list(self, mapping_name, user, default):
