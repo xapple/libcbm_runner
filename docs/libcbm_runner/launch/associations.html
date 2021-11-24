@@ -23,7 +23,7 @@
 </header>
 <section id="section-intro">
 <p>Written by Lucas Sinclair and Paul Rougieux.</p>
-<p>JRC biomass Project.
+<p>JRC Biomass Project.
 Unit D1 Bioeconomy.</p>
 <details class="source">
 <summary>
@@ -35,7 +35,7 @@ Unit D1 Bioeconomy.</p>
 &#34;&#34;&#34;
 Written by Lucas Sinclair and Paul Rougieux.
 
-JRC biomass Project.
+JRC Biomass Project.
 Unit D1 Bioeconomy.
 &#34;&#34;&#34;
 
@@ -61,40 +61,14 @@ class Associations(object):
         # Default attributes #
         self.parent = parent
 
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def df(self):
-        &#34;&#34;&#34;Load the CSV that is &#39;associations.csv&#39;.&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Load the CSV that is the original &#39;associations.csv&#39; from cbmcfs3.
+        The path is taken from the OrigData class.
+        &#34;&#34;&#34;
         return pandas.read_csv(str(self.parent.orig_data.paths.associations))
-
-    def key_to_rows(self, mapping_name):
-        &#34;&#34;&#34;
-        The *mapping_name* has to be one of &#34;keys&#34;.
-        Here is an example call:
-
-        &gt;&gt;&gt; self.key_to_rows(&#39;MapDisturbanceType&#39;)
-
-        {&#39;10% commercial thinning&#39;: &#39;10% Commercial thinning&#39;,
-         &#39;Deforestation&#39;: &#39;Deforestation&#39;,
-         &#39;Fire&#39;: &#39;Wild Fire&#39;,
-         &#39;Generic 15%&#39;: &#39;generic 15% mortality&#39;,
-         &#39;Generic 20%&#39;: &#39;generic 20% mortality&#39;,
-         &#39;Generic 30%&#39;: &#39;generic 30% mortality&#39;}
-        &#34;&#34;&#34;
-        query   = &#34;A == &#39;%s&#39;&#34; % mapping_name
-        mapping = self.df.query(query).set_index(&#39;B&#39;)[&#39;C&#39;].to_dict()
-        return mapping
-
-    def rows_to_list(self, mapping_name, user, default):
-        &#34;&#34;&#34;
-        Create a list string by picking the appropriate rows in the CSV file.
-
-        Here is an example call:
-
-        &gt;&gt;&gt; self.key_to_rows(&#39;MapSpecies&#39;, &#39;user_species&#39;, &#39;default_species&#39;)
-
-        {...}
-        &#34;&#34;&#34;
-        return [{user:k, default:v} for k,v in self.key_to_rows(mapping_name).items()]
 
     @property_cached
     def all_mappings(self):
@@ -112,7 +86,44 @@ class Associations(object):
            &#39;map_disturbance&#39;: self.rows_to_list(&#39;MapDisturbanceType&#39;,
                                                 &#39;user_dist_type&#39;,
                                                 &#39;default_dist_type&#39;),
-        }</code></pre>
+        }
+
+    #------------------------------- Methods ---------------------------------#
+    def key_to_rows(self, mapping_name):
+        &#34;&#34;&#34;
+        The *mapping_name* has to be one of &#34;keys&#34;.
+        Here is an example call:
+
+        &gt;&gt;&gt; self.key_to_rows(&#39;MapDisturbanceType&#39;)
+
+        {&#39;10% commercial thinning&#39;: &#39;10% Commercial thinning&#39;,
+         &#39;Deforestation&#39;:           &#39;Deforestation&#39;,
+         &#39;Fire&#39;:                    &#39;Wild Fire&#39;,
+         &#39;Generic 15%&#39;:             &#39;generic 15% mortality&#39;,
+         &#39;Generic 20%&#39;:             &#39;generic 20% mortality&#39;,
+         &#39;Generic 30%&#39;:             &#39;generic 30% mortality&#39;}
+        &#34;&#34;&#34;
+        # The query to filter results #
+        query = &#34;category == &#39;%s&#39;&#34; % mapping_name
+        # Run query #
+        df = self.df.query(query).set_index(&#39;name_input&#39;)
+        # Get names that match the AIDB #
+        mapping = df[&#39;name_aidb&#39;].to_dict()
+        # Return #
+        return mapping
+
+    def rows_to_list(self, mapping_name, user, default):
+        &#34;&#34;&#34;
+        Create a list string by picking the appropriate rows in the CSV file.
+
+        Here is an example call:
+
+        &gt;&gt;&gt; self.rows_to_list(&#39;MapSpecies&#39;, &#39;user_species&#39;, &#39;default_species&#39;)
+
+        {...}
+        &#34;&#34;&#34;
+        return [{user: k, default: v}
+                for k, v in self.key_to_rows(mapping_name).items()]</code></pre>
 </details>
 </section>
 <section>
@@ -147,40 +158,14 @@ libcbm.</p></div>
         # Default attributes #
         self.parent = parent
 
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def df(self):
-        &#34;&#34;&#34;Load the CSV that is &#39;associations.csv&#39;.&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Load the CSV that is the original &#39;associations.csv&#39; from cbmcfs3.
+        The path is taken from the OrigData class.
+        &#34;&#34;&#34;
         return pandas.read_csv(str(self.parent.orig_data.paths.associations))
-
-    def key_to_rows(self, mapping_name):
-        &#34;&#34;&#34;
-        The *mapping_name* has to be one of &#34;keys&#34;.
-        Here is an example call:
-
-        &gt;&gt;&gt; self.key_to_rows(&#39;MapDisturbanceType&#39;)
-
-        {&#39;10% commercial thinning&#39;: &#39;10% Commercial thinning&#39;,
-         &#39;Deforestation&#39;: &#39;Deforestation&#39;,
-         &#39;Fire&#39;: &#39;Wild Fire&#39;,
-         &#39;Generic 15%&#39;: &#39;generic 15% mortality&#39;,
-         &#39;Generic 20%&#39;: &#39;generic 20% mortality&#39;,
-         &#39;Generic 30%&#39;: &#39;generic 30% mortality&#39;}
-        &#34;&#34;&#34;
-        query   = &#34;A == &#39;%s&#39;&#34; % mapping_name
-        mapping = self.df.query(query).set_index(&#39;B&#39;)[&#39;C&#39;].to_dict()
-        return mapping
-
-    def rows_to_list(self, mapping_name, user, default):
-        &#34;&#34;&#34;
-        Create a list string by picking the appropriate rows in the CSV file.
-
-        Here is an example call:
-
-        &gt;&gt;&gt; self.key_to_rows(&#39;MapSpecies&#39;, &#39;user_species&#39;, &#39;default_species&#39;)
-
-        {...}
-        &#34;&#34;&#34;
-        return [{user:k, default:v} for k,v in self.key_to_rows(mapping_name).items()]
 
     @property_cached
     def all_mappings(self):
@@ -198,7 +183,44 @@ libcbm.</p></div>
            &#39;map_disturbance&#39;: self.rows_to_list(&#39;MapDisturbanceType&#39;,
                                                 &#39;user_dist_type&#39;,
                                                 &#39;default_dist_type&#39;),
-        }</code></pre>
+        }
+
+    #------------------------------- Methods ---------------------------------#
+    def key_to_rows(self, mapping_name):
+        &#34;&#34;&#34;
+        The *mapping_name* has to be one of &#34;keys&#34;.
+        Here is an example call:
+
+        &gt;&gt;&gt; self.key_to_rows(&#39;MapDisturbanceType&#39;)
+
+        {&#39;10% commercial thinning&#39;: &#39;10% Commercial thinning&#39;,
+         &#39;Deforestation&#39;:           &#39;Deforestation&#39;,
+         &#39;Fire&#39;:                    &#39;Wild Fire&#39;,
+         &#39;Generic 15%&#39;:             &#39;generic 15% mortality&#39;,
+         &#39;Generic 20%&#39;:             &#39;generic 20% mortality&#39;,
+         &#39;Generic 30%&#39;:             &#39;generic 30% mortality&#39;}
+        &#34;&#34;&#34;
+        # The query to filter results #
+        query = &#34;category == &#39;%s&#39;&#34; % mapping_name
+        # Run query #
+        df = self.df.query(query).set_index(&#39;name_input&#39;)
+        # Get names that match the AIDB #
+        mapping = df[&#39;name_aidb&#39;].to_dict()
+        # Return #
+        return mapping
+
+    def rows_to_list(self, mapping_name, user, default):
+        &#34;&#34;&#34;
+        Create a list string by picking the appropriate rows in the CSV file.
+
+        Here is an example call:
+
+        &gt;&gt;&gt; self.rows_to_list(&#39;MapSpecies&#39;, &#39;user_species&#39;, &#39;default_species&#39;)
+
+        {...}
+        &#34;&#34;&#34;
+        return [{user: k, default: v}
+                for k, v in self.key_to_rows(mapping_name).items()]</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
@@ -234,7 +256,8 @@ libcbm.</p></div>
 </dd>
 <dt id="libcbm_runner.launch.associations.Associations.df"><code class="name">var <span class="ident">df</span></code></dt>
 <dd>
-<div class="desc"><p>Load the CSV that is 'associations.csv'.</p></div>
+<div class="desc"><p>Load the CSV that is the original 'associations.csv' from cbmcfs3.
+The path is taken from the OrigData class.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -274,11 +297,16 @@ Here is an example call:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; self.key_to_rows('MapDisturbanceType')
 </code></pre>
 <p>{'10% commercial thinning': '10% Commercial thinning',
-'Deforestation': 'Deforestation',
-'Fire': 'Wild Fire',
-'Generic 15%': 'generic 15% mortality',
-'Generic 20%': 'generic 20% mortality',
-'Generic 30%': 'generic 30% mortality'}</p></div>
+'Deforestation':
+'Deforestation',
+'Fire':
+'Wild Fire',
+'Generic 15%':
+'generic 15% mortality',
+'Generic 20%':
+'generic 20% mortality',
+'Generic 30%':
+'generic 30% mortality'}</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -291,14 +319,19 @@ Here is an example call:</p>
     &gt;&gt;&gt; self.key_to_rows(&#39;MapDisturbanceType&#39;)
 
     {&#39;10% commercial thinning&#39;: &#39;10% Commercial thinning&#39;,
-     &#39;Deforestation&#39;: &#39;Deforestation&#39;,
-     &#39;Fire&#39;: &#39;Wild Fire&#39;,
-     &#39;Generic 15%&#39;: &#39;generic 15% mortality&#39;,
-     &#39;Generic 20%&#39;: &#39;generic 20% mortality&#39;,
-     &#39;Generic 30%&#39;: &#39;generic 30% mortality&#39;}
+     &#39;Deforestation&#39;:           &#39;Deforestation&#39;,
+     &#39;Fire&#39;:                    &#39;Wild Fire&#39;,
+     &#39;Generic 15%&#39;:             &#39;generic 15% mortality&#39;,
+     &#39;Generic 20%&#39;:             &#39;generic 20% mortality&#39;,
+     &#39;Generic 30%&#39;:             &#39;generic 30% mortality&#39;}
     &#34;&#34;&#34;
-    query   = &#34;A == &#39;%s&#39;&#34; % mapping_name
-    mapping = self.df.query(query).set_index(&#39;B&#39;)[&#39;C&#39;].to_dict()
+    # The query to filter results #
+    query = &#34;category == &#39;%s&#39;&#34; % mapping_name
+    # Run query #
+    df = self.df.query(query).set_index(&#39;name_input&#39;)
+    # Get names that match the AIDB #
+    mapping = df[&#39;name_aidb&#39;].to_dict()
+    # Return #
     return mapping</code></pre>
 </details>
 </dd>
@@ -308,7 +341,7 @@ Here is an example call:</p>
 <dd>
 <div class="desc"><p>Create a list string by picking the appropriate rows in the CSV file.</p>
 <p>Here is an example call:</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; self.key_to_rows('MapSpecies', 'user_species', 'default_species')
+<pre><code class="language-python-repl">&gt;&gt;&gt; self.rows_to_list('MapSpecies', 'user_species', 'default_species')
 </code></pre>
 <p>{&hellip;}</p></div>
 <details class="source">
@@ -321,11 +354,12 @@ Here is an example call:</p>
 
     Here is an example call:
 
-    &gt;&gt;&gt; self.key_to_rows(&#39;MapSpecies&#39;, &#39;user_species&#39;, &#39;default_species&#39;)
+    &gt;&gt;&gt; self.rows_to_list(&#39;MapSpecies&#39;, &#39;user_species&#39;, &#39;default_species&#39;)
 
     {...}
     &#34;&#34;&#34;
-    return [{user:k, default:v} for k,v in self.key_to_rows(mapping_name).items()]</code></pre>
+    return [{user: k, default: v}
+            for k, v in self.key_to_rows(mapping_name).items()]</code></pre>
 </details>
 </dd>
 </dl>

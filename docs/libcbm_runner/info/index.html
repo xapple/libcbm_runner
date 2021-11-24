@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>libcbm_runner API documentation</title>
-<meta name="description" content="Written by Lucas Sinclair and Paul Rougieux …" />
+<title>libcbm_runner.info API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,81 +19,24 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>libcbm_runner</code></h1>
+<h1 class="title">Namespace <code>libcbm_runner.info</code></h1>
 </header>
 <section id="section-intro">
-<p>Written by Lucas Sinclair and Paul Rougieux.</p>
-<p>JRC Biomass Project.
-Unit D1 Bioeconomy.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-&#34;&#34;&#34;
-Written by Lucas Sinclair and Paul Rougieux.
-
-JRC Biomass Project.
-Unit D1 Bioeconomy.
-&#34;&#34;&#34;
-
-# Special variables #
-__version__ = &#39;0.2.2&#39;
-
-# Built-in modules #
-import os, sys
-
-# First party modules #
-from autopaths import Path
-from autopaths.dir_path import DirectoryPath
-from plumbing.git import GitRepo
-
-# Constants #
-project_name = &#39;libcbm_runner&#39;
-project_url  = &#39;https://github.com/xapple/libcbm_runner&#39;
-
-# Get paths to module #
-self       = sys.modules[__name__]
-module_dir = Path(os.path.dirname(self.__file__))
-
-# The repository directory #
-repos_dir = module_dir.directory
-
-# The module is maybe in a git repository #
-git_repo = GitRepo(repos_dir, empty=True)
-
-# Where is the data, default case #
-libcbm_data_dir = DirectoryPath(&#34;~/repos/libcbm_data/&#34;)
-
-# But you can override that with an environment variable #
-if os.environ.get(&#34;LIBCBM_DATA&#34;):
-    libcbm_data_dir = DirectoryPath(os.environ[&#39;LIBCBM_DATA&#39;])</code></pre>
-</details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="libcbm_runner.combos" href="combos/index.html">libcbm_runner.combos</a></code></dt>
+<dt><code class="name"><a title="libcbm_runner.info.aidb" href="aidb.html">libcbm_runner.info.aidb</a></code></dt>
 <dd>
 <div class="desc"><p>Written by Lucas Sinclair and Paul Rougieux …</p></div>
 </dd>
-<dt><code class="name"><a title="libcbm_runner.core" href="core/index.html">libcbm_runner.core</a></code></dt>
+<dt><code class="name"><a title="libcbm_runner.info.input_data" href="input_data.html">libcbm_runner.info.input_data</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Written by Lucas Sinclair and Paul Rougieux …</p></div>
 </dd>
-<dt><code class="name"><a title="libcbm_runner.info" href="info/index.html">libcbm_runner.info</a></code></dt>
+<dt><code class="name"><a title="libcbm_runner.info.orig_data" href="orig_data.html">libcbm_runner.info.orig_data</a></code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="libcbm_runner.launch" href="launch/index.html">libcbm_runner.launch</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="libcbm_runner.pump" href="pump/index.html">libcbm_runner.pump</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>Written by Lucas Sinclair and Paul Rougieux …</p></div>
 </dd>
 </dl>
 </section>
@@ -110,13 +53,16 @@ if os.environ.get(&#34;LIBCBM_DATA&#34;):
 <ul></ul>
 </div>
 <ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="libcbm_runner" href="../index.html">libcbm_runner</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="libcbm_runner.combos" href="combos/index.html">libcbm_runner.combos</a></code></li>
-<li><code><a title="libcbm_runner.core" href="core/index.html">libcbm_runner.core</a></code></li>
-<li><code><a title="libcbm_runner.info" href="info/index.html">libcbm_runner.info</a></code></li>
-<li><code><a title="libcbm_runner.launch" href="launch/index.html">libcbm_runner.launch</a></code></li>
-<li><code><a title="libcbm_runner.pump" href="pump/index.html">libcbm_runner.pump</a></code></li>
+<li><code><a title="libcbm_runner.info.aidb" href="aidb.html">libcbm_runner.info.aidb</a></code></li>
+<li><code><a title="libcbm_runner.info.input_data" href="input_data.html">libcbm_runner.info.input_data</a></code></li>
+<li><code><a title="libcbm_runner.info.orig_data" href="orig_data.html">libcbm_runner.info.orig_data</a></code></li>
 </ul>
 </li>
 </ul>

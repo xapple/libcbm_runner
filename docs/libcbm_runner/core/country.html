@@ -23,7 +23,7 @@
 </header>
 <section id="section-intro">
 <p>Written by Lucas Sinclair and Paul Rougieux.</p>
-<p>JRC biomass Project.
+<p>JRC Biomass Project.
 Unit D1 Bioeconomy.</p>
 <details class="source">
 <summary>
@@ -35,7 +35,7 @@ Unit D1 Bioeconomy.</p>
 &#34;&#34;&#34;
 Written by Lucas Sinclair and Paul Rougieux.
 
-JRC biomass Project.
+JRC Biomass Project.
 Unit D1 Bioeconomy.
 &#34;&#34;&#34;
 
@@ -46,27 +46,27 @@ import pandas
 
 # First party modules #
 from autopaths.dir_path   import DirectoryPath
-from autopaths.auto_paths import AutoPaths
 from plumbing.cache       import property_cached
 
 # Internal modules #
-from libcbm_runner.core.continent      import libcbm_data_dir
+from libcbm_runner                     import libcbm_data_dir
 from libcbm_runner.launch.associations import Associations
-from libcbm_runner.pump.orig_data      import OrigData
-from libcbm_runner.pump.aidb           import AIDB
+from libcbm_runner.info.orig_data      import OrigData
+from libcbm_runner.info.aidb           import AIDB
 
 # Country codes #
 all_country_codes = libcbm_data_dir + &#39;common/country_codes.csv&#39;
 all_country_codes = pandas.read_csv(str(all_country_codes))
+
+# Country reference years #
+ref_years = libcbm_data_dir + &#39;common/reference_years.csv&#39;
+ref_years = pandas.read_csv(str(ref_years))
 
 ###############################################################################
 class Country(object):
     &#34;&#34;&#34;
     This object gives access to the data pertaining to one country
     amongst the 26 EU member states we are examining.
-    &#34;&#34;&#34;
-
-    all_paths = &#34;&#34;&#34;
     &#34;&#34;&#34;
 
     def __repr__(self):
@@ -78,20 +78,12 @@ class Country(object):
         self.continent = continent
         # Main directory #
         self.data_dir = DirectoryPath(data_dir)
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.data_dir, self.all_paths)
         # Set country codes #
         self.set_codes()
+        # Store the reference years #
+        self.set_years()
 
-    @property_cached
-    def scenarios(self):
-        &#34;&#34;&#34;
-        A dictionary linking scenario names to a list of runners
-        that concern only this country.
-        &#34;&#34;&#34;
-        from cbmcfs3_runner.core.continent import continent
-        return {n: s.runners[self.iso2_code] for n, s in continent.scenarios.items()}
-
+    #---------------------------- Compositions -------------------------------#
     @property_cached
     def associations(self):
         &#34;&#34;&#34;
@@ -110,6 +102,23 @@ class Country(object):
         &#34;&#34;&#34;Access the immutable original data.&#34;&#34;&#34;
         return OrigData(self)
 
+    @property_cached
+    def cbmcfs3_country(self):
+        &#34;&#34;&#34;Access the corresponding country in the `cbmcfs3_runner` module.&#34;&#34;&#34;
+        from cbmcfs3_runner.core.continent import continent as cbm_continent
+        return cbm_continent.countries[self.iso2_code]
+
+    #----------------------------- Properties --------------------------------#
+    @property_cached
+    def combos(self):
+        &#34;&#34;&#34;
+        A dictionary linking combo names to a list of runners
+        that concern only this country.
+        &#34;&#34;&#34;
+        from cbmcfs3_runner.core.continent import continent
+        return {n: s.runners[self.iso2_code]
+                for n, s in continent.combos.items()}
+
     #------------------------------- Methods ---------------------------------#
     def set_codes(self):
         &#34;&#34;&#34;
@@ -117,9 +126,9 @@ class Country(object):
         Typically the result will look something like this:
 
          &#39;iso2_code&#39;:      &#39;BE&#39;,
-         &#39;country_num&#39;:    255,
+         &#39;country_num&#39;:     255,
          &#39;country_name&#39;:   &#39;Belgium&#39;,
-         &#39;country_m49&#39;:    56,
+         &#39;country_m49&#39;:     56,
          &#39;country_iso3&#39;:   &#39;BEL&#39;,
          &#39;nuts_zero_2006&#39;: &#39;BE&#39;,
          &#39;nuts_zero_2016&#39;: &#39;BE&#39;,
@@ -128,7 +137,12 @@ class Country(object):
         self.iso2_code = self.data_dir.name
         # Load name mappings #
         selector = all_country_codes[&#39;iso2_code&#39;] == self.iso2_code
-        row      = all_country_codes.loc[selector].iloc[0]
+        # Check that we know about this country #
+        if not selector.any():
+            msg = &#34;The directory &#39;%s&#39; is not a country that is known.&#34;
+            raise ValueError(msg % self.data_dir)
+        # Get the right row #
+        row = all_country_codes.loc[selector].iloc[0]
         # Store all the country references codes #
         self.country_num  = row[&#39;country_code&#39;]
         self.country_name = row[&#39;country&#39;]
@@ -136,7 +150,48 @@ class Country(object):
         self.country_iso3 = row[&#39;iso3_code&#39;]
         # More crazy codes #
         self.nuts_zero_2006 = row[&#39;nuts_zero_2006&#39;]
-        self.nuts_zero_2016 = row[&#39;nuts_zero_2010&#39;]</code></pre>
+        self.nuts_zero_2016 = row[&#39;nuts_zero_2010&#39;]
+
+    def set_years(self):
+        &#34;&#34;&#34;Update all the reference years for this country.&#34;&#34;&#34;
+        # This is the same for all countries #
+        self.base_year = 2015
+        # This is different for each country.
+        # The `inventory_start_year` is the oldest year in the inventory data
+        # reported by the national forest inventory.
+        row = ref_years.loc[ref_years[&#39;country&#39;] == self.iso2_code].iloc[0]
+        self.inventory_start_year = row[&#39;ref_year&#39;]
+
+    def timestep_to_year(self, timestep):
+        &#34;&#34;&#34;
+        Time step 0 is the output of the makelist (so called &#34;spin-up&#34;)
+        procedure. It represents the initial state.
+
+        Will convert a Series containing simulation time-steps such as:
+           [1, 2, 3, 4, 5]
+        to actual corresponding simulation years such as:
+           [1990, 1991, 1992, 1993, 1994]
+        &#34;&#34;&#34;
+        return timestep + self.inventory_start_year
+
+    def year_to_timestep(self, input_year):
+        &#34;&#34;&#34;
+        The reverse operation of `timestep_to_year`.
+
+        Will convert a Series containing years such as:
+           [1990, 1991, 1992, 1993, 1994]
+        to simulation time-steps such as:
+           [1, 2, 3, 4, 5]
+
+        Checking the consistency between the 2 functions:
+
+            &gt;&gt;&gt; from libcbm_runner.core.continent import continent
+            &gt;&gt;&gt; country = continent.countries[&#39;ZZ&#39;]
+            &gt;&gt;&gt; year = country.timestep_to_year([1,2])
+            &gt;&gt;&gt; country.year_to_timestep(year)
+            array([1, 2])
+        &#34;&#34;&#34;
+        return input_year - self.inventory_start_year</code></pre>
 </details>
 </section>
 <section>
@@ -166,9 +221,6 @@ amongst the 26 EU member states we are examining.</p>
     amongst the 26 EU member states we are examining.
     &#34;&#34;&#34;
 
-    all_paths = &#34;&#34;&#34;
-    &#34;&#34;&#34;
-
     def __repr__(self):
         return &#39;%s object code &#34;%s&#34;&#39; % (self.__class__, self.iso2_code)
 
@@ -178,20 +230,12 @@ amongst the 26 EU member states we are examining.</p>
         self.continent = continent
         # Main directory #
         self.data_dir = DirectoryPath(data_dir)
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.data_dir, self.all_paths)
         # Set country codes #
         self.set_codes()
+        # Store the reference years #
+        self.set_years()
 
-    @property_cached
-    def scenarios(self):
-        &#34;&#34;&#34;
-        A dictionary linking scenario names to a list of runners
-        that concern only this country.
-        &#34;&#34;&#34;
-        from cbmcfs3_runner.core.continent import continent
-        return {n: s.runners[self.iso2_code] for n, s in continent.scenarios.items()}
-
+    #---------------------------- Compositions -------------------------------#
     @property_cached
     def associations(self):
         &#34;&#34;&#34;
@@ -210,6 +254,23 @@ amongst the 26 EU member states we are examining.</p>
         &#34;&#34;&#34;Access the immutable original data.&#34;&#34;&#34;
         return OrigData(self)
 
+    @property_cached
+    def cbmcfs3_country(self):
+        &#34;&#34;&#34;Access the corresponding country in the `cbmcfs3_runner` module.&#34;&#34;&#34;
+        from cbmcfs3_runner.core.continent import continent as cbm_continent
+        return cbm_continent.countries[self.iso2_code]
+
+    #----------------------------- Properties --------------------------------#
+    @property_cached
+    def combos(self):
+        &#34;&#34;&#34;
+        A dictionary linking combo names to a list of runners
+        that concern only this country.
+        &#34;&#34;&#34;
+        from cbmcfs3_runner.core.continent import continent
+        return {n: s.runners[self.iso2_code]
+                for n, s in continent.combos.items()}
+
     #------------------------------- Methods ---------------------------------#
     def set_codes(self):
         &#34;&#34;&#34;
@@ -217,9 +278,9 @@ amongst the 26 EU member states we are examining.</p>
         Typically the result will look something like this:
 
          &#39;iso2_code&#39;:      &#39;BE&#39;,
-         &#39;country_num&#39;:    255,
+         &#39;country_num&#39;:     255,
          &#39;country_name&#39;:   &#39;Belgium&#39;,
-         &#39;country_m49&#39;:    56,
+         &#39;country_m49&#39;:     56,
          &#39;country_iso3&#39;:   &#39;BEL&#39;,
          &#39;nuts_zero_2006&#39;: &#39;BE&#39;,
          &#39;nuts_zero_2016&#39;: &#39;BE&#39;,
@@ -228,7 +289,12 @@ amongst the 26 EU member states we are examining.</p>
         self.iso2_code = self.data_dir.name
         # Load name mappings #
         selector = all_country_codes[&#39;iso2_code&#39;] == self.iso2_code
-        row      = all_country_codes.loc[selector].iloc[0]
+        # Check that we know about this country #
+        if not selector.any():
+            msg = &#34;The directory &#39;%s&#39; is not a country that is known.&#34;
+            raise ValueError(msg % self.data_dir)
+        # Get the right row #
+        row = all_country_codes.loc[selector].iloc[0]
         # Store all the country references codes #
         self.country_num  = row[&#39;country_code&#39;]
         self.country_name = row[&#39;country&#39;]
@@ -236,15 +302,49 @@ amongst the 26 EU member states we are examining.</p>
         self.country_iso3 = row[&#39;iso3_code&#39;]
         # More crazy codes #
         self.nuts_zero_2006 = row[&#39;nuts_zero_2006&#39;]
-        self.nuts_zero_2016 = row[&#39;nuts_zero_2010&#39;]</code></pre>
+        self.nuts_zero_2016 = row[&#39;nuts_zero_2010&#39;]
+
+    def set_years(self):
+        &#34;&#34;&#34;Update all the reference years for this country.&#34;&#34;&#34;
+        # This is the same for all countries #
+        self.base_year = 2015
+        # This is different for each country.
+        # The `inventory_start_year` is the oldest year in the inventory data
+        # reported by the national forest inventory.
+        row = ref_years.loc[ref_years[&#39;country&#39;] == self.iso2_code].iloc[0]
+        self.inventory_start_year = row[&#39;ref_year&#39;]
+
+    def timestep_to_year(self, timestep):
+        &#34;&#34;&#34;
+        Time step 0 is the output of the makelist (so called &#34;spin-up&#34;)
+        procedure. It represents the initial state.
+
+        Will convert a Series containing simulation time-steps such as:
+           [1, 2, 3, 4, 5]
+        to actual corresponding simulation years such as:
+           [1990, 1991, 1992, 1993, 1994]
+        &#34;&#34;&#34;
+        return timestep + self.inventory_start_year
+
+    def year_to_timestep(self, input_year):
+        &#34;&#34;&#34;
+        The reverse operation of `timestep_to_year`.
+
+        Will convert a Series containing years such as:
+           [1990, 1991, 1992, 1993, 1994]
+        to simulation time-steps such as:
+           [1, 2, 3, 4, 5]
+
+        Checking the consistency between the 2 functions:
+
+            &gt;&gt;&gt; from libcbm_runner.core.continent import continent
+            &gt;&gt;&gt; country = continent.countries[&#39;ZZ&#39;]
+            &gt;&gt;&gt; year = country.timestep_to_year([1,2])
+            &gt;&gt;&gt; country.year_to_timestep(year)
+            array([1, 2])
+        &#34;&#34;&#34;
+        return input_year - self.inventory_start_year</code></pre>
 </details>
-<h3>Class variables</h3>
-<dl>
-<dt id="libcbm_runner.core.country.Country.all_paths"><code class="name">var <span class="ident">all_paths</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 <h3>Instance variables</h3>
 <dl>
 <dt id="libcbm_runner.core.country.Country.aidb"><code class="name">var <span class="ident">aidb</span></code></dt>
@@ -308,9 +408,9 @@ the input and the reference.</p></div>
     return result</code></pre>
 </details>
 </dd>
-<dt id="libcbm_runner.core.country.Country.orig_data"><code class="name">var <span class="ident">orig_data</span></code></dt>
+<dt id="libcbm_runner.core.country.Country.cbmcfs3_country"><code class="name">var <span class="ident">cbmcfs3_country</span></code></dt>
 <dd>
-<div class="desc"><p>Access the immutable original data.</p></div>
+<div class="desc"><p>Access the corresponding country in the <code>cbmcfs3_runner</code> module.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -338,10 +438,40 @@ the input and the reference.</p></div>
     return result</code></pre>
 </details>
 </dd>
-<dt id="libcbm_runner.core.country.Country.scenarios"><code class="name">var <span class="ident">scenarios</span></code></dt>
+<dt id="libcbm_runner.core.country.Country.combos"><code class="name">var <span class="ident">combos</span></code></dt>
 <dd>
-<div class="desc"><p>A dictionary linking scenario names to a list of runners
+<div class="desc"><p>A dictionary linking combo names to a list of runners
 that concern only this country.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner):
+    &#34;&#34;&#34;
+    If you see the current source code in a seemingly unrelated part of
+    an auto-generated documentation, it means the program making the
+    documentation was unable to correctly traverse a decorated property.
+    &#34;&#34;&#34;
+    # For debugging purposes #
+    if False: print(&#34;-&gt; property cached `%s`&#34; % instance)
+    # If called from a class #
+    if instance is None: return self
+    # Does a cache exist for this instance? #
+    self.check_cache(instance)
+    # Is the answer in the cache? #
+    if self.name in instance.__cache__: return instance.__cache__[self.name]
+    # If not we will compute it #
+    if inspect.isgeneratorfunction(self.func): result = tuple(self.func(instance))
+    else:                                      result = self.func(instance)
+    # Let&#39;s store the answer for later #
+    instance.__cache__[self.name] = result
+    # Return #
+    return result</code></pre>
+</details>
+</dd>
+<dt id="libcbm_runner.core.country.Country.orig_data"><code class="name">var <span class="ident">orig_data</span></code></dt>
+<dd>
+<div class="desc"><p>Access the immutable original data.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -400,9 +530,9 @@ Typically the result will look something like this:</p>
     Typically the result will look something like this:
 
      &#39;iso2_code&#39;:      &#39;BE&#39;,
-     &#39;country_num&#39;:    255,
+     &#39;country_num&#39;:     255,
      &#39;country_name&#39;:   &#39;Belgium&#39;,
-     &#39;country_m49&#39;:    56,
+     &#39;country_m49&#39;:     56,
      &#39;country_iso3&#39;:   &#39;BEL&#39;,
      &#39;nuts_zero_2006&#39;: &#39;BE&#39;,
      &#39;nuts_zero_2016&#39;: &#39;BE&#39;,
@@ -411,7 +541,12 @@ Typically the result will look something like this:</p>
     self.iso2_code = self.data_dir.name
     # Load name mappings #
     selector = all_country_codes[&#39;iso2_code&#39;] == self.iso2_code
-    row      = all_country_codes.loc[selector].iloc[0]
+    # Check that we know about this country #
+    if not selector.any():
+        msg = &#34;The directory &#39;%s&#39; is not a country that is known.&#34;
+        raise ValueError(msg % self.data_dir)
+    # Get the right row #
+    row = all_country_codes.loc[selector].iloc[0]
     # Store all the country references codes #
     self.country_num  = row[&#39;country_code&#39;]
     self.country_name = row[&#39;country&#39;]
@@ -420,6 +555,93 @@ Typically the result will look something like this:</p>
     # More crazy codes #
     self.nuts_zero_2006 = row[&#39;nuts_zero_2006&#39;]
     self.nuts_zero_2016 = row[&#39;nuts_zero_2010&#39;]</code></pre>
+</details>
+</dd>
+<dt id="libcbm_runner.core.country.Country.set_years"><code class="name flex">
+<span>def <span class="ident">set_years</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Update all the reference years for this country.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_years(self):
+    &#34;&#34;&#34;Update all the reference years for this country.&#34;&#34;&#34;
+    # This is the same for all countries #
+    self.base_year = 2015
+    # This is different for each country.
+    # The `inventory_start_year` is the oldest year in the inventory data
+    # reported by the national forest inventory.
+    row = ref_years.loc[ref_years[&#39;country&#39;] == self.iso2_code].iloc[0]
+    self.inventory_start_year = row[&#39;ref_year&#39;]</code></pre>
+</details>
+</dd>
+<dt id="libcbm_runner.core.country.Country.timestep_to_year"><code class="name flex">
+<span>def <span class="ident">timestep_to_year</span></span>(<span>self, timestep)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Time step 0 is the output of the makelist (so called "spin-up")
+procedure. It represents the initial state.</p>
+<p>Will convert a Series containing simulation time-steps such as:
+[1, 2, 3, 4, 5]
+to actual corresponding simulation years such as:
+[1990, 1991, 1992, 1993, 1994]</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def timestep_to_year(self, timestep):
+    &#34;&#34;&#34;
+    Time step 0 is the output of the makelist (so called &#34;spin-up&#34;)
+    procedure. It represents the initial state.
+
+    Will convert a Series containing simulation time-steps such as:
+       [1, 2, 3, 4, 5]
+    to actual corresponding simulation years such as:
+       [1990, 1991, 1992, 1993, 1994]
+    &#34;&#34;&#34;
+    return timestep + self.inventory_start_year</code></pre>
+</details>
+</dd>
+<dt id="libcbm_runner.core.country.Country.year_to_timestep"><code class="name flex">
+<span>def <span class="ident">year_to_timestep</span></span>(<span>self, input_year)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The reverse operation of <code>timestep_to_year</code>.</p>
+<p>Will convert a Series containing years such as:
+[1990, 1991, 1992, 1993, 1994]
+to simulation time-steps such as:
+[1, 2, 3, 4, 5]</p>
+<p>Checking the consistency between the 2 functions:</p>
+<pre><code>&gt;&gt;&gt; from libcbm_runner.core.continent import continent
+&gt;&gt;&gt; country = continent.countries['ZZ']
+&gt;&gt;&gt; year = country.timestep_to_year([1,2])
+&gt;&gt;&gt; country.year_to_timestep(year)
+array([1, 2])
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def year_to_timestep(self, input_year):
+    &#34;&#34;&#34;
+    The reverse operation of `timestep_to_year`.
+
+    Will convert a Series containing years such as:
+       [1990, 1991, 1992, 1993, 1994]
+    to simulation time-steps such as:
+       [1, 2, 3, 4, 5]
+
+    Checking the consistency between the 2 functions:
+
+        &gt;&gt;&gt; from libcbm_runner.core.continent import continent
+        &gt;&gt;&gt; country = continent.countries[&#39;ZZ&#39;]
+        &gt;&gt;&gt; year = country.timestep_to_year([1,2])
+        &gt;&gt;&gt; country.year_to_timestep(year)
+        array([1, 2])
+    &#34;&#34;&#34;
+    return input_year - self.inventory_start_year</code></pre>
 </details>
 </dd>
 </dl>
@@ -444,11 +666,14 @@ Typically the result will look something like this:</p>
 <h4><code><a title="libcbm_runner.core.country.Country" href="#libcbm_runner.core.country.Country">Country</a></code></h4>
 <ul class="two-column">
 <li><code><a title="libcbm_runner.core.country.Country.aidb" href="#libcbm_runner.core.country.Country.aidb">aidb</a></code></li>
-<li><code><a title="libcbm_runner.core.country.Country.all_paths" href="#libcbm_runner.core.country.Country.all_paths">all_paths</a></code></li>
 <li><code><a title="libcbm_runner.core.country.Country.associations" href="#libcbm_runner.core.country.Country.associations">associations</a></code></li>
+<li><code><a title="libcbm_runner.core.country.Country.cbmcfs3_country" href="#libcbm_runner.core.country.Country.cbmcfs3_country">cbmcfs3_country</a></code></li>
+<li><code><a title="libcbm_runner.core.country.Country.combos" href="#libcbm_runner.core.country.Country.combos">combos</a></code></li>
 <li><code><a title="libcbm_runner.core.country.Country.orig_data" href="#libcbm_runner.core.country.Country.orig_data">orig_data</a></code></li>
-<li><code><a title="libcbm_runner.core.country.Country.scenarios" href="#libcbm_runner.core.country.Country.scenarios">scenarios</a></code></li>
 <li><code><a title="libcbm_runner.core.country.Country.set_codes" href="#libcbm_runner.core.country.Country.set_codes">set_codes</a></code></li>
+<li><code><a title="libcbm_runner.core.country.Country.set_years" href="#libcbm_runner.core.country.Country.set_years">set_years</a></code></li>
+<li><code><a title="libcbm_runner.core.country.Country.timestep_to_year" href="#libcbm_runner.core.country.Country.timestep_to_year">timestep_to_year</a></code></li>
+<li><code><a title="libcbm_runner.core.country.Country.year_to_timestep" href="#libcbm_runner.core.country.Country.year_to_timestep">year_to_timestep</a></code></li>
 </ul>
 </li>
 </ul>

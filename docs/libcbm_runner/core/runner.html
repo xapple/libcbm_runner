@@ -23,7 +23,7 @@
 </header>
 <section id="section-intro">
 <p>Written by Lucas Sinclair and Paul Rougieux.</p>
-<p>JRC biomass Project.
+<p>JRC Biomass Project.
 Unit D1 Bioeconomy.</p>
 <details class="source">
 <summary>
@@ -35,22 +35,30 @@ Unit D1 Bioeconomy.</p>
 &#34;&#34;&#34;
 Written by Lucas Sinclair and Paul Rougieux.
 
-JRC biomass Project.
+JRC Biomass Project.
 Unit D1 Bioeconomy.
 &#34;&#34;&#34;
 
 # Built-in modules #
 
 # First party modules #
-from autopaths            import Path
 from autopaths.auto_paths import AutoPaths
 from plumbing.cache       import property_cached
 from plumbing.logger      import create_file_logger
+from plumbing.timer       import LogTimer
 
 # Internal modules #
 import libcbm_runner
-from libcbm_runner.launch.simulation import Simulation
-from libcbm_runner.pump.input_data   import InputData
+from libcbm_runner.launch.create_json  import CreateJSON
+from libcbm_runner.launch.simulation   import Simulation
+from libcbm_runner.info.input_data     import InputData
+from libcbm_runner.pump.output_data    import OutputData
+from libcbm_runner.pump.internal_data  import InternalData
+from libcbm_runner.pump.pre_processor  import PreProcessor
+from libcbm_runner.pump.post_processor import PostProcessor
+
+# Third party modules
+import pandas
 
 ###############################################################################
 class Runner(object):
@@ -59,40 +67,116 @@ class Runner(object):
     from a few input tables, such as an inventory and a list of disturbances
     and to bring this data all the way to the predicted carbon stock and
     fluxes.
+
+    You can run a combo like this:
+
+        &gt;&gt;&gt; from libcbm_runner.core.continent import continent
+        &gt;&gt;&gt; combo  = continent.combos[&#39;historical&#39;]
+        &gt;&gt;&gt; runner = combo.runners[&#39;LU&#39;][0]
+        &gt;&gt;&gt; runner.run()
+
+    The runner has an attribute `output` that only deals with final output
+    data that can be reached after closing and reopening your interpreter.
+
+    The runner has an attribute `internal` that only deals with getting the
+    data from the libcbm objects as they are while still in RAM and not
+    written to disk. Examples:
+
+    &gt;&gt;&gt; runner.internal.classif_df
+    If you are running a simluation and want to get the information from RAM.
+
+    &gt;&gt;&gt; runner.output.classif_df
+    If you are analyzing results that were run in the past and want to get the
+    information from disk.
     &#34;&#34;&#34;
 
     all_paths = &#34;&#34;&#34;
     /input/
+    /input/json/config.json
     /output/
     /logs/runner.log
     &#34;&#34;&#34;
+
+    def __init__(self, combo, country, num):
+        # Base attributes #
+        self.combo   = combo
+        self.country = country
+        self.num     = num
+        # How to reference this runner #
+        self.short_name  = self.combo.short_name + &#39;/&#39;
+        self.short_name += self.country.iso2_code + &#39;/&#39;
+        self.short_name += str(self.num)
+        # Where the data will be stored for this run #
+        self.data_dir = self.combo.combos_dir + self.short_name + &#39;/&#39;
+        # Automatically access paths based on a string of many subpaths #
+        self.paths = AutoPaths(self.data_dir, self.all_paths)
 
     def __repr__(self):
         return &#39;%s object on &#34;%s&#34;&#39; % (self.__class__, self.data_dir)
 
     def __bool__(self): return self.paths.log.exists
 
-    def __init__(self, scenario, country, num):
-        # Base attributes #
-        self.scenario = scenario
-        self.country  = country
-        self.num      = num
-        # How to reference this runner #
-        self.short_name  = self.scenario.short_name + &#39;/&#39;
-        self.short_name += self.country.iso2_code + &#39;/&#39;
-        self.short_name += str(self.num)
-        # Where the data will be stored for this run #
-        self.data_dir = self.scenario.scenarios_dir + self.short_name + &#39;/&#39;
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.data_dir, self.all_paths)
+    #---------------------------- Compositions -------------------------------#
+    @property_cached
+    def create_json(self):
+        return CreateJSON(self)
 
+    @property_cached
+    def simulation(self):
+        &#34;&#34;&#34;The object that can run `libcbm` simulations.&#34;&#34;&#34;
+        return Simulation(self)
+
+    @property_cached
+    def pre_processor(self):
+        &#34;&#34;&#34;Update the input data to this run using some rules.&#34;&#34;&#34;
+        return PreProcessor(self)
+
+    @property_cached
+    def post_processor(self):
+        &#34;&#34;&#34;Update or convert the output data to this run using some rules.&#34;&#34;&#34;
+        return PostProcessor(self)
+
+    @property_cached
+    def input_data(self):
+        &#34;&#34;&#34;
+        Access the input data to this run. This data can be
+        a modified version of the original country&#39;s CSV files.
+        &#34;&#34;&#34;
+        return InputData(self)
+
+    @property_cached
+    def output(self):
+        &#34;&#34;&#34;Create and access the output data to this run.&#34;&#34;&#34;
+        return OutputData(self)
+
+    @property_cached
+    def internal(self):
+        &#34;&#34;&#34;
+        Access and format data concerning the simulation as it is being
+        run.
+        &#34;&#34;&#34;
+        return InternalData(self)
+
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def log(self):
         &#34;&#34;&#34;
         Each runner will have its own logger.
         By default we clear the log file when we start logging.
         &#34;&#34;&#34;
-        return create_file_logger(self.short_name, self.paths.log)
+        # Pick console level #
+        level = &#39;error&#39;
+        if hasattr(self, &#39;verbose&#39;):
+            if isinstance(self.verbose, bool):
+                if self.verbose:
+                    level = &#39;debug&#39;
+            else: level = self.verbose
+        # Create #
+        logger = create_file_logger(self.short_name,
+                                    self.paths.log,
+                                    console_level = level)
+        # Return #
+        return logger
 
     @property
     def tail(self):
@@ -103,50 +187,70 @@ class Runner(object):
         return msg
 
     @property_cached
-    def simulation(self):
-        &#34;&#34;&#34;The object that can run `libcbm` simulations.&#34;&#34;&#34;
-        return Simulation(self)
-
-    @property_cached
-    def input_data(self):
+    def num_timesteps(self):
         &#34;&#34;&#34;
-        Access the input data to this run. This data can be
-        a modified version of the original country&#39;s CSV files.
+        Compute the default number of years we have to run the simulation for.
+        To do this, we select the disturbance with the highest time step.
         &#34;&#34;&#34;
-        return InputData(self)
+        # Load #
+        df = self.input_data.load(&#39;events&#39;)
+        # Compute #
+        period_max = df[&#39;step&#39;].max()
+        # Return #
+        return period_max
 
     #------------------------------- Methods ---------------------------------#
-    def run(self):
+    def run(self, keep_in_ram=False, verbose=True, interrupt_on_error=False):
         &#34;&#34;&#34;
-        Run the full modelling pipeline for a given country,
-        a given scenario and a given step.
+        Run the full modelling pipeline for a given country, a given combo
+        and a given step.
         &#34;&#34;&#34;
+        # Verbosity level #
+        self.verbose = verbose
         # Messages #
-        self.log.info(&#34;Using module at &#39;%s&#39;.&#34; % Path(libcbm_runner))
+        self.log.info(&#34;Using %s.&#34; % libcbm_runner)
         self.log.info(&#34;Runner &#39;%s&#39; starting.&#34; % self.short_name)
+        # Start the timer #
+        self.timer = LogTimer(self.log)
+        self.timer.print_start()
         # Clean everything from previous run #
-        self.remove_directory()
-        # Copy the original input data #
-        self.copy_orig_from_country()
-        # Modify input data #
-        pass
+        self.remove_directories()
+        # Create the input data #
+        self.input_data()
+        # Modify input data, combos can subclass this #
+        self.modify_input()
+        # Pre-processing #
+        self.pre_processor()
+        # Create the JSON configuration #
+        self.create_json()
         # Run the model #
-        self.simulation.run()
+        self.timer.print_elapsed()
+        self.simulation(interrupt_on_error)
+        self.timer.print_elapsed()
+        # Save the results to disk #
+        if self.simulation.error is not True: self.output.save()
+        # Free memory #
+        if not keep_in_ram: self.simulation.clear()
         # Post-processing #
-        pass
-        # Reporting #
-        pass
+        self.post_processor()
         # Messages #
-        self.log.info(&#34;Done.&#34;)
+        self.timer.print_end()
+        self.timer.print_total_elapsed()
+        # Final message #
+        if self.simulation.error is not True: msg = &#34;Done.&#34;
+        else: msg = &#34;Done with errors.&#34;
+        self.log.info(msg)
+        # Return #
+        return self.output
 
-    def remove_directory(self):
+    def remove_directories(self):
         &#34;&#34;&#34;
         Removes the directory that will be recreated by running this runner.
         This guarantees that all output data is regenerated.
         Note: we need to keep the log we are writing to currently.
         &#34;&#34;&#34;
         # Message #
-        self.log.info(&#34;Removing directory &#39;%s&#39;.&#34; % self.data_dir)
+        self.log.info(&#34;Removing directory &#39;%s&#39;.&#34; % self.data_dir.with_tilda)
         # The output directory #
         self.paths.input_dir.remove(safe=False)
         self.paths.output_dir.remove(safe=False)
@@ -155,14 +259,10 @@ class Runner(object):
             if element != self.paths.log:
                 element.remove()
 
-    def copy_orig_from_country(self):
-        &#34;&#34;&#34;
-        Refresh the input data by copying the immutable original
-        CSVs from the current country to this runner&#39;s input.
-        &#34;&#34;&#34;
-        destination_dir = self.input_data.paths.csv_dir
-        destination_dir.remove()
-        self.country.orig_data.paths.csv_dir.copy(destination_dir)</code></pre>
+    #--------------------------- Special Methods -----------------------------#
+    def modify_input(self):
+        &#34;&#34;&#34;Combos can subclass this at will.&#34;&#34;&#34;
+        pass</code></pre>
 </details>
 </section>
 <section>
@@ -176,13 +276,31 @@ class Runner(object):
 <dl>
 <dt id="libcbm_runner.core.runner.Runner"><code class="flex name class">
 <span>class <span class="ident">Runner</span></span>
-<span>(</span><span>scenario, country, num)</span>
+<span>(</span><span>combo, country, num)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This object is capable of running a CBM simulation pipeline, starting
 from a few input tables, such as an inventory and a list of disturbances
 and to bring this data all the way to the predicted carbon stock and
-fluxes.</p></div>
+fluxes.</p>
+<p>You can run a combo like this:</p>
+<pre><code>&gt;&gt;&gt; from libcbm_runner.core.continent import continent
+&gt;&gt;&gt; combo  = continent.combos['historical']
+&gt;&gt;&gt; runner = combo.runners['LU'][0]
+&gt;&gt;&gt; runner.run()
+</code></pre>
+<p>The runner has an attribute <code>output</code> that only deals with final output
+data that can be reached after closing and reopening your interpreter.</p>
+<p>The runner has an attribute <code>internal</code> that only deals with getting the
+data from the libcbm objects as they are while still in RAM and not
+written to disk. Examples:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; runner.internal.classif_df
+If you are running a simluation and want to get the information from RAM.
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; runner.output.classif_df
+If you are analyzing results that were run in the past and want to get the
+information from disk.
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -193,40 +311,116 @@ fluxes.</p></div>
     from a few input tables, such as an inventory and a list of disturbances
     and to bring this data all the way to the predicted carbon stock and
     fluxes.
+
+    You can run a combo like this:
+
+        &gt;&gt;&gt; from libcbm_runner.core.continent import continent
+        &gt;&gt;&gt; combo  = continent.combos[&#39;historical&#39;]
+        &gt;&gt;&gt; runner = combo.runners[&#39;LU&#39;][0]
+        &gt;&gt;&gt; runner.run()
+
+    The runner has an attribute `output` that only deals with final output
+    data that can be reached after closing and reopening your interpreter.
+
+    The runner has an attribute `internal` that only deals with getting the
+    data from the libcbm objects as they are while still in RAM and not
+    written to disk. Examples:
+
+    &gt;&gt;&gt; runner.internal.classif_df
+    If you are running a simluation and want to get the information from RAM.
+
+    &gt;&gt;&gt; runner.output.classif_df
+    If you are analyzing results that were run in the past and want to get the
+    information from disk.
     &#34;&#34;&#34;
 
     all_paths = &#34;&#34;&#34;
     /input/
+    /input/json/config.json
     /output/
     /logs/runner.log
     &#34;&#34;&#34;
+
+    def __init__(self, combo, country, num):
+        # Base attributes #
+        self.combo   = combo
+        self.country = country
+        self.num     = num
+        # How to reference this runner #
+        self.short_name  = self.combo.short_name + &#39;/&#39;
+        self.short_name += self.country.iso2_code + &#39;/&#39;
+        self.short_name += str(self.num)
+        # Where the data will be stored for this run #
+        self.data_dir = self.combo.combos_dir + self.short_name + &#39;/&#39;
+        # Automatically access paths based on a string of many subpaths #
+        self.paths = AutoPaths(self.data_dir, self.all_paths)
 
     def __repr__(self):
         return &#39;%s object on &#34;%s&#34;&#39; % (self.__class__, self.data_dir)
 
     def __bool__(self): return self.paths.log.exists
 
-    def __init__(self, scenario, country, num):
-        # Base attributes #
-        self.scenario = scenario
-        self.country  = country
-        self.num      = num
-        # How to reference this runner #
-        self.short_name  = self.scenario.short_name + &#39;/&#39;
-        self.short_name += self.country.iso2_code + &#39;/&#39;
-        self.short_name += str(self.num)
-        # Where the data will be stored for this run #
-        self.data_dir = self.scenario.scenarios_dir + self.short_name + &#39;/&#39;
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.data_dir, self.all_paths)
+    #---------------------------- Compositions -------------------------------#
+    @property_cached
+    def create_json(self):
+        return CreateJSON(self)
 
+    @property_cached
+    def simulation(self):
+        &#34;&#34;&#34;The object that can run `libcbm` simulations.&#34;&#34;&#34;
+        return Simulation(self)
+
+    @property_cached
+    def pre_processor(self):
+        &#34;&#34;&#34;Update the input data to this run using some rules.&#34;&#34;&#34;
+        return PreProcessor(self)
+
+    @property_cached
+    def post_processor(self):
+        &#34;&#34;&#34;Update or convert the output data to this run using some rules.&#34;&#34;&#34;
+        return PostProcessor(self)
+
+    @property_cached
+    def input_data(self):
+        &#34;&#34;&#34;
+        Access the input data to this run. This data can be
+        a modified version of the original country&#39;s CSV files.
+        &#34;&#34;&#34;
+        return InputData(self)
+
+    @property_cached
+    def output(self):
+        &#34;&#34;&#34;Create and access the output data to this run.&#34;&#34;&#34;
+        return OutputData(self)
+
+    @property_cached
+    def internal(self):
+        &#34;&#34;&#34;
+        Access and format data concerning the simulation as it is being
+        run.
+        &#34;&#34;&#34;
+        return InternalData(self)
+
+    #----------------------------- Properties --------------------------------#
     @property_cached
     def log(self):
         &#34;&#34;&#34;
         Each runner will have its own logger.
         By default we clear the log file when we start logging.
         &#34;&#34;&#34;
-        return create_file_logger(self.short_name, self.paths.log)
+        # Pick console level #
+        level = &#39;error&#39;
+        if hasattr(self, &#39;verbose&#39;):
+            if isinstance(self.verbose, bool):
+                if self.verbose:
+                    level = &#39;debug&#39;
+            else: level = self.verbose
+        # Create #
+        logger = create_file_logger(self.short_name,
+                                    self.paths.log,
+                                    console_level = level)
+        # Return #
+        return logger
 
     @property
     def tail(self):
@@ -237,50 +431,70 @@ fluxes.</p></div>
         return msg
 
     @property_cached
-    def simulation(self):
-        &#34;&#34;&#34;The object that can run `libcbm` simulations.&#34;&#34;&#34;
-        return Simulation(self)
-
-    @property_cached
-    def input_data(self):
+    def num_timesteps(self):
         &#34;&#34;&#34;
-        Access the input data to this run. This data can be
-        a modified version of the original country&#39;s CSV files.
+        Compute the default number of years we have to run the simulation for.
+        To do this, we select the disturbance with the highest time step.
         &#34;&#34;&#34;
-        return InputData(self)
+        # Load #
+        df = self.input_data.load(&#39;events&#39;)
+        # Compute #
+        period_max = df[&#39;step&#39;].max()
+        # Return #
+        return period_max
 
     #------------------------------- Methods ---------------------------------#
-    def run(self):
+    def run(self, keep_in_ram=False, verbose=True, interrupt_on_error=False):
         &#34;&#34;&#34;
-        Run the full modelling pipeline for a given country,
-        a given scenario and a given step.
+        Run the full modelling pipeline for a given country, a given combo
+        and a given step.
         &#34;&#34;&#34;
+        # Verbosity level #
+        self.verbose = verbose
         # Messages #
-        self.log.info(&#34;Using module at &#39;%s&#39;.&#34; % Path(libcbm_runner))
+        self.log.info(&#34;Using %s.&#34; % libcbm_runner)
         self.log.info(&#34;Runner &#39;%s&#39; starting.&#34; % self.short_name)
+        # Start the timer #
+        self.timer = LogTimer(self.log)
+        self.timer.print_start()
         # Clean everything from previous run #
-        self.remove_directory()
-        # Copy the original input data #
-        self.copy_orig_from_country()
-        # Modify input data #
-        pass
+        self.remove_directories()
+        # Create the input data #
+        self.input_data()
+        # Modify input data, combos can subclass this #
+        self.modify_input()
+        # Pre-processing #
+        self.pre_processor()
+        # Create the JSON configuration #
+        self.create_json()
         # Run the model #
-        self.simulation.run()
+        self.timer.print_elapsed()
+        self.simulation(interrupt_on_error)
+        self.timer.print_elapsed()
+        # Save the results to disk #
+        if self.simulation.error is not True: self.output.save()
+        # Free memory #
+        if not keep_in_ram: self.simulation.clear()
         # Post-processing #
-        pass
-        # Reporting #
-        pass
+        self.post_processor()
         # Messages #
-        self.log.info(&#34;Done.&#34;)
+        self.timer.print_end()
+        self.timer.print_total_elapsed()
+        # Final message #
+        if self.simulation.error is not True: msg = &#34;Done.&#34;
+        else: msg = &#34;Done with errors.&#34;
+        self.log.info(msg)
+        # Return #
+        return self.output
 
-    def remove_directory(self):
+    def remove_directories(self):
         &#34;&#34;&#34;
         Removes the directory that will be recreated by running this runner.
         This guarantees that all output data is regenerated.
         Note: we need to keep the log we are writing to currently.
         &#34;&#34;&#34;
         # Message #
-        self.log.info(&#34;Removing directory &#39;%s&#39;.&#34; % self.data_dir)
+        self.log.info(&#34;Removing directory &#39;%s&#39;.&#34; % self.data_dir.with_tilda)
         # The output directory #
         self.paths.input_dir.remove(safe=False)
         self.paths.output_dir.remove(safe=False)
@@ -289,15 +503,15 @@ fluxes.</p></div>
             if element != self.paths.log:
                 element.remove()
 
-    def copy_orig_from_country(self):
-        &#34;&#34;&#34;
-        Refresh the input data by copying the immutable original
-        CSVs from the current country to this runner&#39;s input.
-        &#34;&#34;&#34;
-        destination_dir = self.input_data.paths.csv_dir
-        destination_dir.remove()
-        self.country.orig_data.paths.csv_dir.copy(destination_dir)</code></pre>
+    #--------------------------- Special Methods -----------------------------#
+    def modify_input(self):
+        &#34;&#34;&#34;Combos can subclass this at will.&#34;&#34;&#34;
+        pass</code></pre>
 </details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="libcbm_runner.combos.historical.HistoricalRunner" href="../combos/historical.html#libcbm_runner.combos.historical.HistoricalRunner">HistoricalRunner</a></li>
+</ul>
 <h3>Class variables</h3>
 <dl>
 <dt id="libcbm_runner.core.runner.Runner.all_paths"><code class="name">var <span class="ident">all_paths</span></code></dt>
@@ -307,6 +521,38 @@ fluxes.</p></div>
 </dl>
 <h3>Instance variables</h3>
 <dl>
+<dt id="libcbm_runner.core.runner.Runner.create_json"><code class="name">var <span class="ident">create_json</span></code></dt>
+<dd>
+<div class="desc"><p>If you see the current source code in a seemingly unrelated part of
+an auto-generated documentation, it means the program making the
+documentation was unable to correctly traverse a decorated property.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner):
+    &#34;&#34;&#34;
+    If you see the current source code in a seemingly unrelated part of
+    an auto-generated documentation, it means the program making the
+    documentation was unable to correctly traverse a decorated property.
+    &#34;&#34;&#34;
+    # For debugging purposes #
+    if False: print(&#34;-&gt; property cached `%s`&#34; % instance)
+    # If called from a class #
+    if instance is None: return self
+    # Does a cache exist for this instance? #
+    self.check_cache(instance)
+    # Is the answer in the cache? #
+    if self.name in instance.__cache__: return instance.__cache__[self.name]
+    # If not we will compute it #
+    if inspect.isgeneratorfunction(self.func): result = tuple(self.func(instance))
+    else:                                      result = self.func(instance)
+    # Let&#39;s store the answer for later #
+    instance.__cache__[self.name] = result
+    # Return #
+    return result</code></pre>
+</details>
+</dd>
 <dt id="libcbm_runner.core.runner.Runner.input_data"><code class="name">var <span class="ident">input_data</span></code></dt>
 <dd>
 <div class="desc"><p>Access the input data to this run. This data can be
@@ -338,10 +584,162 @@ a modified version of the original country's CSV files.</p></div>
     return result</code></pre>
 </details>
 </dd>
+<dt id="libcbm_runner.core.runner.Runner.internal"><code class="name">var <span class="ident">internal</span></code></dt>
+<dd>
+<div class="desc"><p>Access and format data concerning the simulation as it is being
+run.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner):
+    &#34;&#34;&#34;
+    If you see the current source code in a seemingly unrelated part of
+    an auto-generated documentation, it means the program making the
+    documentation was unable to correctly traverse a decorated property.
+    &#34;&#34;&#34;
+    # For debugging purposes #
+    if False: print(&#34;-&gt; property cached `%s`&#34; % instance)
+    # If called from a class #
+    if instance is None: return self
+    # Does a cache exist for this instance? #
+    self.check_cache(instance)
+    # Is the answer in the cache? #
+    if self.name in instance.__cache__: return instance.__cache__[self.name]
+    # If not we will compute it #
+    if inspect.isgeneratorfunction(self.func): result = tuple(self.func(instance))
+    else:                                      result = self.func(instance)
+    # Let&#39;s store the answer for later #
+    instance.__cache__[self.name] = result
+    # Return #
+    return result</code></pre>
+</details>
+</dd>
 <dt id="libcbm_runner.core.runner.Runner.log"><code class="name">var <span class="ident">log</span></code></dt>
 <dd>
 <div class="desc"><p>Each runner will have its own logger.
 By default we clear the log file when we start logging.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner):
+    &#34;&#34;&#34;
+    If you see the current source code in a seemingly unrelated part of
+    an auto-generated documentation, it means the program making the
+    documentation was unable to correctly traverse a decorated property.
+    &#34;&#34;&#34;
+    # For debugging purposes #
+    if False: print(&#34;-&gt; property cached `%s`&#34; % instance)
+    # If called from a class #
+    if instance is None: return self
+    # Does a cache exist for this instance? #
+    self.check_cache(instance)
+    # Is the answer in the cache? #
+    if self.name in instance.__cache__: return instance.__cache__[self.name]
+    # If not we will compute it #
+    if inspect.isgeneratorfunction(self.func): result = tuple(self.func(instance))
+    else:                                      result = self.func(instance)
+    # Let&#39;s store the answer for later #
+    instance.__cache__[self.name] = result
+    # Return #
+    return result</code></pre>
+</details>
+</dd>
+<dt id="libcbm_runner.core.runner.Runner.num_timesteps"><code class="name">var <span class="ident">num_timesteps</span></code></dt>
+<dd>
+<div class="desc"><p>Compute the default number of years we have to run the simulation for.
+To do this, we select the disturbance with the highest time step.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner):
+    &#34;&#34;&#34;
+    If you see the current source code in a seemingly unrelated part of
+    an auto-generated documentation, it means the program making the
+    documentation was unable to correctly traverse a decorated property.
+    &#34;&#34;&#34;
+    # For debugging purposes #
+    if False: print(&#34;-&gt; property cached `%s`&#34; % instance)
+    # If called from a class #
+    if instance is None: return self
+    # Does a cache exist for this instance? #
+    self.check_cache(instance)
+    # Is the answer in the cache? #
+    if self.name in instance.__cache__: return instance.__cache__[self.name]
+    # If not we will compute it #
+    if inspect.isgeneratorfunction(self.func): result = tuple(self.func(instance))
+    else:                                      result = self.func(instance)
+    # Let&#39;s store the answer for later #
+    instance.__cache__[self.name] = result
+    # Return #
+    return result</code></pre>
+</details>
+</dd>
+<dt id="libcbm_runner.core.runner.Runner.output"><code class="name">var <span class="ident">output</span></code></dt>
+<dd>
+<div class="desc"><p>Create and access the output data to this run.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner):
+    &#34;&#34;&#34;
+    If you see the current source code in a seemingly unrelated part of
+    an auto-generated documentation, it means the program making the
+    documentation was unable to correctly traverse a decorated property.
+    &#34;&#34;&#34;
+    # For debugging purposes #
+    if False: print(&#34;-&gt; property cached `%s`&#34; % instance)
+    # If called from a class #
+    if instance is None: return self
+    # Does a cache exist for this instance? #
+    self.check_cache(instance)
+    # Is the answer in the cache? #
+    if self.name in instance.__cache__: return instance.__cache__[self.name]
+    # If not we will compute it #
+    if inspect.isgeneratorfunction(self.func): result = tuple(self.func(instance))
+    else:                                      result = self.func(instance)
+    # Let&#39;s store the answer for later #
+    instance.__cache__[self.name] = result
+    # Return #
+    return result</code></pre>
+</details>
+</dd>
+<dt id="libcbm_runner.core.runner.Runner.post_processor"><code class="name">var <span class="ident">post_processor</span></code></dt>
+<dd>
+<div class="desc"><p>Update or convert the output data to this run using some rules.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner):
+    &#34;&#34;&#34;
+    If you see the current source code in a seemingly unrelated part of
+    an auto-generated documentation, it means the program making the
+    documentation was unable to correctly traverse a decorated property.
+    &#34;&#34;&#34;
+    # For debugging purposes #
+    if False: print(&#34;-&gt; property cached `%s`&#34; % instance)
+    # If called from a class #
+    if instance is None: return self
+    # Does a cache exist for this instance? #
+    self.check_cache(instance)
+    # Is the answer in the cache? #
+    if self.name in instance.__cache__: return instance.__cache__[self.name]
+    # If not we will compute it #
+    if inspect.isgeneratorfunction(self.func): result = tuple(self.func(instance))
+    else:                                      result = self.func(instance)
+    # Let&#39;s store the answer for later #
+    instance.__cache__[self.name] = result
+    # Return #
+    return result</code></pre>
+</details>
+</dd>
+<dt id="libcbm_runner.core.runner.Runner.pre_processor"><code class="name">var <span class="ident">pre_processor</span></code></dt>
+<dd>
+<div class="desc"><p>Update the input data to this run using some rules.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -418,28 +816,22 @@ def tail(self):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="libcbm_runner.core.runner.Runner.copy_orig_from_country"><code class="name flex">
-<span>def <span class="ident">copy_orig_from_country</span></span>(<span>self)</span>
+<dt id="libcbm_runner.core.runner.Runner.modify_input"><code class="name flex">
+<span>def <span class="ident">modify_input</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Refresh the input data by copying the immutable original
-CSVs from the current country to this runner's input.</p></div>
+<div class="desc"><p>Combos can subclass this at will.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def copy_orig_from_country(self):
-    &#34;&#34;&#34;
-    Refresh the input data by copying the immutable original
-    CSVs from the current country to this runner&#39;s input.
-    &#34;&#34;&#34;
-    destination_dir = self.input_data.paths.csv_dir
-    destination_dir.remove()
-    self.country.orig_data.paths.csv_dir.copy(destination_dir)</code></pre>
+<pre><code class="python">def modify_input(self):
+    &#34;&#34;&#34;Combos can subclass this at will.&#34;&#34;&#34;
+    pass</code></pre>
 </details>
 </dd>
-<dt id="libcbm_runner.core.runner.Runner.remove_directory"><code class="name flex">
-<span>def <span class="ident">remove_directory</span></span>(<span>self)</span>
+<dt id="libcbm_runner.core.runner.Runner.remove_directories"><code class="name flex">
+<span>def <span class="ident">remove_directories</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Removes the directory that will be recreated by running this runner.
@@ -449,14 +841,14 @@ Note: we need to keep the log we are writing to currently.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def remove_directory(self):
+<pre><code class="python">def remove_directories(self):
     &#34;&#34;&#34;
     Removes the directory that will be recreated by running this runner.
     This guarantees that all output data is regenerated.
     Note: we need to keep the log we are writing to currently.
     &#34;&#34;&#34;
     # Message #
-    self.log.info(&#34;Removing directory &#39;%s&#39;.&#34; % self.data_dir)
+    self.log.info(&#34;Removing directory &#39;%s&#39;.&#34; % self.data_dir.with_tilda)
     # The output directory #
     self.paths.input_dir.remove(safe=False)
     self.paths.output_dir.remove(safe=False)
@@ -467,37 +859,57 @@ Note: we need to keep the log we are writing to currently.</p></div>
 </details>
 </dd>
 <dt id="libcbm_runner.core.runner.Runner.run"><code class="name flex">
-<span>def <span class="ident">run</span></span>(<span>self)</span>
+<span>def <span class="ident">run</span></span>(<span>self, keep_in_ram=False, verbose=True, interrupt_on_error=False)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Run the full modelling pipeline for a given country,
-a given scenario and a given step.</p></div>
+<div class="desc"><p>Run the full modelling pipeline for a given country, a given combo
+and a given step.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run(self):
+<pre><code class="python">def run(self, keep_in_ram=False, verbose=True, interrupt_on_error=False):
     &#34;&#34;&#34;
-    Run the full modelling pipeline for a given country,
-    a given scenario and a given step.
+    Run the full modelling pipeline for a given country, a given combo
+    and a given step.
     &#34;&#34;&#34;
+    # Verbosity level #
+    self.verbose = verbose
     # Messages #
-    self.log.info(&#34;Using module at &#39;%s&#39;.&#34; % Path(libcbm_runner))
+    self.log.info(&#34;Using %s.&#34; % libcbm_runner)
     self.log.info(&#34;Runner &#39;%s&#39; starting.&#34; % self.short_name)
+    # Start the timer #
+    self.timer = LogTimer(self.log)
+    self.timer.print_start()
     # Clean everything from previous run #
-    self.remove_directory()
-    # Copy the original input data #
-    self.copy_orig_from_country()
-    # Modify input data #
-    pass
+    self.remove_directories()
+    # Create the input data #
+    self.input_data()
+    # Modify input data, combos can subclass this #
+    self.modify_input()
+    # Pre-processing #
+    self.pre_processor()
+    # Create the JSON configuration #
+    self.create_json()
     # Run the model #
-    self.simulation.run()
+    self.timer.print_elapsed()
+    self.simulation(interrupt_on_error)
+    self.timer.print_elapsed()
+    # Save the results to disk #
+    if self.simulation.error is not True: self.output.save()
+    # Free memory #
+    if not keep_in_ram: self.simulation.clear()
     # Post-processing #
-    pass
-    # Reporting #
-    pass
+    self.post_processor()
     # Messages #
-    self.log.info(&#34;Done.&#34;)</code></pre>
+    self.timer.print_end()
+    self.timer.print_total_elapsed()
+    # Final message #
+    if self.simulation.error is not True: msg = &#34;Done.&#34;
+    else: msg = &#34;Done with errors.&#34;
+    self.log.info(msg)
+    # Return #
+    return self.output</code></pre>
 </details>
 </dd>
 </dl>
@@ -520,12 +932,18 @@ a given scenario and a given step.</p></div>
 <ul>
 <li>
 <h4><code><a title="libcbm_runner.core.runner.Runner" href="#libcbm_runner.core.runner.Runner">Runner</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="libcbm_runner.core.runner.Runner.all_paths" href="#libcbm_runner.core.runner.Runner.all_paths">all_paths</a></code></li>
-<li><code><a title="libcbm_runner.core.runner.Runner.copy_orig_from_country" href="#libcbm_runner.core.runner.Runner.copy_orig_from_country">copy_orig_from_country</a></code></li>
+<li><code><a title="libcbm_runner.core.runner.Runner.create_json" href="#libcbm_runner.core.runner.Runner.create_json">create_json</a></code></li>
 <li><code><a title="libcbm_runner.core.runner.Runner.input_data" href="#libcbm_runner.core.runner.Runner.input_data">input_data</a></code></li>
+<li><code><a title="libcbm_runner.core.runner.Runner.internal" href="#libcbm_runner.core.runner.Runner.internal">internal</a></code></li>
 <li><code><a title="libcbm_runner.core.runner.Runner.log" href="#libcbm_runner.core.runner.Runner.log">log</a></code></li>
-<li><code><a title="libcbm_runner.core.runner.Runner.remove_directory" href="#libcbm_runner.core.runner.Runner.remove_directory">remove_directory</a></code></li>
+<li><code><a title="libcbm_runner.core.runner.Runner.modify_input" href="#libcbm_runner.core.runner.Runner.modify_input">modify_input</a></code></li>
+<li><code><a title="libcbm_runner.core.runner.Runner.num_timesteps" href="#libcbm_runner.core.runner.Runner.num_timesteps">num_timesteps</a></code></li>
+<li><code><a title="libcbm_runner.core.runner.Runner.output" href="#libcbm_runner.core.runner.Runner.output">output</a></code></li>
+<li><code><a title="libcbm_runner.core.runner.Runner.post_processor" href="#libcbm_runner.core.runner.Runner.post_processor">post_processor</a></code></li>
+<li><code><a title="libcbm_runner.core.runner.Runner.pre_processor" href="#libcbm_runner.core.runner.Runner.pre_processor">pre_processor</a></code></li>
+<li><code><a title="libcbm_runner.core.runner.Runner.remove_directories" href="#libcbm_runner.core.runner.Runner.remove_directories">remove_directories</a></code></li>
 <li><code><a title="libcbm_runner.core.runner.Runner.run" href="#libcbm_runner.core.runner.Runner.run">run</a></code></li>
 <li><code><a title="libcbm_runner.core.runner.Runner.simulation" href="#libcbm_runner.core.runner.Runner.simulation">simulation</a></code></li>
 <li><code><a title="libcbm_runner.core.runner.Runner.tail" href="#libcbm_runner.core.runner.Runner.tail">tail</a></code></li>

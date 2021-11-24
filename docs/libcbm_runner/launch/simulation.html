@@ -23,7 +23,7 @@
 </header>
 <section id="section-intro">
 <p>Written by Lucas Sinclair and Paul Rougieux.</p>
-<p>JRC biomass Project.
+<p>JRC Biomass Project.
 Unit D1 Bioeconomy.</p>
 <details class="source">
 <summary>
@@ -35,7 +35,7 @@ Unit D1 Bioeconomy.</p>
 &#34;&#34;&#34;
 Written by Lucas Sinclair and Paul Rougieux.
 
-JRC biomass Project.
+JRC Biomass Project.
 Unit D1 Bioeconomy.
 &#34;&#34;&#34;
 
@@ -46,68 +46,129 @@ from libcbm.input.sit import sit_cbm_factory
 from libcbm.model.cbm import cbm_simulator
 
 # First party modules #
-from autopaths.auto_paths import AutoPaths
-from plumbing.cache       import property_cached
 
 # Internal modules #
-from libcbm_runner.launch.create_json import CreateJSON
 
 ###############################################################################
 class Simulation(object):
-    &#34;&#34;&#34;
-    This class will run a `libcbm_py` simulation.
-    &#34;&#34;&#34;
-
-    all_paths = &#34;&#34;&#34;
-    /input/json/config.json
-    /output/
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;This class will run a `libcbm_py` simulation.&#34;&#34;&#34;
 
     def __init__(self, parent):
         # Default attributes #
-        self.parent = parent
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
+        self.parent  = parent
+        self.runner  = parent
+        self.country = self.runner.country
+        # Record if we ended with an error or not #
+        self.error = None
 
-    @property_cached
-    def create_json(self):
-        return CreateJSON(self)
+    def __repr__(self):
+        return &#39;%s object code &#34;%s&#34;&#39; % (self.__class__, self.runner.short_name)
+
+    #--------------------------- Special Methods -----------------------------#
+    def dynamics_func(self, timestep, cbm_vars):
+        &#34;&#34;&#34;
+        See the simulate method of the libcbm simulator:
+
+            https://github.com/cat-cfs/libcbm_py/blob/master/libcbm/
+            model/cbm/cbm_simulator.py#L148
+
+        If t=1, we know this is the first timestep, and nothing has yet been
+        done to the post-spinup pools. It is at this moment that we want to
+        change the growth curves, and this can be done by switching the
+        classifier value of each inventory record.
+        &#34;&#34;&#34;
+        # Check the timestep #
+        if timestep == 1:
+            # Print message #
+            msg = &#34;Carbon pool initialization period is finished.&#34; \
+                  &#34; Now starting the `current` period.&#34;
+            self.parent.log.info(msg)
+            # The name of our extra classifier #
+            key = &#39;growth_period&#39;
+            # The value that the classifier should take for all timesteps #
+            val = &#34;Cur&#34;
+            # Get the corresponding ID in the libcbm simulation #
+            id_of_cur = self.sit.classifier_value_ids[key][val]
+            # Modify the whole column of the dataframe #
+            cbm_vars.classifiers[key] = id_of_cur
+        # Print a message #
+        self.parent.log.info(f&#34;Time step {timestep} is about to run.&#34;)
+        # Return #
+        return self.rule_based_proc.pre_dynamics_func(timestep, cbm_vars)
 
     #------------------------------- Methods ---------------------------------#
+    # noinspection PyBroadException
+    def __call__(self, interrupt_on_error=False):
+        &#34;&#34;&#34;
+        Wrap the `run()` method by catching any type of exception
+        and logging it. This is useful when running all countries one after
+        each other and not wanting that process to be interrupted even if a few
+        countries fail along the way.
+        &#34;&#34;&#34;
+        try:
+            self.run()
+        except Exception:
+            message = &#34;Runner &#39;%s&#39; encountered an exception. See log file.&#34;
+            self.runner.log.error(message % self.runner.short_name)
+            self.runner.log.exception(&#34;Exception&#34;, exc_info=True)
+            self.error = True
+            if interrupt_on_error: raise
+
     def run(self):
         &#34;&#34;&#34;
-        Call `libcbm_py` to run the cbm simulation.
-
-        The interaction with libcm_py is decomposed in several calls to pass a
-        `.json` config, a default database (also called aidb) and csv files.
+        Call `libcbm_py` to run the actual CBM simulation after creating some
+        objects.
+        The interaction with `libcbm_py` is decomposed in several calls to pass
+        a `.json` config, a default database (also called aidb) and csv files.
         &#34;&#34;&#34;
-        # Create the JSON #
-        self.create_json()
+        # Message #
+        self.runner.log.info(&#34;Setting up the libcbm_py objects.&#34;)
         # The &#39;AIDB&#39; path as it was called previously #
-        db_path = self.parent.country.aidb.paths.db
+        db_path = self.runner.country.aidb.paths.db
+        if not db_path:
+            msg = &#34;The database file at &#39;%s&#39; was not found.&#34;
+            raise FileNotFoundError(msg % self.runner.country.aidb.paths.db)
         # Create a SIT object #
-        self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config), db_path=str(db_path))
+        json_path = str(self.runner.paths.json)
+        self.sit = sit_cbm_factory.load_sit(json_path, str(db_path))
         # Do some initialization #
-        self.classifiers, self.inventory = sit_cbm_factory.initialize_inventory(self.sit)
-        # Create a CBM object #
-        self.cbm = sit_cbm_factory.initialize_cbm(self.sit)
+        init_inv = sit_cbm_factory.initialize_inventory
+        self.clfrs, self.inv = init_inv(self.sit)
         # This will contain results #
-        self.results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
-        # Create a function to apply rule based events and transition rules #
-        rule_based_processor = sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
-        # Run #
-        cbm_simulator.simulate(
-            self.cbm,
-            n_steps              = 100,
-            classifiers          = self.classifiers,
-            inventory            = self.inventory,
-            pool_codes           = self.sit.defaults.get_pools(),
-            flux_indicator_codes = self.sit.defaults.get_flux_indicators(),
-            pre_dynamics_func    = rule_based_processor.pre_dynamic_func,
-            reporting_func       = reporting_func
-        )
+        create_func = cbm_simulator.create_in_memory_reporting_func
+        self.results, self.reporting_func = create_func()
+        # Create a CBM object #
+        with sit_cbm_factory.initialize_cbm(self.sit) as self.cbm:
+            # Create a function to apply rule based events #
+            create_proc = sit_cbm_factory.create_sit_rule_based_processor
+            self.rule_based_proc = create_proc(self.sit, self.cbm)
+            # Message #
+            self.runner.log.info(&#34;Calling the cbm_simulator.&#34;)
+            # Run #
+            cbm_simulator.simulate(
+                self.cbm,
+                n_steps           = self.runner.num_timesteps,
+                classifiers       = self.clfrs,
+                inventory         = self.inv,
+                pre_dynamics_func = self.dynamics_func,
+                reporting_func    = self.reporting_func
+            )
+        # If we got here then we did not encounter any simulation error #
+        self.error = False
         # Return for convenience #
-        return self.results</code></pre>
+        return self.results
+
+    def clear(self):
+        &#34;&#34;&#34;
+        Remove all objects from RAM otherwise the kernel will kill the python
+        process after a couple countries being run.
+        &#34;&#34;&#34;
+        if hasattr(self, &#39;cbm&#39;):            del self.cbm
+        if hasattr(self, &#39;sit&#39;):            del self.sit
+        if hasattr(self, &#39;clfrs&#39;):          del self.clfrs
+        if hasattr(self, &#39;inv&#39;):            del self.inv
+        if hasattr(self, &#39;results&#39;):        del self.results
+        if hasattr(self, &#39;reporting_func&#39;): del self.reporting_func</code></pre>
 </details>
 </section>
 <section>
@@ -130,148 +191,251 @@ class Simulation(object):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Simulation(object):
-    &#34;&#34;&#34;
-    This class will run a `libcbm_py` simulation.
-    &#34;&#34;&#34;
-
-    all_paths = &#34;&#34;&#34;
-    /input/json/config.json
-    /output/
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;This class will run a `libcbm_py` simulation.&#34;&#34;&#34;
 
     def __init__(self, parent):
         # Default attributes #
-        self.parent = parent
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
+        self.parent  = parent
+        self.runner  = parent
+        self.country = self.runner.country
+        # Record if we ended with an error or not #
+        self.error = None
 
-    @property_cached
-    def create_json(self):
-        return CreateJSON(self)
+    def __repr__(self):
+        return &#39;%s object code &#34;%s&#34;&#39; % (self.__class__, self.runner.short_name)
+
+    #--------------------------- Special Methods -----------------------------#
+    def dynamics_func(self, timestep, cbm_vars):
+        &#34;&#34;&#34;
+        See the simulate method of the libcbm simulator:
+
+            https://github.com/cat-cfs/libcbm_py/blob/master/libcbm/
+            model/cbm/cbm_simulator.py#L148
+
+        If t=1, we know this is the first timestep, and nothing has yet been
+        done to the post-spinup pools. It is at this moment that we want to
+        change the growth curves, and this can be done by switching the
+        classifier value of each inventory record.
+        &#34;&#34;&#34;
+        # Check the timestep #
+        if timestep == 1:
+            # Print message #
+            msg = &#34;Carbon pool initialization period is finished.&#34; \
+                  &#34; Now starting the `current` period.&#34;
+            self.parent.log.info(msg)
+            # The name of our extra classifier #
+            key = &#39;growth_period&#39;
+            # The value that the classifier should take for all timesteps #
+            val = &#34;Cur&#34;
+            # Get the corresponding ID in the libcbm simulation #
+            id_of_cur = self.sit.classifier_value_ids[key][val]
+            # Modify the whole column of the dataframe #
+            cbm_vars.classifiers[key] = id_of_cur
+        # Print a message #
+        self.parent.log.info(f&#34;Time step {timestep} is about to run.&#34;)
+        # Return #
+        return self.rule_based_proc.pre_dynamics_func(timestep, cbm_vars)
 
     #------------------------------- Methods ---------------------------------#
+    # noinspection PyBroadException
+    def __call__(self, interrupt_on_error=False):
+        &#34;&#34;&#34;
+        Wrap the `run()` method by catching any type of exception
+        and logging it. This is useful when running all countries one after
+        each other and not wanting that process to be interrupted even if a few
+        countries fail along the way.
+        &#34;&#34;&#34;
+        try:
+            self.run()
+        except Exception:
+            message = &#34;Runner &#39;%s&#39; encountered an exception. See log file.&#34;
+            self.runner.log.error(message % self.runner.short_name)
+            self.runner.log.exception(&#34;Exception&#34;, exc_info=True)
+            self.error = True
+            if interrupt_on_error: raise
+
     def run(self):
         &#34;&#34;&#34;
-        Call `libcbm_py` to run the cbm simulation.
-
-        The interaction with libcm_py is decomposed in several calls to pass a
-        `.json` config, a default database (also called aidb) and csv files.
+        Call `libcbm_py` to run the actual CBM simulation after creating some
+        objects.
+        The interaction with `libcbm_py` is decomposed in several calls to pass
+        a `.json` config, a default database (also called aidb) and csv files.
         &#34;&#34;&#34;
-        # Create the JSON #
-        self.create_json()
+        # Message #
+        self.runner.log.info(&#34;Setting up the libcbm_py objects.&#34;)
         # The &#39;AIDB&#39; path as it was called previously #
-        db_path = self.parent.country.aidb.paths.db
+        db_path = self.runner.country.aidb.paths.db
+        if not db_path:
+            msg = &#34;The database file at &#39;%s&#39; was not found.&#34;
+            raise FileNotFoundError(msg % self.runner.country.aidb.paths.db)
         # Create a SIT object #
-        self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config), db_path=str(db_path))
+        json_path = str(self.runner.paths.json)
+        self.sit = sit_cbm_factory.load_sit(json_path, str(db_path))
         # Do some initialization #
-        self.classifiers, self.inventory = sit_cbm_factory.initialize_inventory(self.sit)
-        # Create a CBM object #
-        self.cbm = sit_cbm_factory.initialize_cbm(self.sit)
+        init_inv = sit_cbm_factory.initialize_inventory
+        self.clfrs, self.inv = init_inv(self.sit)
         # This will contain results #
-        self.results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
-        # Create a function to apply rule based events and transition rules #
-        rule_based_processor = sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
-        # Run #
-        cbm_simulator.simulate(
-            self.cbm,
-            n_steps              = 100,
-            classifiers          = self.classifiers,
-            inventory            = self.inventory,
-            pool_codes           = self.sit.defaults.get_pools(),
-            flux_indicator_codes = self.sit.defaults.get_flux_indicators(),
-            pre_dynamics_func    = rule_based_processor.pre_dynamic_func,
-            reporting_func       = reporting_func
-        )
+        create_func = cbm_simulator.create_in_memory_reporting_func
+        self.results, self.reporting_func = create_func()
+        # Create a CBM object #
+        with sit_cbm_factory.initialize_cbm(self.sit) as self.cbm:
+            # Create a function to apply rule based events #
+            create_proc = sit_cbm_factory.create_sit_rule_based_processor
+            self.rule_based_proc = create_proc(self.sit, self.cbm)
+            # Message #
+            self.runner.log.info(&#34;Calling the cbm_simulator.&#34;)
+            # Run #
+            cbm_simulator.simulate(
+                self.cbm,
+                n_steps           = self.runner.num_timesteps,
+                classifiers       = self.clfrs,
+                inventory         = self.inv,
+                pre_dynamics_func = self.dynamics_func,
+                reporting_func    = self.reporting_func
+            )
+        # If we got here then we did not encounter any simulation error #
+        self.error = False
         # Return for convenience #
-        return self.results</code></pre>
+        return self.results
+
+    def clear(self):
+        &#34;&#34;&#34;
+        Remove all objects from RAM otherwise the kernel will kill the python
+        process after a couple countries being run.
+        &#34;&#34;&#34;
+        if hasattr(self, &#39;cbm&#39;):            del self.cbm
+        if hasattr(self, &#39;sit&#39;):            del self.sit
+        if hasattr(self, &#39;clfrs&#39;):          del self.clfrs
+        if hasattr(self, &#39;inv&#39;):            del self.inv
+        if hasattr(self, &#39;results&#39;):        del self.results
+        if hasattr(self, &#39;reporting_func&#39;): del self.reporting_func</code></pre>
 </details>
-<h3>Class variables</h3>
+<h3>Methods</h3>
 <dl>
-<dt id="libcbm_runner.launch.simulation.Simulation.all_paths"><code class="name">var <span class="ident">all_paths</span></code></dt>
+<dt id="libcbm_runner.launch.simulation.Simulation.clear"><code class="name flex">
+<span>def <span class="ident">clear</span></span>(<span>self)</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-</dl>
-<h3>Instance variables</h3>
-<dl>
-<dt id="libcbm_runner.launch.simulation.Simulation.create_json"><code class="name">var <span class="ident">create_json</span></code></dt>
-<dd>
-<div class="desc"><p>If you see the current source code in a seemingly unrelated part of
-an auto-generated documentation, it means the program making the
-documentation was unable to correctly traverse a decorated property.</p></div>
+<div class="desc"><p>Remove all objects from RAM otherwise the kernel will kill the python
+process after a couple countries being run.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def __get__(self, instance, owner):
+<pre><code class="python">def clear(self):
     &#34;&#34;&#34;
-    If you see the current source code in a seemingly unrelated part of
-    an auto-generated documentation, it means the program making the
-    documentation was unable to correctly traverse a decorated property.
+    Remove all objects from RAM otherwise the kernel will kill the python
+    process after a couple countries being run.
     &#34;&#34;&#34;
-    # For debugging purposes #
-    if False: print(&#34;-&gt; property cached `%s`&#34; % instance)
-    # If called from a class #
-    if instance is None: return self
-    # Does a cache exist for this instance? #
-    self.check_cache(instance)
-    # Is the answer in the cache? #
-    if self.name in instance.__cache__: return instance.__cache__[self.name]
-    # If not we will compute it #
-    if inspect.isgeneratorfunction(self.func): result = tuple(self.func(instance))
-    else:                                      result = self.func(instance)
-    # Let&#39;s store the answer for later #
-    instance.__cache__[self.name] = result
-    # Return #
-    return result</code></pre>
+    if hasattr(self, &#39;cbm&#39;):            del self.cbm
+    if hasattr(self, &#39;sit&#39;):            del self.sit
+    if hasattr(self, &#39;clfrs&#39;):          del self.clfrs
+    if hasattr(self, &#39;inv&#39;):            del self.inv
+    if hasattr(self, &#39;results&#39;):        del self.results
+    if hasattr(self, &#39;reporting_func&#39;): del self.reporting_func</code></pre>
 </details>
 </dd>
-</dl>
-<h3>Methods</h3>
-<dl>
+<dt id="libcbm_runner.launch.simulation.Simulation.dynamics_func"><code class="name flex">
+<span>def <span class="ident">dynamics_func</span></span>(<span>self, timestep, cbm_vars)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>See the simulate method of the libcbm simulator:</p>
+<pre><code>&lt;https://github.com/cat-cfs/libcbm_py/blob/master/libcbm/&gt;
+model/cbm/cbm_simulator.py#L148
+</code></pre>
+<p>If t=1, we know this is the first timestep, and nothing has yet been
+done to the post-spinup pools. It is at this moment that we want to
+change the growth curves, and this can be done by switching the
+classifier value of each inventory record.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dynamics_func(self, timestep, cbm_vars):
+    &#34;&#34;&#34;
+    See the simulate method of the libcbm simulator:
+
+        https://github.com/cat-cfs/libcbm_py/blob/master/libcbm/
+        model/cbm/cbm_simulator.py#L148
+
+    If t=1, we know this is the first timestep, and nothing has yet been
+    done to the post-spinup pools. It is at this moment that we want to
+    change the growth curves, and this can be done by switching the
+    classifier value of each inventory record.
+    &#34;&#34;&#34;
+    # Check the timestep #
+    if timestep == 1:
+        # Print message #
+        msg = &#34;Carbon pool initialization period is finished.&#34; \
+              &#34; Now starting the `current` period.&#34;
+        self.parent.log.info(msg)
+        # The name of our extra classifier #
+        key = &#39;growth_period&#39;
+        # The value that the classifier should take for all timesteps #
+        val = &#34;Cur&#34;
+        # Get the corresponding ID in the libcbm simulation #
+        id_of_cur = self.sit.classifier_value_ids[key][val]
+        # Modify the whole column of the dataframe #
+        cbm_vars.classifiers[key] = id_of_cur
+    # Print a message #
+    self.parent.log.info(f&#34;Time step {timestep} is about to run.&#34;)
+    # Return #
+    return self.rule_based_proc.pre_dynamics_func(timestep, cbm_vars)</code></pre>
+</details>
+</dd>
 <dt id="libcbm_runner.launch.simulation.Simulation.run"><code class="name flex">
 <span>def <span class="ident">run</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Call <code>libcbm_py</code> to run the cbm simulation.</p>
-<p>The interaction with libcm_py is decomposed in several calls to pass a
-<code>.json</code> config, a default database (also called aidb) and csv files.</p></div>
+<div class="desc"><p>Call <code>libcbm_py</code> to run the actual CBM simulation after creating some
+objects.
+The interaction with <code>libcbm_py</code> is decomposed in several calls to pass
+a <code>.json</code> config, a default database (also called aidb) and csv files.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def run(self):
     &#34;&#34;&#34;
-    Call `libcbm_py` to run the cbm simulation.
-
-    The interaction with libcm_py is decomposed in several calls to pass a
-    `.json` config, a default database (also called aidb) and csv files.
+    Call `libcbm_py` to run the actual CBM simulation after creating some
+    objects.
+    The interaction with `libcbm_py` is decomposed in several calls to pass
+    a `.json` config, a default database (also called aidb) and csv files.
     &#34;&#34;&#34;
-    # Create the JSON #
-    self.create_json()
+    # Message #
+    self.runner.log.info(&#34;Setting up the libcbm_py objects.&#34;)
     # The &#39;AIDB&#39; path as it was called previously #
-    db_path = self.parent.country.aidb.paths.db
+    db_path = self.runner.country.aidb.paths.db
+    if not db_path:
+        msg = &#34;The database file at &#39;%s&#39; was not found.&#34;
+        raise FileNotFoundError(msg % self.runner.country.aidb.paths.db)
     # Create a SIT object #
-    self.sit = sit_cbm_factory.load_sit(str(self.paths.json_config), db_path=str(db_path))
+    json_path = str(self.runner.paths.json)
+    self.sit = sit_cbm_factory.load_sit(json_path, str(db_path))
     # Do some initialization #
-    self.classifiers, self.inventory = sit_cbm_factory.initialize_inventory(self.sit)
-    # Create a CBM object #
-    self.cbm = sit_cbm_factory.initialize_cbm(self.sit)
+    init_inv = sit_cbm_factory.initialize_inventory
+    self.clfrs, self.inv = init_inv(self.sit)
     # This will contain results #
-    self.results, reporting_func = cbm_simulator.create_in_memory_reporting_func()
-    # Create a function to apply rule based events and transition rules #
-    rule_based_processor = sit_cbm_factory.create_sit_rule_based_processor(self.sit, self.cbm)
-    # Run #
-    cbm_simulator.simulate(
-        self.cbm,
-        n_steps              = 100,
-        classifiers          = self.classifiers,
-        inventory            = self.inventory,
-        pool_codes           = self.sit.defaults.get_pools(),
-        flux_indicator_codes = self.sit.defaults.get_flux_indicators(),
-        pre_dynamics_func    = rule_based_processor.pre_dynamic_func,
-        reporting_func       = reporting_func
-    )
+    create_func = cbm_simulator.create_in_memory_reporting_func
+    self.results, self.reporting_func = create_func()
+    # Create a CBM object #
+    with sit_cbm_factory.initialize_cbm(self.sit) as self.cbm:
+        # Create a function to apply rule based events #
+        create_proc = sit_cbm_factory.create_sit_rule_based_processor
+        self.rule_based_proc = create_proc(self.sit, self.cbm)
+        # Message #
+        self.runner.log.info(&#34;Calling the cbm_simulator.&#34;)
+        # Run #
+        cbm_simulator.simulate(
+            self.cbm,
+            n_steps           = self.runner.num_timesteps,
+            classifiers       = self.clfrs,
+            inventory         = self.inv,
+            pre_dynamics_func = self.dynamics_func,
+            reporting_func    = self.reporting_func
+        )
+    # If we got here then we did not encounter any simulation error #
+    self.error = False
     # Return for convenience #
     return self.results</code></pre>
 </details>
@@ -297,8 +461,8 @@ documentation was unable to correctly traverse a decorated property.</p></div>
 <li>
 <h4><code><a title="libcbm_runner.launch.simulation.Simulation" href="#libcbm_runner.launch.simulation.Simulation">Simulation</a></code></h4>
 <ul class="">
-<li><code><a title="libcbm_runner.launch.simulation.Simulation.all_paths" href="#libcbm_runner.launch.simulation.Simulation.all_paths">all_paths</a></code></li>
-<li><code><a title="libcbm_runner.launch.simulation.Simulation.create_json" href="#libcbm_runner.launch.simulation.Simulation.create_json">create_json</a></code></li>
+<li><code><a title="libcbm_runner.launch.simulation.Simulation.clear" href="#libcbm_runner.launch.simulation.Simulation.clear">clear</a></code></li>
+<li><code><a title="libcbm_runner.launch.simulation.Simulation.dynamics_func" href="#libcbm_runner.launch.simulation.Simulation.dynamics_func">dynamics_func</a></code></li>
 <li><code><a title="libcbm_runner.launch.simulation.Simulation.run" href="#libcbm_runner.launch.simulation.Simulation.run">run</a></code></li>
 </ul>
 </li>

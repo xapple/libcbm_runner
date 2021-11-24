@@ -23,7 +23,7 @@
 </header>
 <section id="section-intro">
 <p>Written by Lucas Sinclair and Paul Rougieux.</p>
-<p>JRC biomass Project.
+<p>JRC Biomass Project.
 Unit D1 Bioeconomy.</p>
 <details class="source">
 <summary>
@@ -35,7 +35,7 @@ Unit D1 Bioeconomy.</p>
 &#34;&#34;&#34;
 Written by Lucas Sinclair and Paul Rougieux.
 
-JRC biomass Project.
+JRC Biomass Project.
 Unit D1 Bioeconomy.
 &#34;&#34;&#34;
 
@@ -45,72 +45,84 @@ Unit D1 Bioeconomy.
 import simplejson as json
 
 # First party modules #
-from autopaths.auto_paths import AutoPaths
 
 ###############################################################################
 class CreateJSON(object):
     &#34;&#34;&#34;
-    This class will generate the JSON file consumed by libcbm.
+    This class will generate the JSON file consumed by `libcbm`.
 
     The mapping mode &#34;SeparateAdminEcoClassifiers&#34; is used by
     libcbm/input/sit/sit_mapping.py to assign the spatial unit IDs.
+
+    We use the same keys as defined in the dictionary below, except
+    for `yield` being translated to `growth_curves` since `yield` is a
+    reserved keyword in python.
     &#34;&#34;&#34;
 
     def __init__(self, parent):
         # Default attributes #
         self.parent = parent
-        self.runner = parent.parent
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.runner.data_dir, self.parent.all_paths)
+        self.runner = parent
+
+    def __repr__(self):
+        return &#39;%s object code &#34;%s&#34;&#39; % (self.__class__, self.runner.short_name)
 
     def __call__(self):
-        self.paths.json.write(json.dumps(self.content, indent=4, ignore_nan=True))
+        self.runner.paths.json.write(json.dumps(self.content,
+                                                indent     = 4,
+                                                ignore_nan = True))
 
+    #-------------------------- Class attributes -----------------------------#
     template = {
         &#34;import_config&#34;: {
+            &#34;age_classes&#34;:       {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
             &#34;classifiers&#34;:       {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
             &#34;disturbance_types&#34;: {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
-            &#34;age_classes&#34;:       {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
-            &#34;inventory&#34;:         {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
-            &#34;yield&#34;:             {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
             &#34;events&#34;:            {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
+            &#34;inventory&#34;:         {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
             &#34;transitions&#34;:       {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
+            &#34;yield&#34;:             {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
           },
         &#34;mapping_config&#34;: {
             &#34;spatial_units&#34;: {
                 &#34;mapping_mode&#34;:     &#34;SeparateAdminEcoClassifiers&#34;,
-                &#34;admin_classifier&#34;: &#34;Region&#34;,
-                &#34;eco_classifier&#34;:   &#34;Climatic unit&#34;,
+                &#34;admin_classifier&#34;: &#34;region&#34;,
+                &#34;eco_classifier&#34;:   &#34;climate&#34;,
                 &#34;admin_mapping&#34;:    None,
                 &#34;eco_mapping&#34;:      None,
             },
             &#34;disturbance_types&#34;: None,
             &#34;species&#34;: {
-                &#34;species_classifier&#34;: &#34;Forest type&#34;,
+                &#34;species_classifier&#34;: &#34;forest_type&#34;,
                 &#34;species_mapping&#34;:    None,
             }
         }
     }
 
+    #----------------------------- Properties --------------------------------#
     @property
     def content(self):
         # Make a copy of the template #
         config = self.template.copy()
         # Get the mapping config sub dictionary #
         maps = config[&#39;mapping_config&#39;]
-        # Retrieve the four classifiers mappings #
+        # Retrieve the four classifiers mappings as a dict #
         mappings = self.runner.country.associations.all_mappings
         # Set the admin and eco classifiers #
-        maps[&#39;spatial_units&#39;][&#39;admin_mapping&#39;]   = mappings[&#39;map_admin_bound&#39;]
-        maps[&#39;spatial_units&#39;][&#39;eco_mapping&#39;]     = mappings[&#39;map_eco_bound&#39;]
+        maps[&#39;spatial_units&#39;][&#39;admin_mapping&#39;] = mappings[&#39;map_admin_bound&#39;]
+        maps[&#39;spatial_units&#39;][&#39;eco_mapping&#39;]   = mappings[&#39;map_eco_bound&#39;]
         # Set the disturbances and species classifiers #
-        maps[&#39;disturbance_types&#39;]                = mappings[&#39;map_disturbance&#39;]
-        maps[&#39;species&#39;][&#39;species_mapping&#39;]       = mappings[&#39;map_species&#39;]
+        maps[&#39;disturbance_types&#39;]              = mappings[&#39;map_disturbance&#39;]
+        maps[&#39;species&#39;][&#39;species_mapping&#39;]     = mappings[&#39;map_species&#39;]
         # Get the names of all the CSVs #
         all_files_names = config[&#39;import_config&#39;].keys()
         # Finally set the paths to all the CSVs #
         for file_name in all_files_names:
-            full_path = self.runner.input_data.paths[file_name]
+            # Special case for the `yields` file #
+            name = file_name if file_name != &#39;yield&#39; else &#39;growth_curves&#39;
+            # Get the path #
+            full_path = self.runner.input_data.paths[name]
+            # Set it in the dictionary #
             config[&#39;import_config&#39;][file_name][&#39;params&#39;][&#39;path&#39;] = full_path
         # Return result #
         return config</code></pre>
@@ -130,76 +142,92 @@ class CreateJSON(object):
 <span>(</span><span>parent)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>This class will generate the JSON file consumed by libcbm.</p>
+<div class="desc"><p>This class will generate the JSON file consumed by <code>libcbm</code>.</p>
 <p>The mapping mode "SeparateAdminEcoClassifiers" is used by
-libcbm/input/sit/sit_mapping.py to assign the spatial unit IDs.</p></div>
+libcbm/input/sit/sit_mapping.py to assign the spatial unit IDs.</p>
+<p>We use the same keys as defined in the dictionary below, except
+for <code>yield</code> being translated to <code>growth_curves</code> since <code>yield</code> is a
+reserved keyword in python.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class CreateJSON(object):
     &#34;&#34;&#34;
-    This class will generate the JSON file consumed by libcbm.
+    This class will generate the JSON file consumed by `libcbm`.
 
     The mapping mode &#34;SeparateAdminEcoClassifiers&#34; is used by
     libcbm/input/sit/sit_mapping.py to assign the spatial unit IDs.
+
+    We use the same keys as defined in the dictionary below, except
+    for `yield` being translated to `growth_curves` since `yield` is a
+    reserved keyword in python.
     &#34;&#34;&#34;
 
     def __init__(self, parent):
         # Default attributes #
         self.parent = parent
-        self.runner = parent.parent
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(self.runner.data_dir, self.parent.all_paths)
+        self.runner = parent
+
+    def __repr__(self):
+        return &#39;%s object code &#34;%s&#34;&#39; % (self.__class__, self.runner.short_name)
 
     def __call__(self):
-        self.paths.json.write(json.dumps(self.content, indent=4, ignore_nan=True))
+        self.runner.paths.json.write(json.dumps(self.content,
+                                                indent     = 4,
+                                                ignore_nan = True))
 
+    #-------------------------- Class attributes -----------------------------#
     template = {
         &#34;import_config&#34;: {
+            &#34;age_classes&#34;:       {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
             &#34;classifiers&#34;:       {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
             &#34;disturbance_types&#34;: {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
-            &#34;age_classes&#34;:       {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
-            &#34;inventory&#34;:         {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
-            &#34;yield&#34;:             {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
             &#34;events&#34;:            {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
+            &#34;inventory&#34;:         {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
             &#34;transitions&#34;:       {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
+            &#34;yield&#34;:             {&#34;type&#34;: &#34;csv&#34;, &#34;params&#34;: {&#34;path&#34;: None}},
           },
         &#34;mapping_config&#34;: {
             &#34;spatial_units&#34;: {
                 &#34;mapping_mode&#34;:     &#34;SeparateAdminEcoClassifiers&#34;,
-                &#34;admin_classifier&#34;: &#34;Region&#34;,
-                &#34;eco_classifier&#34;:   &#34;Climatic unit&#34;,
+                &#34;admin_classifier&#34;: &#34;region&#34;,
+                &#34;eco_classifier&#34;:   &#34;climate&#34;,
                 &#34;admin_mapping&#34;:    None,
                 &#34;eco_mapping&#34;:      None,
             },
             &#34;disturbance_types&#34;: None,
             &#34;species&#34;: {
-                &#34;species_classifier&#34;: &#34;Forest type&#34;,
+                &#34;species_classifier&#34;: &#34;forest_type&#34;,
                 &#34;species_mapping&#34;:    None,
             }
         }
     }
 
+    #----------------------------- Properties --------------------------------#
     @property
     def content(self):
         # Make a copy of the template #
         config = self.template.copy()
         # Get the mapping config sub dictionary #
         maps = config[&#39;mapping_config&#39;]
-        # Retrieve the four classifiers mappings #
+        # Retrieve the four classifiers mappings as a dict #
         mappings = self.runner.country.associations.all_mappings
         # Set the admin and eco classifiers #
-        maps[&#39;spatial_units&#39;][&#39;admin_mapping&#39;]   = mappings[&#39;map_admin_bound&#39;]
-        maps[&#39;spatial_units&#39;][&#39;eco_mapping&#39;]     = mappings[&#39;map_eco_bound&#39;]
+        maps[&#39;spatial_units&#39;][&#39;admin_mapping&#39;] = mappings[&#39;map_admin_bound&#39;]
+        maps[&#39;spatial_units&#39;][&#39;eco_mapping&#39;]   = mappings[&#39;map_eco_bound&#39;]
         # Set the disturbances and species classifiers #
-        maps[&#39;disturbance_types&#39;]                = mappings[&#39;map_disturbance&#39;]
-        maps[&#39;species&#39;][&#39;species_mapping&#39;]       = mappings[&#39;map_species&#39;]
+        maps[&#39;disturbance_types&#39;]              = mappings[&#39;map_disturbance&#39;]
+        maps[&#39;species&#39;][&#39;species_mapping&#39;]     = mappings[&#39;map_species&#39;]
         # Get the names of all the CSVs #
         all_files_names = config[&#39;import_config&#39;].keys()
         # Finally set the paths to all the CSVs #
         for file_name in all_files_names:
-            full_path = self.runner.input_data.paths[file_name]
+            # Special case for the `yields` file #
+            name = file_name if file_name != &#39;yield&#39; else &#39;growth_curves&#39;
+            # Get the path #
+            full_path = self.runner.input_data.paths[name]
+            # Set it in the dictionary #
             config[&#39;import_config&#39;][file_name][&#39;params&#39;][&#39;path&#39;] = full_path
         # Return result #
         return config</code></pre>
@@ -226,19 +254,23 @@ def content(self):
     config = self.template.copy()
     # Get the mapping config sub dictionary #
     maps = config[&#39;mapping_config&#39;]
-    # Retrieve the four classifiers mappings #
+    # Retrieve the four classifiers mappings as a dict #
     mappings = self.runner.country.associations.all_mappings
     # Set the admin and eco classifiers #
-    maps[&#39;spatial_units&#39;][&#39;admin_mapping&#39;]   = mappings[&#39;map_admin_bound&#39;]
-    maps[&#39;spatial_units&#39;][&#39;eco_mapping&#39;]     = mappings[&#39;map_eco_bound&#39;]
+    maps[&#39;spatial_units&#39;][&#39;admin_mapping&#39;] = mappings[&#39;map_admin_bound&#39;]
+    maps[&#39;spatial_units&#39;][&#39;eco_mapping&#39;]   = mappings[&#39;map_eco_bound&#39;]
     # Set the disturbances and species classifiers #
-    maps[&#39;disturbance_types&#39;]                = mappings[&#39;map_disturbance&#39;]
-    maps[&#39;species&#39;][&#39;species_mapping&#39;]       = mappings[&#39;map_species&#39;]
+    maps[&#39;disturbance_types&#39;]              = mappings[&#39;map_disturbance&#39;]
+    maps[&#39;species&#39;][&#39;species_mapping&#39;]     = mappings[&#39;map_species&#39;]
     # Get the names of all the CSVs #
     all_files_names = config[&#39;import_config&#39;].keys()
     # Finally set the paths to all the CSVs #
     for file_name in all_files_names:
-        full_path = self.runner.input_data.paths[file_name]
+        # Special case for the `yields` file #
+        name = file_name if file_name != &#39;yield&#39; else &#39;growth_curves&#39;
+        # Get the path #
+        full_path = self.runner.input_data.paths[name]
+        # Set it in the dictionary #
         config[&#39;import_config&#39;][file_name][&#39;params&#39;][&#39;path&#39;] = full_path
     # Return result #
     return config</code></pre>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>libcbm_runner.core.continent API documentation</title>
+<title>libcbm_runner.info.orig_data API documentation</title>
 <meta name="description" content="Written by Lucas Sinclair and Paul Rougieux …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>libcbm_runner.core.continent</code></h1>
+<h1 class="title">Module <code>libcbm_runner.info.orig_data</code></h1>
 </header>
 <section id="section-intro">
 <p>Written by Lucas Sinclair and Paul Rougieux.</p>
@@ -42,76 +42,91 @@ Unit D1 Bioeconomy.
 # Built-in modules #
 
 # Third party modules #
+import pandas
 
 # First party modules #
 from autopaths.auto_paths import AutoPaths
-from plumbing.cache       import property_cached
+from plumbing.cache import property_cached
 
 # Internal modules #
-from libcbm_runner import libcbm_data_dir
-from libcbm_runner.core.country import Country
-from libcbm_runner.combos       import combo_classes
 
 ###############################################################################
-class Continent(object):
+class OrigData(object):
     &#34;&#34;&#34;
-    Entry object to the pipeline.
+    This class will provide access to the original data of a Country
+    as several pandas data frames.
 
-    Aggregates countries together and enables access to a data frame containing
-    concatenated data from all countries at once.
+    This data was taken from the original cbmcfs3 dataset composed by
+    Roberto P.
+
+    To copy all the data from the `cbmcfs3_data` repository do the following:
+
+        &gt;&gt;&gt; from libcbm_runner.core.continent import continent
+        &gt;&gt;&gt; for country in continent: country.orig_data.copy_from_cbmcfs3()
+
+    This was done at some point before the data was reorganized and changed
+    by Viorel B. It can still be seen in `f42fb77` and it depends on the
+    `cbmcfs3_runner` python module to be run.
     &#34;&#34;&#34;
 
     all_paths = &#34;&#34;&#34;
-    /countries/
-    /combos/
+    /config/associations.csv               # Static
+    /common/age_classes.csv                # Static
+    /common/classifiers.csv                # Static
+    /common/disturbance_types.csv          # Static
+    /extras/product_types.csv              # Dynamic
+    /extras/silvicultural_practices.csv    # Dynamic
+    /activities/                           # Dynamic
     &#34;&#34;&#34;
 
-    def __init__(self, base_dir):
-        &#34;&#34;&#34;
-        Store the directory paths where there is a directory for every
-        country and for every combo.
-        &#34;&#34;&#34;
-        # The base directory #
-        self.base_dir = base_dir
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(libcbm_data_dir, self.all_paths)
-        # Where the input data will be stored #
-        self.countries_dir = self.paths.countries_dir
-        # Where the output data will be stored #
-        self.combos_dir = self.paths.combos_dir
+    # These files are not listed in the paths above because they depend on
+    # different activities.
+    files_to_be_generated = [&#39;growth_curves&#39;,
+                             &#39;transitions&#39;,
+                             &#39;events&#39;,
+                             &#39;inventory&#39;]
 
-    def __repr__(self):
-        return &#39;%s object with %i countries&#39; % (self.__class__, len(self))
+    def __init__(self, parent):
+        # Default attributes #
+        self.parent = parent
+        self.runner = parent
+        # Directories #
+        self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
-    def __getitem__(self, key):
-        &#34;&#34;&#34;Return a runner based on a tuple of combo, country and step.&#34;&#34;&#34;
-        return self.get_runner(*key)
-
-    def __iter__(self): return iter(self.countries.values())
-    def __len__(self):  return len(self.countries.values())
+    def __getitem__(self, item):
+        return pandas.read_csv(str(self.paths[item]))
 
     #----------------------------- Properties --------------------------------#
     @property_cached
-    def countries(self):
-        &#34;&#34;&#34;Return a dictionary of country iso2 codes to country objects.&#34;&#34;&#34;
-        all_countries = [Country(self, d)
-                         for d in self.countries_dir.flat_directories]
-        return {c.iso2_code: c for c in all_countries}
+    def activities(self):
+        &#34;&#34;&#34;All the activities that exist for the current country.&#34;&#34;&#34;
+        return [d.name for d in self.paths.activities_dir.flat_directories]
 
     @property_cached
-    def combos(self):
-        &#34;&#34;&#34;Return a dictionary of combination names to Combination objects.&#34;&#34;&#34;
-        all_combos = [combo(self) for combo in combo_classes]
-        return {s.short_name: s for s in all_combos}
+    def classif_names(self):
+        # Load #
+        result = self[&#39;classifiers&#39;]
+        # Query #
+        result = result.query(&#34;classifier_value_id == &#39;_CLASSIFIER&#39;&#34;)
+        # Get a series #
+        result = result.set_index(&#39;classifier_number&#39;)[&#39;name&#39;]
+        # Link number to name #
+        result = {&#39;_&#39; + str(k): v for k,v in result.items()}
+        # Return #
+        return result
 
     #------------------------------- Methods ---------------------------------#
-    def get_runner(self, combo, country, step):
-        &#34;&#34;&#34;Return a runner based on combo, country and step.&#34;&#34;&#34;
-        return self.combos[combo].runners[country][step]
-
-###############################################################################
-# Create singleton #
-continent = Continent(libcbm_data_dir)</code></pre>
+    def load(self, name, clfrs_names=False):
+        &#34;&#34;&#34;
+        Loads one of the dataframes in the orig data and adds information
+        to it.
+        &#34;&#34;&#34;
+        # Load from CSV #
+        df = self[name]
+        # Optionally rename classifiers #
+        if clfrs_names: df = df.rename(columns=self.classif_names)
+        # Return #
+        return df</code></pre>
 </details>
 </section>
 <section>
@@ -123,88 +138,119 @@ continent = Continent(libcbm_data_dir)</code></pre>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="libcbm_runner.core.continent.Continent"><code class="flex name class">
-<span>class <span class="ident">Continent</span></span>
-<span>(</span><span>base_dir)</span>
+<dt id="libcbm_runner.info.orig_data.OrigData"><code class="flex name class">
+<span>class <span class="ident">OrigData</span></span>
+<span>(</span><span>parent)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Entry object to the pipeline.</p>
-<p>Aggregates countries together and enables access to a data frame containing
-concatenated data from all countries at once.</p>
-<p>Store the directory paths where there is a directory for every
-country and for every combo.</p></div>
+<div class="desc"><p>This class will provide access to the original data of a Country
+as several pandas data frames.</p>
+<p>This data was taken from the original cbmcfs3 dataset composed by
+Roberto P.</p>
+<p>To copy all the data from the <code>cbmcfs3_data</code> repository do the following:</p>
+<pre><code>&gt;&gt;&gt; from libcbm_runner.core.continent import continent
+&gt;&gt;&gt; for country in continent: country.orig_data.copy_from_cbmcfs3()
+</code></pre>
+<p>This was done at some point before the data was reorganized and changed
+by Viorel B. It can still be seen in <code>f42fb77</code> and it depends on the
+<code>cbmcfs3_runner</code> python module to be run.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Continent(object):
+<pre><code class="python">class OrigData(object):
     &#34;&#34;&#34;
-    Entry object to the pipeline.
+    This class will provide access to the original data of a Country
+    as several pandas data frames.
 
-    Aggregates countries together and enables access to a data frame containing
-    concatenated data from all countries at once.
+    This data was taken from the original cbmcfs3 dataset composed by
+    Roberto P.
+
+    To copy all the data from the `cbmcfs3_data` repository do the following:
+
+        &gt;&gt;&gt; from libcbm_runner.core.continent import continent
+        &gt;&gt;&gt; for country in continent: country.orig_data.copy_from_cbmcfs3()
+
+    This was done at some point before the data was reorganized and changed
+    by Viorel B. It can still be seen in `f42fb77` and it depends on the
+    `cbmcfs3_runner` python module to be run.
     &#34;&#34;&#34;
 
     all_paths = &#34;&#34;&#34;
-    /countries/
-    /combos/
+    /config/associations.csv               # Static
+    /common/age_classes.csv                # Static
+    /common/classifiers.csv                # Static
+    /common/disturbance_types.csv          # Static
+    /extras/product_types.csv              # Dynamic
+    /extras/silvicultural_practices.csv    # Dynamic
+    /activities/                           # Dynamic
     &#34;&#34;&#34;
 
-    def __init__(self, base_dir):
-        &#34;&#34;&#34;
-        Store the directory paths where there is a directory for every
-        country and for every combo.
-        &#34;&#34;&#34;
-        # The base directory #
-        self.base_dir = base_dir
-        # Automatically access paths based on a string of many subpaths #
-        self.paths = AutoPaths(libcbm_data_dir, self.all_paths)
-        # Where the input data will be stored #
-        self.countries_dir = self.paths.countries_dir
-        # Where the output data will be stored #
-        self.combos_dir = self.paths.combos_dir
+    # These files are not listed in the paths above because they depend on
+    # different activities.
+    files_to_be_generated = [&#39;growth_curves&#39;,
+                             &#39;transitions&#39;,
+                             &#39;events&#39;,
+                             &#39;inventory&#39;]
 
-    def __repr__(self):
-        return &#39;%s object with %i countries&#39; % (self.__class__, len(self))
+    def __init__(self, parent):
+        # Default attributes #
+        self.parent = parent
+        self.runner = parent
+        # Directories #
+        self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
-    def __getitem__(self, key):
-        &#34;&#34;&#34;Return a runner based on a tuple of combo, country and step.&#34;&#34;&#34;
-        return self.get_runner(*key)
-
-    def __iter__(self): return iter(self.countries.values())
-    def __len__(self):  return len(self.countries.values())
+    def __getitem__(self, item):
+        return pandas.read_csv(str(self.paths[item]))
 
     #----------------------------- Properties --------------------------------#
     @property_cached
-    def countries(self):
-        &#34;&#34;&#34;Return a dictionary of country iso2 codes to country objects.&#34;&#34;&#34;
-        all_countries = [Country(self, d)
-                         for d in self.countries_dir.flat_directories]
-        return {c.iso2_code: c for c in all_countries}
+    def activities(self):
+        &#34;&#34;&#34;All the activities that exist for the current country.&#34;&#34;&#34;
+        return [d.name for d in self.paths.activities_dir.flat_directories]
 
     @property_cached
-    def combos(self):
-        &#34;&#34;&#34;Return a dictionary of combination names to Combination objects.&#34;&#34;&#34;
-        all_combos = [combo(self) for combo in combo_classes]
-        return {s.short_name: s for s in all_combos}
+    def classif_names(self):
+        # Load #
+        result = self[&#39;classifiers&#39;]
+        # Query #
+        result = result.query(&#34;classifier_value_id == &#39;_CLASSIFIER&#39;&#34;)
+        # Get a series #
+        result = result.set_index(&#39;classifier_number&#39;)[&#39;name&#39;]
+        # Link number to name #
+        result = {&#39;_&#39; + str(k): v for k,v in result.items()}
+        # Return #
+        return result
 
     #------------------------------- Methods ---------------------------------#
-    def get_runner(self, combo, country, step):
-        &#34;&#34;&#34;Return a runner based on combo, country and step.&#34;&#34;&#34;
-        return self.combos[combo].runners[country][step]</code></pre>
+    def load(self, name, clfrs_names=False):
+        &#34;&#34;&#34;
+        Loads one of the dataframes in the orig data and adds information
+        to it.
+        &#34;&#34;&#34;
+        # Load from CSV #
+        df = self[name]
+        # Optionally rename classifiers #
+        if clfrs_names: df = df.rename(columns=self.classif_names)
+        # Return #
+        return df</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="libcbm_runner.core.continent.Continent.all_paths"><code class="name">var <span class="ident">all_paths</span></code></dt>
+<dt id="libcbm_runner.info.orig_data.OrigData.all_paths"><code class="name">var <span class="ident">all_paths</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="libcbm_runner.info.orig_data.OrigData.files_to_be_generated"><code class="name">var <span class="ident">files_to_be_generated</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="libcbm_runner.core.continent.Continent.combos"><code class="name">var <span class="ident">combos</span></code></dt>
+<dt id="libcbm_runner.info.orig_data.OrigData.activities"><code class="name">var <span class="ident">activities</span></code></dt>
 <dd>
-<div class="desc"><p>Return a dictionary of combination names to Combination objects.</p></div>
+<div class="desc"><p>All the activities that exist for the current country.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -232,9 +278,11 @@ country and for every combo.</p></div>
     return result</code></pre>
 </details>
 </dd>
-<dt id="libcbm_runner.core.continent.Continent.countries"><code class="name">var <span class="ident">countries</span></code></dt>
+<dt id="libcbm_runner.info.orig_data.OrigData.classif_names"><code class="name">var <span class="ident">classif_names</span></code></dt>
 <dd>
-<div class="desc"><p>Return a dictionary of country iso2 codes to country objects.</p></div>
+<div class="desc"><p>If you see the current source code in a seemingly unrelated part of
+an auto-generated documentation, it means the program making the
+documentation was unable to correctly traverse a decorated property.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -265,18 +313,27 @@ country and for every combo.</p></div>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="libcbm_runner.core.continent.Continent.get_runner"><code class="name flex">
-<span>def <span class="ident">get_runner</span></span>(<span>self, combo, country, step)</span>
+<dt id="libcbm_runner.info.orig_data.OrigData.load"><code class="name flex">
+<span>def <span class="ident">load</span></span>(<span>self, name, clfrs_names=False)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a runner based on combo, country and step.</p></div>
+<div class="desc"><p>Loads one of the dataframes in the orig data and adds information
+to it.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_runner(self, combo, country, step):
-    &#34;&#34;&#34;Return a runner based on combo, country and step.&#34;&#34;&#34;
-    return self.combos[combo].runners[country][step]</code></pre>
+<pre><code class="python">def load(self, name, clfrs_names=False):
+    &#34;&#34;&#34;
+    Loads one of the dataframes in the orig data and adds information
+    to it.
+    &#34;&#34;&#34;
+    # Load from CSV #
+    df = self[name]
+    # Optionally rename classifiers #
+    if clfrs_names: df = df.rename(columns=self.classif_names)
+    # Return #
+    return df</code></pre>
 </details>
 </dd>
 </dl>
@@ -292,18 +349,19 @@ country and for every combo.</p></div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="libcbm_runner.core" href="index.html">libcbm_runner.core</a></code></li>
+<li><code><a title="libcbm_runner.info" href="index.html">libcbm_runner.info</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="libcbm_runner.core.continent.Continent" href="#libcbm_runner.core.continent.Continent">Continent</a></code></h4>
+<h4><code><a title="libcbm_runner.info.orig_data.OrigData" href="#libcbm_runner.info.orig_data.OrigData">OrigData</a></code></h4>
 <ul class="">
-<li><code><a title="libcbm_runner.core.continent.Continent.all_paths" href="#libcbm_runner.core.continent.Continent.all_paths">all_paths</a></code></li>
-<li><code><a title="libcbm_runner.core.continent.Continent.combos" href="#libcbm_runner.core.continent.Continent.combos">combos</a></code></li>
-<li><code><a title="libcbm_runner.core.continent.Continent.countries" href="#libcbm_runner.core.continent.Continent.countries">countries</a></code></li>
-<li><code><a title="libcbm_runner.core.continent.Continent.get_runner" href="#libcbm_runner.core.continent.Continent.get_runner">get_runner</a></code></li>
+<li><code><a title="libcbm_runner.info.orig_data.OrigData.activities" href="#libcbm_runner.info.orig_data.OrigData.activities">activities</a></code></li>
+<li><code><a title="libcbm_runner.info.orig_data.OrigData.all_paths" href="#libcbm_runner.info.orig_data.OrigData.all_paths">all_paths</a></code></li>
+<li><code><a title="libcbm_runner.info.orig_data.OrigData.classif_names" href="#libcbm_runner.info.orig_data.OrigData.classif_names">classif_names</a></code></li>
+<li><code><a title="libcbm_runner.info.orig_data.OrigData.files_to_be_generated" href="#libcbm_runner.info.orig_data.OrigData.files_to_be_generated">files_to_be_generated</a></code></li>
+<li><code><a title="libcbm_runner.info.orig_data.OrigData.load" href="#libcbm_runner.info.orig_data.OrigData.load">load</a></code></li>
 </ul>
 </li>
 </ul>
