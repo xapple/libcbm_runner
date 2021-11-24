@@ -19,7 +19,8 @@ import pandas
 from autopaths.auto_paths import AutoPaths
 
 # Internal modules #
-from libcbm_runner.core.continent import continent, libcbm_data_dir
+from libcbm_runner                    import libcbm_data_dir
+from libcbm_runner.core.continent     import continent
 from libcbm_runner.pump.pre_processor import PreProcessor
 
 # Constants #

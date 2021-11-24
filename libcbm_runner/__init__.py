@@ -16,6 +16,7 @@ import os, sys
 
 # First party modules #
 from autopaths import Path
+from autopaths.dir_path import DirectoryPath
 from plumbing.git import GitRepo
 
 # Constants #
@@ -31,3 +32,10 @@ repos_dir = module_dir.directory
 
 # The module is maybe in a git repository #
 git_repo = GitRepo(repos_dir, empty=True)
+
+# Where is the data, default case #
+libcbm_data_dir = DirectoryPath("~/repos/libcbm_data/")
+
+# But you can override that with an environment variable #
+if os.environ.get("LIBCBM_DATA"):
+    libcbm_data_dir = DirectoryPath(os.environ['LIBCBM_DATA'])

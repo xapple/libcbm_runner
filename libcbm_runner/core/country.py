@@ -18,7 +18,7 @@ from autopaths.dir_path   import DirectoryPath
 from plumbing.cache       import property_cached
 
 # Internal modules #
-from libcbm_runner.core.continent      import libcbm_data_dir
+from libcbm_runner                     import libcbm_data_dir
 from libcbm_runner.launch.associations import Associations
 from libcbm_runner.info.orig_data      import OrigData
 from libcbm_runner.info.aidb           import AIDB
