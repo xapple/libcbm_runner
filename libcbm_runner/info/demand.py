@@ -12,7 +12,7 @@ called "GFTMX". This economic model is not run dymamically, instead it
 was run once in the past and the outputs recorded in the `libcbm_data`
 repository.
 
-The wood prodcut demand used in the `libcbm_runner` simulations is seen as the
+The wood product demand used in the `libcbm_runner` simulations is seen as the
 production from the perspective of the economic model.
 
 Usage:
