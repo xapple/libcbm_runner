@@ -18,6 +18,10 @@ production from the perspective of the economic model.
 Usage:
 
     >>> from libcbm_runner.info.demand import fuelwood, roundwood
+
+Related issues:
+
+* https://gitlab.com/bioeconomy/libcbm/libcbm_runner/-/issues/8
 """
 
 # Built-in modules #
