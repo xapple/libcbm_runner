@@ -39,16 +39,23 @@ class DynamicSimulation(Simulation):
 
             https://github.com/cat-cfs/libcbm_py/blob/master/examples/
             disturbance_iterations.ipynb
+
+        First apply predetermined disturbances first by calling the method in
+        the parent class, then apply demand specific harvesting.
         """
+        # Apply predetermined disturbances #
         return super().dynamics_func(timestep, cbm_vars)
+        # Get demand for the current year for both soft and hard wood #
+        hard_demand = 0
+        soft_demand = 0
 
 ###############################################################################
 class ExampleHarvestProcessor:
     """
     This class was copied and adapted from the following notebook:
 
-            https://github.com/cat-cfs/libcbm_py/blob/master/examples/
-            disturbance_iterations.ipynb
+        https://github.com/cat-cfs/libcbm_py/blob/master/examples/
+        disturbance_iterations.ipynb
     """
 
     def __init__(self, sit, cbm, production_target):
@@ -77,7 +84,7 @@ class ExampleHarvestProcessor:
 
     def get_base_process_stats(self):
         """
-        Gets the stats for all disturbances in
+        Gets the stats for all disturbances in:
         `sit.sit_data.disturbance_events`.
         """
         stats_df = pandas.concat(

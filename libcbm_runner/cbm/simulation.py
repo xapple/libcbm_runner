@@ -36,7 +36,7 @@ class Simulation(object):
     #--------------------------- Special Methods -----------------------------#
     def dynamics_func(self, timestep, cbm_vars):
         """
-        See the simulate method of the libcbm simulator:
+        See the simulate method of the `libcbm_py` simulator:
 
             https://github.com/cat-cfs/libcbm_py/blob/master/libcbm/
             model/cbm/cbm_simulator.py#L148
