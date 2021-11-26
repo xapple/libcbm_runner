@@ -12,6 +12,7 @@
 /.idea
 .spyproject
 
-# Save only the markdown version of notebooks, automatically synchronized with Jupytext
+# Save only the markdown version of notebooks
+# which are automatically synchronized with `jupytext`
 *.ipynb
-notebooks/.ipynb_checkpoints/*
+.ipynb_checkpoints
