@@ -18,6 +18,7 @@ from autopaths.auto_paths import AutoPaths
 from plumbing.cache import property_cached
 
 # Internal modules #
+from libcbm_runner.pump.long_or_wide import events_wide_to_long
 
 ###############################################################################
 class OrigData(object):
@@ -57,13 +58,22 @@ class OrigData(object):
 
     def __init__(self, parent):
         # Default attributes #
-        self.parent = parent
-        self.runner = parent
+        self.parent  = parent
+        self.country = parent
         # Directories #
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
     def __getitem__(self, item):
-        return pandas.read_csv(str(self.paths[item]))
+        # Single argument is a string #
+        if isinstance(item, str):
+            return pandas.read_csv(str(self.paths[item]))
+        # Two arguments as a tuple means an activity #
+        elif len(item) == 2:
+            activity, file = item
+            path = self.paths.activities_dir + activity + '/' + file + '.csv'
+            return pandas.read_csv(str(path))
+        # Wrong number of arguments #
+        raise Exception("Undefined input data access '%s'." % str(item))
 
     #----------------------------- Properties --------------------------------#
     @property_cached
@@ -85,7 +95,7 @@ class OrigData(object):
         return result
 
     #------------------------------- Methods ---------------------------------#
-    def load(self, name, clfrs_names=False):
+    def load(self, name, clfrs_names=False, to_long=False):
         """
         Loads one of the dataframes in the orig data and adds information
         to it.
@@ -94,5 +104,7 @@ class OrigData(object):
         df = self[name]
         # Optionally rename classifiers #
         if clfrs_names: df = df.rename(columns=self.classif_names)
+        # Optionally convert to the long format #
+        if to_long: df = events_wide_to_long(self.country, df)
         # Return #
         return df

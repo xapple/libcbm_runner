@@ -16,7 +16,7 @@ import pandas
 # First party modules #
 
 # Internal modules #
-from libcbm_runner.pump.column_order import events_cols
+from libcbm_runner.pump.long_or_wide import events_wide_to_long
 
 ###############################################################################
 class PreProcessor(object):
@@ -81,7 +81,7 @@ class PreProcessor(object):
         # Load it as a dataframe #
         wide = pandas.read_csv(str(path))
         # Reshape it #
-        long = self.events_wide_to_long(wide)
+        long = events_wide_to_long(self.country, wide)
         # Write to disk #
         long.to_csv(str(path), index=False)
 
@@ -99,65 +99,9 @@ class PreProcessor(object):
         negative_values = df['step'] < 0
         # Check if there are any #
         if not any(negative_values): return
-        # Warn #
+        # Message #
         msg = "The file '%s' has %i negative values for the timestep column." \
               " This means you are attempting to apply disturbances to a" \
               " year that is anterior to the inventory start year configured."
+        # Raise #
         raise Exception(msg % (path, negative_values.sum()))
-
-    #------------------------ Dataframe conversions --------------------------#
-    def events_wide_to_long(self, events):
-        """Reshape disturbance events from wide to long format."""
-        # Make a copy of the dataframe #
-        df = events.copy()
-        # We want to pivot on all columns except two #
-        skip  = ['step', 'amount']
-        cols  = [col for col in events_cols if col not in skip]
-        # Reshape from wide to long format #
-        df = pandas.wide_to_long(df,
-                                 stubnames = "amount",
-                                 i         = cols,
-                                 j         = "year",
-                                 sep       = '_')
-        # Drop rows that don't have an amount #
-        df = df.dropna()
-        # Reset index #
-        df = df.reset_index()
-        # Convert years to time steps #
-        df['step'] = self.country.year_to_timestep(df['year'])
-        # Drop the year column #
-        df = df.drop(columns=['year'])
-        # Reorder columns according to the correct input order #
-        df = df[events_cols]
-        # Return #
-        return df
-
-    def events_long_to_wide(self, events):
-        """Reshape disturbance events from long to wide format."""
-        # Make a copy of the dataframe #
-        df = events.copy()
-        # Convert the step to years #
-        df['year'] = self.country.timestep_to_year(df['step'])
-        # Drop the steps column #
-        df = df.drop(columns=['step'])
-        # We want to pivot on all columns except two #
-        skip_cols = ['step', 'amount']
-        cols = [col for col in events_cols if col not in skip_cols]
-        # Reshape from long to wide format #
-        df = df.pivot(index   = cols,
-                      columns = 'year',
-                      values  = 'amount')
-        # We don't want the columns to be called 'year' though #
-        df = df.rename_axis(columns=None)
-        # Add 'amount_' in front of every column name #
-        df = df.add_prefix('amount_')
-        # Remove rows that are all NaNs #
-        df = df.dropna(how='all')
-        # Reset index #
-        df = df.reset_index()
-        # Sort entries #
-        df = df.sort_values(cols)
-        # Add the scenario column #
-        df.insert(0, 'scenario', 'reference')
-        # Return #
-        return df

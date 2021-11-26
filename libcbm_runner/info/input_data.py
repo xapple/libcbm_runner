@@ -32,7 +32,6 @@ class InputData:
         >>> combo = continent.combos['historical']
         >>> r = combo.runners['LU'][-1]
         >>> print(r.input_data.classifiers_list)
-
     """
 
     all_paths = """
@@ -105,7 +104,7 @@ class InputData:
                     raise FileNotFoundError(msg % (activity, self.act_dir))
                 # Get the path to the file we will read #
                 in_path = self.act_dir + activity + '/' + input_file + '.csv'
-                # Read the file #
+                # Read the file, it can be empty #
                 try:
                     df = pandas.read_csv(str(in_path))
                 except (FileNotFoundError, pandas.errors.EmptyDataError):
@@ -125,7 +124,5 @@ class InputData:
             if debug: print("   * result -> %i rows total\n" % len(result))
             # Write output #
             result.to_csv(str(out_path), index=False)
-        # Filter the rows for the `extras` files #
-        pass
         # Return #
         return csv_dir

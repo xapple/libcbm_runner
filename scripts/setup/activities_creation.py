@@ -21,6 +21,7 @@ from autopaths.auto_paths import AutoPaths
 # Internal modules #
 from libcbm_runner                    import libcbm_data_dir
 from libcbm_runner.core.continent     import continent
+from libcbm_runner.pump.long_or_wide  import events_long_to_wide
 from libcbm_runner.pump.pre_processor import PreProcessor
 
 # Constants #
@@ -173,7 +174,7 @@ class MakeActivities(object):
         # Get a pre-processor #
         pre_proc = PreProcessor(type('X', (), {'country': self.country}))
         # Transform it #
-        wide = pre_proc.events_long_to_wide(long)
+        wide = events_long_to_wide(self.country, long)
         # Write it #
         wide.to_csv(str(path), index=False)
         # Return #

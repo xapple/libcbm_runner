@@ -16,6 +16,7 @@ Unit D1 Bioeconomy.
 from plumbing.common import camel_to_snake
 
 # Internal modules #
+from libcbm_runner.pump.classifiers import make_classif_df
 
 ###############################################################################
 class InternalData(object):
@@ -36,6 +37,8 @@ class InternalData(object):
     #--------------------------- Special Methods -----------------------------#
     def __getitem__(self, item):
         """Read a dataframe from the `results` attribute."""
+        # Special case for values #
+        if item == 'values': return self.sim.sit.classifier_value_ids
         # Load #
         df = getattr(self.sim.results, item).copy()
         # Modify column names #
@@ -48,39 +51,27 @@ class InternalData(object):
     #----------------------------- Properties --------------------------------#
     @property
     def classif_df(self):
-        return self.make_classif_df(self.sim.sit.classifier_value_ids,
-                                    self['classifiers'])
+        return make_classif_df(self['values'], self['classifiers'])
 
     #------------------------------- Methods ---------------------------------#
-    def load(self, name, with_clfrs=True):
+    def load(self, name, with_clfrs=True, add_year=True):
         """
-        Loads one of the dataframes that is available from the
-        `libcbm_py` simulation and adds information to it.
+        Loads one of the files that was previously saved from the `libcbm_py`
+        simulation and adds information to it.
         """
         # Load from CSV #
         df = self[name]
         # Optionally join classifiers #
-        cols = ['identifier', 'timestep']
-        if with_clfrs: df = df.merge(self.classif_df, 'left', cols)
+        if with_clfrs:
+            df = df.merge(self.classif_df, 'left', ['identifier', 'timestep'])
+        # Add year if there is a timestep column #
+        if add_year:
+            if 'timestep' in df.columns:
+                df['year'] = self.runner.country.timestep_to_year(df['timestep'])
+                df = df.drop(columns='timestep')
+        # Add age class information to merge with inventory #
+        if 'age' in df.columns:
+            df['age_class'] = df.age // 10 + 1
+            df['age_class'] = 'AGEID' + df.age_class.astype(str)
         # Return #
         return df
-
-    @staticmethod
-    def make_classif_df(vals, clfrs):
-        """
-        Produces a dataframe useful for joining classifier values to
-        other output dataframes. This dataframe looks like this:
-
-                  identifier timestep Status Forest type Region ...
-            0              1        0    For          OB   LU00 ...
-            1              2        0    For          OB   LU00 ...
-            2              3        0    For          OB   LU00 ...
-        """
-        # Invert dictionary #
-        vals = {v: k for m in vals.values() for k, v in m.items()}
-        # Put actual values such as 'For' instead of numbers like '6' #
-        clfrs = clfrs.set_index(['identifier', 'timestep'])
-        clfrs = clfrs.replace(vals)
-        clfrs = clfrs.reset_index()
-        # Return #
-        return clfrs

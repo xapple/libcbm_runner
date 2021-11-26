@@ -96,7 +96,7 @@ class Combination(object):
         if not parallel:
             result = t_map(run_country, self.runners.items())
         # Run countries in parallel #
-        if parallel:
+        else:
             result = p_umap(run_country, self.runners.items(), num_cpus=4)
         # Timer end #
         timer.print_end()

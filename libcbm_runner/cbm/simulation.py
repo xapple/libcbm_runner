@@ -62,8 +62,10 @@ class Simulation(object):
             cbm_vars.classifiers[key] = id_of_cur
         # Print a message #
         self.parent.log.info(f"Time step {timestep} is about to run.")
+        # Run the usual rule based processor #
+        cbm_vars = self.rule_based_proc.pre_dynamics_func(timestep, cbm_vars)
         # Return #
-        return self.rule_based_proc.pre_dynamics_func(timestep, cbm_vars)
+        return cbm_vars
 
     #------------------------------- Methods ---------------------------------#
     # noinspection PyBroadException
