@@ -156,7 +156,7 @@ class Runner(object):
         msg += self.paths.log.pretty_tail
         return msg
 
-    @property
+    @property_cached
     def num_timesteps(self):
         """
         Compute the default number of years we have to run the simulation for.
