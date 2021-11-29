@@ -139,7 +139,7 @@ with pandas.option_context('display.max_rows', 5):
 ```python
 # Join the age information #
 index = ['identifier', 'year']
-age = state[index + ['age']]
+age = state[index + ['age', 'time_since_last_disturbance']]
 area_age = area.merge(age, 'left', on=index)
 
 with pandas.option_context('display.max_rows', None):

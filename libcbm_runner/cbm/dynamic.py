@@ -20,7 +20,6 @@ from libcbm.input.sit import sit_cbm_factory
 from libcbm_runner.cbm.simulation import Simulation
 
 # Constants #
-create_processor = sit_cbm_factory.create_sit_rule_based_processor
 
 ###############################################################################
 class DynamicSimulation(Simulation):
@@ -43,15 +42,47 @@ class DynamicSimulation(Simulation):
         First apply predetermined disturbances first by calling the method in
         the parent class, then apply demand specific harvesting.
         """
+        # Check the timestep #
+        if timestep == 12:
+            print('test')
+
         # Apply predetermined disturbances #
-        return super().dynamics_func(timestep, cbm_vars)
+        cbm_vars = super().dynamics_func(timestep, cbm_vars)
+
+        # Info sources ? #
+        # prod has columns:
+        # Index(['DisturbanceSoftProduction', 'DisturbanceHardProduction',
+        #        'DisturbanceDOMProduction', 'Total'],
+        #       dtype='object')
+        prod = self.cbm.compute_disturbance_production(cbm_vars, density=False)
+        print(prod)
+
+        # Sit events has columns:
+        # Index(['total_eligible_value', 'total_achieved', 'shortfall',
+        #        'num_records_disturbed', 'num_splits', 'num_eligible',
+        #        'sit_event_index'],
+        #        dtype = 'object')#
+        print(self.rule_based_proc.sit_event_stats_by_timestep)
+
+        # This is just the same as the input events.csv #
+        print(self.sit.sit_data.disturbance_events)
+
+        # This doesn't contain the current timestep, only past ones
+        print(self.results.state)
+
         # Get demand for the current year for both soft and hard wood #
         hard_demand = 0
         soft_demand = 0
 
+        # Return #
+        return cbm_vars
+
 ###############################################################################
 class ExampleHarvestProcessor:
     """
+    This class can dynamically generate disturbance events using an
+    event template to meet the specified production target.
+
     This class was copied and adapted from the following notebook:
 
         https://github.com/cat-cfs/libcbm_py/blob/master/examples/
@@ -62,31 +93,92 @@ class ExampleHarvestProcessor:
         # Base attributes #
         self.sit = sit
         self.cbm = cbm
-        # Other attributes #
+        # User attributes #
         self.production_target = production_target
-        # Extras #
-        self.base_processor = create_processor(self.sit, self.cbm)
-        self.dynamic_stats_list = []
+        # List to accumulate information #
+        self.dynamic_stats_list     = []
         self.base_production_totals = []
-        # Shortcuts #
+        # Function shortcuts #
         self.calc_prod = self.cbm.compute_disturbance_production
+        self.create_proc = sit_cbm_factory.create_sit_rule_based_processor
+        # Extras #
+        self.base_processor = self.create_proc(self.sit, self.cbm)
 
     sit_events_path = "~/repos/sinclair/work/freelance_clients/ispra_italy/" \
                       "repos/libcbm_py/libcbm/resources/test/cbm3_tutorial2" \
                       "/disturbance_events.csv"
 
-    @property
-    def event_template(self):
+    def get_event_template(self):
+        """Return a prototypical disturbance event ready to be customized."""
         # Make dataframe #
         df = pandas.read_csv(self.sit_events_path).iloc[[0]]
+        # Reset #
+        df = df.reset_index(drop=True)
         # Return #
         return df
 
+    def pre_dynamics_func(self, timestep, cbm_vars):
+        """
+        Use a production target (tonnes C) to apply across all years.
+        This will be partially met by the base tutorial2 events,
+        then fully met by a second dynamically generated event.
+        """
+        # Get CBM variables #
+        cbm_vars = self.base_processor.pre_dynamics_func(timestep, cbm_vars)
+
+        # Compute the total production resulting from the sit_events
+        # bundled in the tutorial2 dataset.
+        production_df = self.calc_prod(cbm_vars, density=False)
+        total_production = production_df["Total"].sum()
+
+        # Append #
+        self.base_production_totals.append([timestep, total_production])
+
+        # Subtract #
+        remaining_production = self.production_target - total_production
+
+        # If the target is already met we stop here #
+        if remaining_production <= 0: return cbm_vars
+
+        # Otherwise we create a dynamic event #
+        dynamic_event = self.get_event_template()
+        dynamic_event["disturbance_year"] = timestep
+        dynamic_event["target_type"]      = "M"
+        dynamic_event["target"]           = remaining_production
+
+        # See the documentation:
+        # `libcbm.input.sit.sit_cbm_factory.create_sit_rule_based_processor`
+        dynamic_processor = self.create_proc(
+            self.sit,
+            self.cbm,
+            reset_parameters = False,
+            sit_events = dynamic_event
+        )
+
+        # Apply the disturbance #
+        cbm_vars = dynamic_processor.pre_dynamics_func(timestep, cbm_vars)
+
+        # Merge #
+        df = dynamic_processor.sit_event_stats_by_timestep[timestep]
+        df = df.merge(
+            dynamic_event,
+            left_on     = "sit_event_index",
+            right_index = True
+        )
+
+        # Append #
+        self.dynamic_stats_list.append(df)
+
+        # Return CBM variables #
+        return cbm_vars
+
+    #----------------------------- Reporting ---------------------------------#
     def get_base_process_stats(self):
         """
         Gets the stats for all disturbances in:
         `sit.sit_data.disturbance_events`.
         """
+        # Get stats #
         stats_df = pandas.concat(
             self.base_processor.sit_event_stats_by_timestep.values()
         )
@@ -99,7 +191,7 @@ class ExampleHarvestProcessor:
         # Return #
         return df
 
-    def get_base_production_totals(self):
+    def base_prod_totals_to_df(self):
         # Make dataframe #
         df = pandas.DataFrame(
             columns = ["timestep", "total_production"],
@@ -108,61 +200,8 @@ class ExampleHarvestProcessor:
         # Return #
         return df
 
-    def get_dynamic_process_stats(self):
+    def dynamic_proc_stats_to_df(self):
         # Make dataframe #
         df = pandas.concat(self.dynamic_stats_list).reset_index(drop=True)
         # Return #
         return df
-
-    def pre_dynamics_func(self, timestep, cbm_vars):
-        """
-        Use a production target (tonnes C) to apply across all years
-        this will be partially met by the base tutorial2 events,
-        then fully met by a second dynamically generated event.
-        """
-        # Get CBM variables #
-        cbm_vars = self.base_processor.pre_dynamics_func(timestep, cbm_vars)
-
-        # Compute the total production resulting from the sit_events
-        # bundled in the tutorial2 dataset.
-        production_df = self.calc_prod(cbm_vars, density=False)
-        total_production = production_df["Total"].sum()
-        self.base_production_totals.append([timestep, total_production])
-
-        # Subtract #
-        remaining_production = self.production_target - total_production
-
-        # Case target already met #
-        if remaining_production <= 0: return cbm_vars
-
-        # Dynamic event #
-        dynamic_event = self.event_template.reset_index(drop=True)
-        dynamic_event["disturbance_year"] = timestep
-        dynamic_event["target_type"]      = "M"
-        dynamic_event["target"]           = remaining_production
-
-        # See the documentation:
-        # `libcbm.input.sit.sit_cbm_factory.create_sit_rule_based_processor`
-        dynamic_processor = create_processor(
-            self.sit,
-            self.cbm,
-            reset_parameters = False,
-            sit_events = dynamic_event
-        )
-
-        # Variables again #
-        cbm_vars = dynamic_processor.pre_dynamics_func(timestep, cbm_vars)
-
-        # Merge #
-        df = dynamic_processor.sit_event_stats_by_timestep[timestep].merge(
-            dynamic_event,
-            left_on     = "sit_event_index",
-            right_index = True
-        )
-
-        # Append #
-        self.dynamic_stats_list.append(df)
-
-        # Return CBM variables #
-        return cbm_vars
-

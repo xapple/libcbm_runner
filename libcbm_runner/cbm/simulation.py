@@ -18,6 +18,10 @@ from libcbm.model.cbm import cbm_simulator
 
 # Internal modules #
 
+# Constants #
+create_proc = sit_cbm_factory.create_sit_rule_based_processor
+create_func = cbm_simulator.create_in_memory_reporting_func
+
 ###############################################################################
 class Simulation(object):
     """This class will run a `libcbm_py` simulation."""
@@ -106,12 +110,10 @@ class Simulation(object):
         init_inv = sit_cbm_factory.initialize_inventory
         self.clfrs, self.inv = init_inv(self.sit)
         # This will contain results #
-        create_func = cbm_simulator.create_in_memory_reporting_func
         self.results, self.reporting_func = create_func()
         # Create a CBM object #
         with sit_cbm_factory.initialize_cbm(self.sit) as self.cbm:
             # Create a function to apply rule based events #
-            create_proc = sit_cbm_factory.create_sit_rule_based_processor
             self.rule_based_proc = create_proc(self.sit, self.cbm)
             # Message #
             self.runner.log.info("Calling the cbm_simulator.")
