@@ -30,9 +30,11 @@ Related issues:
 import pandas
 
 # First party modules #
+from plumbing.cache import property_cached
 
 # Internal modules #
 from libcbm_runner import libcbm_data_dir
+from libcbm_runner.core.country import all_country_codes
 
 # Constants #
 demand_dir = libcbm_data_dir + 'common/gftmx/'
@@ -53,5 +55,28 @@ def wide_to_long(df):
     return df
 
 ###############################################################################
-roundwood = wide_to_long(pandas.read_csv(demand_dir + "indroundprod.csv"))
-fuelwood  = wide_to_long(pandas.read_csv(demand_dir + "fuelprod.csv"))
+class Demand:
+
+    def __init__(self, csv_path):
+        self.csv_path = csv_path
+
+    @property_cached
+    def raw(self):
+        return pandas.read_csv(self.csv_path)
+
+    @property_cached
+    def df(self):
+        # Load #
+        df = self.raw.copy()
+        # Wide to long #
+        df = wide_to_long(df)
+        # Add country codes (remove all unknown countries) #
+        country_to_iso2 = all_country_codes[['country', 'iso2_code']]
+        df = df.merge(country_to_iso2, on='country')
+        # Return #
+        return df
+
+###############################################################################
+# Make two singletons #
+roundwood = Demand(demand_dir + "indroundprod.csv")
+fuelwood  = Demand(demand_dir + "fuelprod.csv")

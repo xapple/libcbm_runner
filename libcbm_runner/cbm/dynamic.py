@@ -18,6 +18,7 @@ from libcbm.input.sit import sit_cbm_factory
 
 # Internal modules #
 from libcbm_runner.cbm.simulation import Simulation
+from libcbm_runner.info.demand import fuelwood, roundwood
 
 # Constants #
 
@@ -42,12 +43,28 @@ class DynamicSimulation(Simulation):
         First apply predetermined disturbances first by calling the method in
         the parent class, then apply demand specific harvesting.
         """
+        # Apply predetermined disturbances #
+        cbm_vars = super().dynamics_func(timestep, cbm_vars)
+
+        # Compute the current year #
+        year = self.country.timestep_to_year(timestep)
+
+        # Get demand for the current year and current country in 1000m3 #
+        params = (year, self.country.iso2_code)
+        query  = "year == %s & iso2_code == '%s'"
+        fuel_demand  = fuelwood.df.query(query % params)['value']
+        round_demand = roundwood.df.query(query % params) ['value']
+
+        pass
+        
+        # Return #
+        return cbm_vars
+
+    #---------------------------- Exploration --------------------------------#
+    def test(self, timestep, cbm_vars):
         # Check the timestep #
         if timestep == 12:
             print('test')
-
-        # Apply predetermined disturbances #
-        cbm_vars = super().dynamics_func(timestep, cbm_vars)
 
         # Info sources ? #
         # prod has columns:
@@ -69,10 +86,6 @@ class DynamicSimulation(Simulation):
 
         # This doesn't contain the current timestep, only past ones
         print(self.results.state)
-
-        # Get demand for the current year for both soft and hard wood #
-        hard_demand = 0
-        soft_demand = 0
 
         # Return #
         return cbm_vars
