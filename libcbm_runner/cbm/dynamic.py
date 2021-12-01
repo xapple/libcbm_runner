@@ -56,7 +56,7 @@ class DynamicSimulation(Simulation):
         round_demand = roundwood.df.query(query % params) ['value']
 
         pass
-        
+
         # Return #
         return cbm_vars
 

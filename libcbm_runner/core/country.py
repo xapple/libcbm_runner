@@ -129,7 +129,7 @@ class Country(object):
         # The `inventory_start_year` is the oldest year in the inventory data
         # reported by the national forest inventory.
         row = ref_years.loc[ref_years['country'] == self.iso2_code].iloc[0]
-        self.inventory_start_year = row['ref_year']
+        self.inventory_start_year = row['inv_start_year']
 
     def timestep_to_year(self, timestep):
         """
