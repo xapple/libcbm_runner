@@ -21,6 +21,6 @@ from activities_creation import MakeActivities
 
 ###############################################################################
 makers = [MakeActivities(c) for c in continent]
+
 if __name__ == '__main__':
     print([maker.make_interface() for maker in tqdm(makers)])
-

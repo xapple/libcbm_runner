@@ -234,14 +234,14 @@ class MakeActivities(object):
         files with the same name.
 
         Moreover, in the case of windows, symbolic links don't overcome this
-        limitation and Excel still complains when it opens two symbolic links that
-        point to different files.
+        limitation and Excel still complains when it opens two symbolic links
+        that point to different files.
 
         This issue is not fixed by using hard links instead of symbolic links.
-        This is because Excel never modifies a given file. When saving, it creates
-        a temporary file in the same directory, then deletes the original file and
-        renames the temporary file to the name of the original file. This destroys
-        the hard links upon every save operation.
+        This is because Excel never modifies a given file. When saving, it
+        creates a temporary file in the same directory, then deletes the
+        original file and renames the temporary file to the name of the
+        original file. This destroys the hard links upon every save operation.
         """
         # Create the directory #
         self.country_interface_dir.create_if_not_exists()
@@ -268,9 +268,9 @@ class MakeActivities(object):
     #------------------------ Copying files back -----------------------------#
     def save_interface(self, debug=False):
         """
-        In the end, the only way to make this `interface` work is to have a script
-        copy every file in the flat hierarchy back to it's expected place within
-        the `libcbm_data` repository.
+        In the end, the only way to make this `interface` work is to have a
+        script copy every file in the flat hierarchy back to it's expected
+        place within the `libcbm_data` repository.
         """
         # Same case for all of: "Common, Silv, Config" #
         for item in self.common_list + self.silv_list + self.config_list:
