@@ -112,8 +112,7 @@ with pandas.option_context('display.max_rows', 5):
 ```python
 classif_df = runner.internal.classif_df
 
-with pandas.option_context('display.max_rows', 5):
-    display(classif_df)
+with pandas.option_context('display.max_rows', 5): display(classif_df)
 ```
 
 ## Area (internal)
@@ -121,8 +120,7 @@ with pandas.option_context('display.max_rows', 5):
 ```python
 area = runner.internal.load('area')
 
-with pandas.option_context('display.max_rows', 5):
-    display(area)
+with pandas.option_context('display.max_rows', 5): display(area)
 ```
 
 ## State (internal)
@@ -130,8 +128,7 @@ with pandas.option_context('display.max_rows', 5):
 ```python
 state = runner.internal.load('state')
 
-with pandas.option_context('display.max_rows', 5):
-    display(state)
+with pandas.option_context('display.max_rows', 5): display(state)
 ```
 
 ## Area with age (internal)
@@ -142,8 +139,7 @@ index = ['identifier', 'year']
 age = state[index + ['age', 'time_since_last_disturbance']]
 area_age = area.merge(age, 'left', on=index)
 
-with pandas.option_context('display.max_rows', None):
-    display(area_age)
+with pandas.option_context('display.max_rows', None): display(area_age)
 ```
 
 # Graph results
@@ -152,12 +148,4 @@ with pandas.option_context('display.max_rows', None):
 area_by_step = area.groupby("year").sum().drop(columns='identifier')
 display(area_by_step)
 area_by_step[['area']].plot(figsize=(15,10))
-```
-
-```python
-
-```
-
-```python
-
 ```
