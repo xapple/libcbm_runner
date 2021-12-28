@@ -26,8 +26,8 @@ class OrigData(object):
     This class will provide access to the original data of a Country
     as several pandas data frames.
 
-    This data was taken from the original cbmcfs3 dataset composed by
-    Roberto P.
+    The data content itself for the historical period was taken from the
+    original `cbmcfs3` dataset composed by Roberto P.
 
     To copy all the data from the `cbmcfs3_data` repository do the following:
 
@@ -64,10 +64,10 @@ class OrigData(object):
         self.paths = AutoPaths(self.parent.data_dir, self.all_paths)
 
     def __getitem__(self, item):
-        # Single argument is a string #
+        # A single argument is used for the static files #
         if isinstance(item, str):
             return pandas.read_csv(str(self.paths[item]))
-        # Two arguments as a tuple means an activity #
+        # Two arguments as a tuple indicates an activity #
         elif len(item) == 2:
             activity, file = item
             path = self.paths.activities_dir + activity + '/' + file + '.csv'
