@@ -14,7 +14,7 @@ Unit D1 Bioeconomy.
 from plumbing.cache import property_cached
 
 # Internal modules #
-from libcbm_runner.cbm.dynamic import DynamicSimulation
+from libcbm_runner.cbm.dynamic       import DynamicSimulation, DynamicRunner
 from libcbm_runner.combos.historical import Historical
 from libcbm_runner.core.runner       import Runner
 
@@ -35,14 +35,3 @@ class HarvestTest(Historical):
         """
         return {c.iso2_code: [DynamicRunner(self, c, 0)]
                 for c in self.continent}
-
-###############################################################################
-class DynamicRunner(Runner):
-    """
-    Replaces the standard Simulation object with a DynamicSimulation instead.
-    """
-
-    @property_cached
-    def simulation(self):
-        """The object that can run `libcbm` simulations."""
-        return DynamicSimulation(self)

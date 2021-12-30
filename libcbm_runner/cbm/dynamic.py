@@ -14,13 +14,26 @@ Unit D1 Bioeconomy.
 import pandas
 
 # First party modules #
-from libcbm.input.sit import sit_cbm_factory
+from plumbing.cache import property_cached
 
 # Internal modules #
 from libcbm_runner.cbm.simulation import Simulation
-from libcbm_runner.info.demand import fuelwood, roundwood
+from libcbm_runner.core.runner import Runner
+from libcbm.input.sit import sit_cbm_factory
 
 # Constants #
+
+###############################################################################
+
+class DynamicRunner(Runner):
+    """
+    Replaces the standard Simulation object with a DynamicSimulation instead.
+    """
+
+    @property_cached
+    def simulation(self):
+        """The object that can run `libcbm` simulations."""
+        return DynamicSimulation(self)
 
 ###############################################################################
 class DynamicSimulation(Simulation):
@@ -43,19 +56,27 @@ class DynamicSimulation(Simulation):
         First apply predetermined disturbances first by calling the method in
         the parent class, then apply demand specific harvesting.
         """
+
+        # Test #
+        if timestep == 12:
+            print('test')
+
         # Apply predetermined disturbances #
         cbm_vars = super().dynamics_func(timestep, cbm_vars)
 
         # Compute the current year #
         year = self.country.timestep_to_year(timestep)
 
-        # Get demand for the current year and current country in 1000m3 #
-        params = (year, self.country.iso2_code)
-        query  = "year == %s & iso2_code == '%s'"
-        fuel_demand  = fuelwood.df.query(query % params)['value']
-        round_demand = roundwood.df.query(query % params) ['value']
+        # Get demand for the current year and current country #
+        query  = "year == %s" % year
+        fw  = self.runner.demand.irw.query(query)['value']
+        irw = self.runner.demand.fw.query(query)['value']
 
-        pass
+        # Convert to a m3 scalar #
+        demand_fw_vol  = fw.values[0]  * 1000
+        demand_irw_vol = irw.values[0] * 1000
+
+        # Compute remaining demand that needs to be satisfied #
 
         # Return #
         return cbm_vars
@@ -71,6 +92,7 @@ class DynamicSimulation(Simulation):
         # Index(['DisturbanceSoftProduction', 'DisturbanceHardProduction',
         #        'DisturbanceDOMProduction', 'Total'],
         #       dtype='object')
+        # Aggregate of fluxes,
         prod = self.cbm.compute_disturbance_production(cbm_vars, density=False)
         print(prod)
 

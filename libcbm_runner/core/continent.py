@@ -32,7 +32,7 @@ class Continent(object):
 
     all_paths = """
     /countries/
-    /combos/
+    /output/
     """
 
     def __init__(self, base_dir):
@@ -47,7 +47,7 @@ class Continent(object):
         # Where the input data will be stored #
         self.countries_dir = self.paths.countries_dir
         # Where the output data will be stored #
-        self.combos_dir = self.paths.combos_dir
+        self.output_dir = self.paths.output_dir
 
     def __repr__(self):
         return '%s object with %i countries' % (self.__class__, len(self))

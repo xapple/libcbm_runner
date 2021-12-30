@@ -89,7 +89,7 @@ class InputData:
             # The path to the file that we will create #
             out_path = self.paths[input_file]
             # What scenarios choices were made for this input file #
-            choices = getattr(self.combo, input_file, {})
+            choices = self.combo.config.get(input_file, {})
             # Initialize #
             result = pandas.DataFrame()
             # Optional debug message #
@@ -104,7 +104,7 @@ class InputData:
                     raise FileNotFoundError(msg % (activity, self.act_dir))
                 # Get the path to the file we will read #
                 in_path = self.act_dir + activity + '/' + input_file + '.csv'
-                # Read the file, it can be empty #
+                # Read the file, but it's ok if it is empty or absent #
                 try:
                     df = pandas.read_csv(str(in_path))
                 except (FileNotFoundError, pandas.errors.EmptyDataError):

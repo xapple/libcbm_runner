@@ -12,6 +12,7 @@ Unit D1 Bioeconomy.
 import textwrap
 
 # Third party modules #
+import yaml, pandas
 from p_tqdm import p_umap, t_map
 
 # First party modules #
@@ -20,7 +21,11 @@ from plumbing.cache import property_cached
 from plumbing.timer import Timer
 
 # Internal modules #
+from libcbm_runner import libcbm_data_dir
 from libcbm_runner.core.runner import Runner
+
+# Constant directory for all the data #
+yaml_dir = libcbm_data_dir + 'combos/'
 
 ###############################################################################
 class Combination(object):
@@ -56,9 +61,9 @@ class Combination(object):
         # Save parent #
         self.continent = continent
         # The combos dir used for all output #
-        self.combos_dir = self.continent.combos_dir
+        self.output_dir = self.continent.output_dir
         # The base dir for our output #
-        self.base_dir = Path(self.combos_dir + self.short_name + '/')
+        self.base_dir = Path(self.output_dir + self.short_name + '/')
 
     def __repr__(self):
         return '%s object with %i runners' % (self.__class__, len(self))
@@ -71,6 +76,29 @@ class Combination(object):
         return self.runners[key]
 
     #----------------------------- Properties --------------------------------#
+    @property_cached
+    def config(self):
+        """
+        The values chosen by the user in the YAML file which decide on every
+        scenario choice for every activity and silvicultural practice.
+        """
+        # The path to our specific YAML file #
+        yaml_path = yaml_dir + self.short_name + '.yaml'
+        # Read it with a third party library #
+        with open(yaml_path, "r") as handle:
+            result = yaml.safe_load(handle)
+        # Convert silvicultural choices to dataframes #
+        key = 'demand'
+        value = result[key]
+        if not isinstance(value, str):
+            df = pandas.DataFrame.from_dict(value,
+                                            orient  = 'index',
+                                            columns = ['scenario'])
+            df = df.rename_axis('year').reset_index()
+            result[key] = df
+        # Return result #
+        return result
+
     @property_cached
     def runners(self):
         """

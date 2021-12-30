@@ -36,8 +36,15 @@ from plumbing.cache import property_cached
 from libcbm_runner import libcbm_data_dir
 from libcbm_runner.core.country import all_country_codes
 
-# Constants #
-demand_dir = libcbm_data_dir + 'common/gftmx/'
+# Constant directory for all the data #
+demand_dir = libcbm_data_dir + 'demand/'
+
+# Constant file names for every scenario #
+roundwood = "fw_demand.csv"
+fuelwood  = "irw_demand.csv"
+
+# A mapping between country names and codes #
+country_to_iso2 = all_country_codes[['country', 'iso2_code']]
 
 ###############################################################################
 def wide_to_long(df):
@@ -48,35 +55,103 @@ def wide_to_long(df):
     df = pandas.wide_to_long(df,
                              stubnames = 'value',
                              i         = cols,
-                             j         = 'year')
+                             j         = 'year',
+                             sep       = '_')
     # Reset index #
     df = df.reset_index()
     # Return #
     return df
 
 ###############################################################################
-class Demand:
+class OutputGFTM:
+    """
+    Access to the raw demand coming from the GFTM model, for a particular
+    scenario and a particular wood type. We also provide a filtered and
+    transformed version of the data.
+    """
 
-    def __init__(self, csv_path):
-        self.csv_path = csv_path
+    def __init__(self, scenario, csv_name):
+        self.scenario = scenario
+        self.csv_name = csv_name
 
     @property_cached
+    def csv_path(self):
+        return demand_dir + self.scenario + '/' + self.csv_name
+
+    @property
     def raw(self):
         return pandas.read_csv(self.csv_path)
 
     @property_cached
     def df(self):
         # Load #
-        df = self.raw.copy()
-        # Wide to long #
+        df = self.raw
+        # Wide to long transform #
         df = wide_to_long(df)
-        # Add country codes (remove all unknown countries) #
-        country_to_iso2 = all_country_codes[['country', 'iso2_code']]
+        # Add country codes (and remove all unknown countries) #
         df = df.merge(country_to_iso2, on='country')
+        # Remove other columns that give no information #
+        df = df[['iso2_code', 'year', 'value']]
         # Return #
         return df
 
 ###############################################################################
-# Make two singletons #
-roundwood = Demand(demand_dir + "indroundprod.csv")
-fuelwood  = Demand(demand_dir + "fuelprod.csv")
+class Demand:
+    """
+    Access the specific demand values for the current simulation run.
+    For both industrial roundwood and fuelwood.
+    """
+
+    def __init__(self, parent):
+        # Default attributes #
+        self.parent = parent
+        self.runner = parent
+        # Shortcuts #
+        self.combo = self.runner.combo
+        self.code  = self.runner.country.iso2_code
+        # Choices made for demand in the current combo #
+        self.choices = self.combo.config['demand']
+
+    def make_df(self, wood_type):
+        # Case number 1: there is only a single scenario specified #
+        if isinstance(self.choices, str):
+            df = gftm_outputs[self.choices][wood_type].df
+        # Case number 2: the scenarios picked vary according to the year #
+        else:
+            df = self.choices.join(all_irw, on=['year', 'scenario'])
+        # Filter for current country #
+        df = df.query("iso2_code == '%s'" % self.code)
+        # Check there is data #
+        assert not df.empty
+        # Return #
+        return df
+
+    #----------------------------- Properties --------------------------------#
+    @property_cached
+    def irw(self): return self.make_df('irw')
+    @property_cached
+    def fw(self):  return self.make_df('fw')
+
+###############################################################################
+# Figure out all possible demand scenarios that we have #
+scenarios = [d.name for d in demand_dir.flat_directories]
+
+# Load all the GFTM outputs for every scenario and every wood type #
+gftm_outputs = {scen: {'irw': OutputGFTM(scen, roundwood),
+                       'fw':  OutputGFTM(scen, fuelwood)}
+                for scen in scenarios}
+
+# Result will look like this:
+#
+#  'reference':   {'irw': <OutputGFTM object>,
+#                  'fw':  <OutputGFTM object>},
+#  'market_drop': {'irw': <OutputGFTM object>,
+#                  'fw':  <OutputGFTM object>}, ...}
+
+# Provide two dataframe that contains all scenarios combined #
+all_irw = [out['irw'].df for out in gftm_outputs.values()]
+all_fw  = [out['fw'].df  for out in gftm_outputs.values()]
+all_irw = pandas.concat(all_irw, keys=scenarios, names=['scenario'])
+all_fw  = pandas.concat(all_fw,  keys=scenarios, names=['scenario'])
+all_irw = all_irw.reset_index(level='scenario').reset_index(drop=True)
+all_fw  = all_fw.reset_index(level='scenario').reset_index(drop=True)

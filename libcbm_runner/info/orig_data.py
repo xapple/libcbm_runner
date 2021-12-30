@@ -44,8 +44,10 @@ class OrigData(object):
     /common/age_classes.csv                # Static
     /common/classifiers.csv                # Static
     /common/disturbance_types.csv          # Static
-    /extras/product_types.csv              # Dynamic
-    /extras/silvicultural_practices.csv    # Dynamic
+    /silv/vol_to_mass_coefs.csv            # Dynamic
+    /silv/irw_frac_by_dist.csv             # Dynamic
+    /silv/harvest_factors.csv              # Dynamic
+    /silv/events_templates.csv             # Dynamic
     /activities/                           # Dynamic
     """
 
