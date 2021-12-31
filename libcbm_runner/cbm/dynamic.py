@@ -9,6 +9,7 @@ Unit D1 Bioeconomy.
 """
 
 # Built-in modules #
+import copy
 
 # Third party modules #
 import pandas
@@ -85,12 +86,17 @@ class DynamicSimulation(Simulation):
         self.demand_fw_vol  = fw.values[0]  * 1000
         self.demand_irw_vol = irw.values[0] * 1000
 
-        # Retrieve all fluxes that went to the `products` pool #
-        x = self.cbm.compute_disturbance_production(cbm_vars, density=False)
+        # Copy cbm_vars and hypothetically end the timestep here #
+        pass
 
-        # Test #
+        # Retrieve all fluxes that went to the `products` pool #
+        pass
+
+        # Debug test #
         if timestep == 19:
-            print('test')
+            end_vars = copy.deepcopy(cbm_vars)
+            end_vars = self.cbm.step(end_vars)
+            print(end_vars)
 
         # Compute remaining demand that needs to be satisfied #
 
