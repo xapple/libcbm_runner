@@ -15,11 +15,11 @@ import pandas
 
 # First party modules #
 from plumbing.cache import property_cached
+from libcbm.input.sit import sit_cbm_factory
 
 # Internal modules #
 from libcbm_runner.cbm.simulation import Simulation
 from libcbm_runner.core.runner import Runner
-from libcbm.input.sit import sit_cbm_factory
 
 # Constants #
 
@@ -46,35 +46,51 @@ class DynamicSimulation(Simulation):
     """
 
     #--------------------------- Special Methods -----------------------------#
-    def dynamics_func(self, timestep, cbm_vars):
+    def dynamics_func(self, timestep, cbm_vars, debug=True):
         """
-        See the example notebook of the `libcbm` package:
+        First apply predetermined disturbances, then apply demand
+        specific to harvesting. The full specification for the "Harvest
+        Allocation Tool" (H.A.T.) is described in:
+
+             ../specifications/libcbm_hat_spec.md
+
+        Information used during development included:
+
+        * The example notebook of the `libcbm` package.
 
             https://github.com/cat-cfs/libcbm_py/blob/master/examples/
             disturbance_iterations.ipynb
-
-        First apply predetermined disturbances first by calling the method in
-        the parent class, then apply demand specific harvesting.
         """
+        # Check if we want to switch growth period #
+        if timestep == 1: cbm_vars = self.switch_period(cbm_vars)
 
-        # Test #
-        if timestep == 12:
-            print('test')
-
-        # Apply predetermined disturbances #
-        cbm_vars = super().dynamics_func(timestep, cbm_vars)
-
-        # Compute the current year #
+        # Retrieve the current year #
         year = self.country.timestep_to_year(timestep)
 
-        # Get demand for the current year and current country #
+        # Optional debug messages #
+        if debug: print(timestep, year, self.country.base_year)
+
+        # Run the usual rule based processor #
+        cbm_vars = self.rule_based_proc.pre_dynamics_func(timestep, cbm_vars)
+
+        # Check if we are still in the historical period #
+        if year < self.country.base_year: return cbm_vars
+
+        # Get demand for the current year #
         query  = "year == %s" % year
         fw  = self.runner.demand.irw.query(query)['value']
         irw = self.runner.demand.fw.query(query)['value']
 
-        # Convert to a m3 scalar #
-        demand_fw_vol  = fw.values[0]  * 1000
-        demand_irw_vol = irw.values[0] * 1000
+        # Convert to a cubic meter float value #
+        self.demand_fw_vol  = fw.values[0]  * 1000
+        self.demand_irw_vol = irw.values[0] * 1000
+
+        # Retrieve all fluxes that went to the `products` pool #
+        x = self.cbm.compute_disturbance_production(cbm_vars, density=False)
+
+        # Test #
+        if timestep == 19:
+            print('test')
 
         # Compute remaining demand that needs to be satisfied #
 

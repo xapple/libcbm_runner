@@ -38,32 +38,37 @@ class Simulation(object):
         return '%s object code "%s"' % (self.__class__, self.runner.short_name)
 
     #--------------------------- Special Methods -----------------------------#
+    def switch_period(self, cbm_vars):
+        """
+        If t=1, we know this is the first timestep, and nothing has yet been
+        done to the post-spinup pools. It is at this moment that we want to
+        change the growth curves, and this can be done by switching the
+        classifier value of each inventory record.
+        """
+        # Print message #
+        msg = "Carbon pool initialization period is finished." \
+              " Now starting the `current` period."
+        self.parent.log.info(msg)
+        # The name of our extra classifier #
+        key = 'growth_period'
+        # The value that the classifier should take for all timesteps #
+        val = "Cur"
+        # Get the corresponding ID in the libcbm simulation #
+        id_of_cur = self.sit.classifier_value_ids[key][val]
+        # Modify the whole column of the dataframe #
+        cbm_vars.classifiers[key] = id_of_cur
+        # Return #
+        return cbm_vars
+
     def dynamics_func(self, timestep, cbm_vars):
         """
         See the simulate method of the `libcbm_py` simulator:
 
             https://github.com/cat-cfs/libcbm_py/blob/master/libcbm/
             model/cbm/cbm_simulator.py#L148
-
-        If t=1, we know this is the first timestep, and nothing has yet been
-        done to the post-spinup pools. It is at this moment that we want to
-        change the growth curves, and this can be done by switching the
-        classifier value of each inventory record.
         """
-        # Check the timestep #
-        if timestep == 1:
-            # Print message #
-            msg = "Carbon pool initialization period is finished." \
-                  " Now starting the `current` period."
-            self.parent.log.info(msg)
-            # The name of our extra classifier #
-            key = 'growth_period'
-            # The value that the classifier should take for all timesteps #
-            val = "Cur"
-            # Get the corresponding ID in the libcbm simulation #
-            id_of_cur = self.sit.classifier_value_ids[key][val]
-            # Modify the whole column of the dataframe #
-            cbm_vars.classifiers[key] = id_of_cur
+        # Check if we want to switch growth period #
+        if timestep == 1: cbm_vars = self.switch_period(cbm_vars)
         # Print a message #
         self.parent.log.info(f"Time step {timestep} is about to run.")
         # Run the usual rule based processor #

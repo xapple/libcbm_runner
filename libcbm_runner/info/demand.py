@@ -118,7 +118,9 @@ class Demand:
             df = gftm_outputs[self.choices][wood_type].df
         # Case number 2: the scenarios picked vary according to the year #
         else:
-            df = self.choices.join(all_irw, on=['year', 'scenario'])
+            df = self.choices.merge(combined[wood_type],
+                                    how = 'left',
+                                    on = ['year', 'scenario'])
         # Filter for current country #
         df = df.query("iso2_code == '%s'" % self.code)
         # Check there is data #
@@ -149,9 +151,11 @@ gftm_outputs = {scen: {'irw': OutputGFTM(scen, roundwood),
 #                  'fw':  <OutputGFTM object>}, ...}
 
 # Provide two dataframe that contains all scenarios combined #
-all_irw = [out['irw'].df for out in gftm_outputs.values()]
-all_fw  = [out['fw'].df  for out in gftm_outputs.values()]
-all_irw = pandas.concat(all_irw, keys=scenarios, names=['scenario'])
-all_fw  = pandas.concat(all_fw,  keys=scenarios, names=['scenario'])
-all_irw = all_irw.reset_index(level='scenario').reset_index(drop=True)
-all_fw  = all_fw.reset_index(level='scenario').reset_index(drop=True)
+def make_combined(wood_type):
+    df = [out[wood_type].df for out in gftm_outputs.values()]
+    df = pandas.concat(df, keys=scenarios, names=['scenario'])
+    df = df.reset_index(level='scenario').reset_index(drop=True)
+    return df
+
+combined = {'irw': make_combined('irw'),
+            'fw':  make_combined('fw')}
