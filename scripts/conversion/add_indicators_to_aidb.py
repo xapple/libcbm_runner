@@ -75,7 +75,7 @@ class AddIndicators(object):
                 'softwood_other_to_product',
                 'softwood_stem_snag_to_product',
                 'softwood_branch_snag_to_product',
-                'hardwood_merch_to_products',
+                'hardwood_merch_to_product',
                 'hardwood_other_to_product',
                 'hardwood_stem_snag_to_product',
                 'hardwood_branch_snag_to_product']
