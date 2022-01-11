@@ -17,6 +17,7 @@ import pandas
 # First party modules #
 from plumbing.cache import property_cached
 from libcbm.input.sit import sit_cbm_factory
+from libcbm.model.cbm import cbm_variables
 
 # Internal modules #
 from libcbm_runner.cbm.simulation import Simulation
@@ -46,6 +47,16 @@ class DynamicSimulation(Simulation):
     disturbances predefined before the model run.
     """
 
+    # These are the dataframe (as attributes) returned by `cbm.step()` #
+    df_names = ['classifiers', 'parameters', 'inventory',
+                'state', 'flux', 'pools']
+
+    # These are the source pools we want to track fluxes from #
+    sources = ['softwood_merch',       'hardwood_merch',
+               'softwood_other',       'hardwood_other',
+               'softwood_stem_snag',   'hardwood_stem_snag',
+               'softwood_branch_snag', 'hardwood_branch_snag']
+
     #--------------------------- Special Methods -----------------------------#
     def dynamics_func(self, timestep, cbm_vars, debug=True):
         """
@@ -62,7 +73,7 @@ class DynamicSimulation(Simulation):
             https://github.com/cat-cfs/libcbm_py/blob/master/examples/
             disturbance_iterations.ipynb
         """
-        # Check if we want to switch growth period #
+        # Check if we want to switch the growth period classifier #
         if timestep == 1: cbm_vars = self.switch_period(cbm_vars)
 
         # Retrieve the current year #
@@ -77,6 +88,50 @@ class DynamicSimulation(Simulation):
         # Check if we are still in the historical period #
         if year < self.country.base_year: return cbm_vars
 
+        # Copy cbm_vars and hypothetically end the timestep here #
+        end_vars = copy.deepcopy(cbm_vars)
+        end_vars = cbm_variables.prepare(end_vars)
+        end_vars = self.cbm.step(end_vars)
+
+        # Check we always have the same sized dataframes #
+        get_num_rows = lambda name: len(getattr(end_vars, name))
+        assert len({get_num_rows(name) for name in self.df_names}) == 1
+
+        # Concatenate dataframes together by columns into one big df #
+        df = pandas.concat([getattr(end_vars, name)
+                            for name in self.df_names], axis=1)
+
+        # Check that the 'Input' column is always one and remove #
+        assert all(df['Input'] == 1.0)
+        df = df.drop(columns='Input')
+
+        # Fluxes and pools are scaled to one hectare so fix it #
+        cols = list(end_vars.flux.columns) + list(end_vars.pools.columns)
+        cols.pop(cols.index('Input'))
+        df[cols] = df[cols].multiply(df['area'], axis="index")
+
+        # Load the fraction that goes to `irw` and to `fw` #
+        irw_frac = self.runner.silv.irw_frac.get_year(year)
+        cols = self.runner.silv.irw_frac.cols
+
+        # Get only eight interesting fluxes, summed by disturbance type #
+        fluxes = df.query("disturbance_type != 0")
+        fluxes = fluxes.groupby(cols)
+        fluxes = fluxes.agg({s + '_to_product': 'sum' for s in self.sources})
+        fluxes = fluxes.reset_index()
+
+        # Join the fluxes going to `products` with the IRW fractions #
+        fluxes = fluxes.merge(irw_frac, how='left', on=cols)
+
+        # Join the wood density and bark fraction parameters #
+        pass #TODO
+
+        # Calculate the `flux_irw` and `flux_fw` for this year #
+        flux_irw = sum([fluxes[s + '_to_product'] * fluxes[s]
+                        for s in self.sources])
+        flux_fw  = sum([fluxes[s + '_to_product'] * (1 - fluxes[s])
+                        for s in self.sources])
+
         # Get demand for the current year #
         query  = "year == %s" % year
         fw  = self.runner.demand.irw.query(query)['value']
@@ -86,17 +141,15 @@ class DynamicSimulation(Simulation):
         self.demand_fw_vol  = fw.values[0]  * 1000
         self.demand_irw_vol = irw.values[0] * 1000
 
-        # Copy cbm_vars and hypothetically end the timestep here #
-        pass
 
-        # Retrieve all fluxes that went to the `products` pool #
-        pass
 
         # Debug test #
         if timestep == 19:
             end_vars = copy.deepcopy(cbm_vars)
+            end_vars = cbm_variables.prepare(end_vars)
             end_vars = self.cbm.step(end_vars)
             print(end_vars)
+            1/0
 
         # Compute remaining demand that needs to be satisfied #
 
@@ -112,8 +165,7 @@ class DynamicSimulation(Simulation):
         # Info sources ? #
         # prod has columns:
         # Index(['DisturbanceSoftProduction', 'DisturbanceHardProduction',
-        #        'DisturbanceDOMProduction', 'Total'],
-        #       dtype='object')
+        #        'DisturbanceDOMProduction', 'Total'])
         # Aggregate of fluxes,
         prod = self.cbm.compute_disturbance_production(cbm_vars, density=False)
         print(prod)

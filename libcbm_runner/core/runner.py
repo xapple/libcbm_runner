@@ -24,6 +24,7 @@ from libcbm_runner.info.input_data     import InputData
 from libcbm_runner.info.output_data    import OutputData
 from libcbm_runner.info.internal_data  import InternalData
 from libcbm_runner.info.demand         import Demand
+from libcbm_runner.info.silviculture   import Silviculture
 from libcbm_runner.pump.pre_processor  import PreProcessor
 from libcbm_runner.pump.post_processor import PostProcessor
 
@@ -117,6 +118,11 @@ class Runner(object):
     def demand(self):
         """Access the specific demand values for this simulation run."""
         return Demand(self)
+
+    @property_cached
+    def silv(self):
+        """Access to silvicultural data."""
+        return Silviculture(self)
 
     @property_cached
     def output(self):

@@ -44,10 +44,10 @@ class OrigData(object):
     /common/age_classes.csv                # Static
     /common/classifiers.csv                # Static
     /common/disturbance_types.csv          # Static
-    /silv/vol_to_mass_coefs.csv            # Dynamic
-    /silv/irw_frac_by_dist.csv             # Dynamic
-    /silv/harvest_factors.csv              # Dynamic
-    /silv/events_templates.csv             # Dynamic
+    /silv/irw_frac_by_dist.csv             # Has scenario column
+    /silv/vol_to_mass_coefs.csv            # Has scenario column
+    /silv/events_templates.csv             # Has scenario column
+    /silv/harvest_factors.csv              # Has scenario column
     /activities/                           # Dynamic
     """
 
@@ -68,12 +68,12 @@ class OrigData(object):
     def __getitem__(self, item):
         # A single argument is used for the static files #
         if isinstance(item, str):
-            return pandas.read_csv(str(self.paths[item]))
+            return pandas.read_csv(str(self.paths[item]), dtype=str)
         # Two arguments as a tuple indicates an activity #
         elif len(item) == 2:
             activity, file = item
             path = self.paths.activities_dir + activity + '/' + file + '.csv'
-            return pandas.read_csv(str(path))
+            return pandas.read_csv(str(path), dtype=str)
         # Wrong number of arguments #
         raise Exception("Undefined input data access '%s'." % str(item))
 

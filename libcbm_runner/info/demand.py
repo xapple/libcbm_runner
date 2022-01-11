@@ -22,6 +22,15 @@ Usage:
 Related issues:
 
 * https://gitlab.com/bioeconomy/libcbm/libcbm_runner/-/issues/8
+
+This script provides a dictionary `gftm_outputs` that looks like this:
+
+    'reference':   {'irw': <OutputGFTM object>,
+                    'fw':  <OutputGFTM object>},
+    'market_drop': {'irw': <OutputGFTM object>,
+                    'fw':  <OutputGFTM object>}, ...}
+
+It also provides a `combined` dictionary.
 """
 
 # Built-in modules #
@@ -123,7 +132,7 @@ class Demand:
                                     on = ['year', 'scenario'])
         # Filter for current country #
         df = df.query("iso2_code == '%s'" % self.code)
-        # Check there is data #
+        # Check there is data left #
         assert not df.empty
         # Return #
         return df
@@ -143,19 +152,13 @@ gftm_outputs = {scen: {'irw': OutputGFTM(scen, roundwood),
                        'fw':  OutputGFTM(scen, fuelwood)}
                 for scen in scenarios}
 
-# Result will look like this:
-#
-#  'reference':   {'irw': <OutputGFTM object>,
-#                  'fw':  <OutputGFTM object>},
-#  'market_drop': {'irw': <OutputGFTM object>,
-#                  'fw':  <OutputGFTM object>}, ...}
-
-# Provide two dataframe that contains all scenarios combined #
+# A function to combine all scenarios together for a given wood type #
 def make_combined(wood_type):
     df = [out[wood_type].df for out in gftm_outputs.values()]
     df = pandas.concat(df, keys=scenarios, names=['scenario'])
     df = df.reset_index(level='scenario').reset_index(drop=True)
     return df
 
+# Provide two dataframes that contain all scenarios combined #
 combined = {'irw': make_combined('irw'),
             'fw':  make_combined('fw')}

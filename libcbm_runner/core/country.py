@@ -63,12 +63,12 @@ class Country(object):
 
     @property_cached
     def aidb(self):
-        """Archive Index Database also called cbm_defaults in libcbm."""
+        """Archive Index Database also called `cbm_defaults` in libcbm."""
         return AIDB(self)
 
     @property_cached
     def orig_data(self):
-        """Access the immutable original data."""
+        """Access to the immutable original data."""
         return OrigData(self)
 
     @property_cached

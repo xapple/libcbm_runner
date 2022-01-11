@@ -83,7 +83,7 @@ print("Number of timesteps:", events_mgmt['step'].max())
 **Set the number of time steps**
 
 ```python
-runner.num_timesteps = 16
+runner.num_timesteps = 30
 ```
 
 # Run
